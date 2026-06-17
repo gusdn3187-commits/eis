@@ -201,7 +201,8 @@ table { width:100%; border-collapse:collapse; min-width:820px; }
 /* 월 그룹 구분선 — 데이터 행 증감률 셀 (5n+6번째) */
 #tbl26 tbody td:nth-child(5n+6), #tblCumul tbody td:nth-child(5n+6) { border-right:2px solid var(--border); }
 #tbl26 tbody td, #tblCumul tbody td { padding:7px 8px; font-size:11px; text-align:center !important; white-space:nowrap; }
-#tbl26 tbody td:first-child, #tblCumul tbody td:first-child { text-align:left !important; font-weight:700; border-right:none; }
+#tbl26 tbody td:first-child, #tblCumul tbody td:first-child { text-align:left !important; font-weight:700; border-right:none; position:sticky; left:0; z-index:1; background:var(--surface); }
+#tbl26 thead th[rowspan], #tblCumul thead th[rowspan] { position:sticky; left:0; z-index:3; }
 #tblCumul { min-width:1800px; }
 /* 미래월 3열 회색 통일 */
 #tbl26 tbody td.td-fut { color:var(--text-3) !important; }
@@ -628,21 +629,19 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
   <!-- 연도별 실적 추이 -->
   <div id="perf-yearly">
     <div class="sec-head">
-      <span class="sec-label">연도별 실적 추이</span>
-      <span class="badge badge-gray">2004~2025</span>
+      <span class="sec-label">연도별 실적 추이 <span class="badge badge-gray" style="vertical-align:middle;margin-left:6px;">2004~2025</span></span>
     </div>
     <!-- 그래프 (위) -->
     <div class="card card-sm" style="margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div class="sub-tab-bar" style="margin-bottom:0;">
-          <button class="sub-tab-btn active" onclick="switchHistTab(this,'sales')">매출액</button>
-          <button class="sub-tab-btn" onclick="switchHistTab(this,'gp')">매출총이익</button>
-          <button class="sub-tab-btn" onclick="switchHistTab(this,'op')">영업이익</button>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px;gap:14px;">
+        <div class="legend" style="margin-bottom:0;">
+          <span><span class="leg-dot" style="background:rgba(212,160,23,0.85);"></span>매출액</span>
+          <span><span class="leg-dot" style="background:#1a4a8a;border-radius:1px;"></span>매출총이익률(%)</span>
+          <span><span class="leg-dot" style="background:#06b6a2;border-radius:1px;"></span>영업이익률(%)</span>
         </div>
         <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
       </div>
-      <div class="legend" id="histLegend"></div>
-      <div style="position:relative;height:260px;"><canvas id="chartHistStacked"></canvas></div>
+      <div style="position:relative;height:300px;"><canvas id="chartHistStacked"></canvas></div>
     </div>
     <!-- 표 (아래) -->
     <div class="card card-sm" id="histCards" style="overflow-x:auto;margin-bottom:20px;"></div>
@@ -1104,26 +1103,26 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
         <button class="peer-chk-btn" data-co="aize"  onclick="switchPeerVs(this)">아이젠</button>
       </div>
 
-      <!-- 비교 콘텐츠 (선택 후 표시) -->
-      <div id="deepCompContent" class="hidden">
+      <!-- 비교 콘텐츠 -->
+      <div id="deepCompContent">
 
-        <!-- ② 전체 비교표 (선택된 회사만) -->
-        <div class="card tbl-wrap card-sm" style="margin-bottom:18px;">
-          <div class="card-title" style="margin-bottom:10px;">재무지표 비교 <span style="font-weight:400;font-size:10px;">(2025년 기준, 억원)</span></div>
-          <table id="deepAllCompTable">
-            <thead id="deepAllCompHead"></thead>
-            <tbody id="deepAllCompBody"></tbody>
-          </table>
-        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
 
-        <!-- ⑤ 레이더 그래프 -->
-        <div class="card card-sm" style="margin-bottom:16px;">
-          <div class="card-title" id="peerRadarTitle" style="margin-bottom:6px;"><strong style="color:#1a4a8a;">대림바스</strong> vs — 레이더</div>
-          <div style="position:relative;height:460px;"><canvas id="peerRadarChart"></canvas></div>
-          <div class="legend" style="margin-top:4px;">
-            <span><span class="leg-dot" style="background:#1a4a8a;"></span><strong style="color:#1a4a8a;">대림바스</strong></span>
-            <span><span class="leg-dot" style="background:#E05570;"></span><span id="peerRadarPeerLabel">-</span></span>
+          <!-- ② 전체 비교표 (선택된 회사만) -->
+          <div class="card tbl-wrap card-sm">
+            <div class="card-title" style="margin-bottom:10px;">재무지표 비교 <span style="font-weight:400;font-size:10px;">(2025년 기준, 억원)</span></div>
+            <table id="deepAllCompTable">
+              <thead id="deepAllCompHead"></thead>
+              <tbody id="deepAllCompBody"></tbody>
+            </table>
           </div>
+
+          <!-- ⑤ 레이더 그래프 -->
+          <div class="card card-sm">
+            <div style="position:relative;height:460px;"><canvas id="peerRadarChart"></canvas></div>
+            <div class="legend" id="peerRadarLegend" style="margin-top:4px;flex-wrap:wrap;gap:10px;"></div>
+          </div>
+
         </div>
 
       </div>
@@ -1492,7 +1491,7 @@ const CHART_OPTS = {
   plugins:{legend:{display:false}},
   scales:{
     x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10}}, grid:{display:false}},
-    y:{ticks:{font:{size:10}, callback:v=>(v/10).toFixed(0)+'억'}, grid:{color:'rgba(0,0,0,0.04)'}}
+    y:{ticks:{font:{size:10}, callback:v=>v%10===0?(v/10)+'억':null}, grid:{color:'rgba(0,0,0,0.04)'}}
   }
 };
 
@@ -1726,10 +1725,6 @@ function renderCumulTable() {
     {label:'매출총이익',        a:'gp',     p:'gpPlan',     prev25:'gp25',     group:null},
     {label:'영업이익',          a:'op',     p:'opPlan',     prev25:'op25',     group:null},
     {label:'수주액',            a:'orders', p:'ordersPlan', prev25:'orders25', group:null},
-    {label:'카펙스',            a:'capex',  p:'capexPlan',  prev25:null,       group:null},
-    {label:'순차입금',          a:null,     p:null,         prev25:null,       group:'header'},
-    {label:'차입금',            a:'debt',   p:'debtPlan',   prev25:null,       group:'sub'},
-    {label:'현금및현금성자산',  a:'cash',   p:'cashPlan',   prev25:null,       group:'sub'},
   ];
 
   const months6 = ['1월','2월','3월','4월','5월','6월'];
@@ -1755,7 +1750,7 @@ function renderCumulTable() {
   let html = '';
   ROW_DEFS.forEach(r => {
     if (r.group === 'header') {
-      html += `<tr style="background:var(--bg-2);"><td colspan="${1 + months6.length * 5}" style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;">${r.label}</td></tr>`;
+      html += `<tr style="background:var(--bg-2);"><td style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;position:sticky;left:0;z-index:2;background:var(--bg-2);">${r.label}</td><td colspan="${months6.length * 5}" style="background:var(--bg-2);"></td></tr>`;
       return;
     }
     const indent = r.group === 'sub' ? 'padding-left:18px;' : '';
@@ -2162,10 +2157,6 @@ function buildSegMonthlyTable(segName) {
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
-    {label:'카펙스',            f:'capex', plan:null,   group:null, ratio:true},
-    {label:'순차입금',          f:null,    plan:null,   group:'header'},
-    {label:'차입금',            f:'debt',  plan:null,   group:'sub',  ratio:true},
-    {label:'현금및현금성자산',  f:'cash',  plan:null,   group:'sub',  ratio:true},
   ];
 
   const months6 = MONTHS;
@@ -2188,7 +2179,7 @@ function buildSegMonthlyTable(segName) {
   let html = '';
   ROW_DEFS.forEach(r => {
     if (r.group === 'header') {
-      html += `<tr style="background:var(--bg-2);"><td colspan="${1 + months6.length * 5}" style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;">${r.label}</td></tr>`;
+      html += `<tr style="background:var(--bg-2);"><td style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;position:sticky;left:0;z-index:2;background:var(--bg-2);">${r.label}</td><td colspan="${months6.length * 5}" style="background:var(--bg-2);"></td></tr>`;
       return;
     }
     const indent = r.group === 'sub' ? 'padding-left:18px;' : '';
@@ -2302,10 +2293,6 @@ function buildSegCumulTable(segName) {
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
-    {label:'카펙스',            f:'capex', plan:null,   group:null, ratio:true},
-    {label:'순차입금',          f:null,    plan:null,   group:'header'},
-    {label:'차입금',            f:'debt',  plan:null,   group:'sub',  ratio:true},
-    {label:'현금및현금성자산',  f:'cash',  plan:null,   group:'sub',  ratio:true},
   ];
 
   const months6 = MONTHS;
@@ -2325,7 +2312,7 @@ function buildSegCumulTable(segName) {
   let html = '';
   ROW_DEFS.forEach(r => {
     if (r.group === 'header') {
-      html += `<tr style="background:var(--bg-2);"><td colspan="${1 + months6.length * 5}" style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;">${r.label}</td></tr>`;
+      html += `<tr style="background:var(--bg-2);"><td style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;position:sticky;left:0;z-index:2;background:var(--bg-2);">${r.label}</td><td colspan="${months6.length * 5}" style="background:var(--bg-2);"></td></tr>`;
       return;
     }
     const indent = r.group === 'sub' ? 'padding-left:18px;' : '';
@@ -2394,10 +2381,6 @@ function build26Table() {
     {label:'매출총이익',    a:'gp',     p:'gpPlan',     group:null},
     {label:'영업이익',      a:'op',     p:'opPlan',     group:null},
     {label:'수주액',        a:'orders', p:'ordersPlan', group:null},
-    {label:'카펙스',        a:'capex',  p:'capexPlan',  group:null},
-    {label:'순차입금',      a:null,     p:null,         group:'header'},
-    {label:'차입금',        a:'debt',   p:'debtPlan',   group:'sub'},
-    {label:'현금및현금성자산', a:'cash', p:'cashPlan',  group:'sub'},
   ];
 
   /* ── 헤더 2단 (5열/월: 전년실적·계획·실적·달성률·증감률) ── */
@@ -2583,10 +2566,15 @@ function buildHistCards() {
   const tdStyle = 'padding:5px 10px;font-size:11px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);';
   const th1Style = 'padding:6px 10px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);position:sticky;left:0;z-index:1;';
   const td1Style = 'padding:5px 10px;font-size:11px;font-weight:600;text-align:left;white-space:nowrap;color:var(--navy);background:var(--surface-2,#f5f7fb);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:1;';
+  const gpArr  = HIST.sales.map((s,i) => Math.round(s * (0.22 + i/21 * 0.04)));
+  const gpRate = gpArr.map((g,i) => (g / HIST.sales[i] * 100).toFixed(1));
+  const opRate = HIST.op.map((o,i) => (o / HIST.sales[i] * 100).toFixed(1));
   const rows = [
-    { label:'매출액 (억원)',  data: HIST.sales,  fmt: v => v.toLocaleString() },
-    { label:'영업이익 (억원)', data: HIST.op,   fmt: v => v.toLocaleString() },
-    { label:'수주 (억원)',    data: HIST.orders, fmt: v => v.toLocaleString() },
+    { label:'매출액 (억원)',      data: HIST.sales, fmt: v => v.toLocaleString() },
+    { label:'매출총이익 (억원)',  data: gpArr,       fmt: v => v.toLocaleString() },
+    { label:'매출총이익률 (%)',   data: gpRate,      fmt: v => v+'%' },
+    { label:'영업이익 (억원)',    data: HIST.op,     fmt: v => v.toLocaleString() },
+    { label:'영업이익률 (%)',     data: opRate,      fmt: v => v+'%' },
   ];
   el.innerHTML = `
     <table style="border-collapse:collapse;width:100%;min-width:max-content;">
@@ -2607,76 +2595,106 @@ function buildHistCards() {
 }
 
 let histStackedChart = null;
-let histKey = 'sales';
 
-function toggleHistLine(name) {
-  if (!histStackedChart) return;
-  const idx = histStackedChart.data.datasets.findIndex(d => d.label === name);
-  if (idx === -1) return;
-  const visible = histStackedChart.isDatasetVisible(idx);
-  histStackedChart.setDatasetVisibility(idx, !visible);
-  histStackedChart.update();
-  document.querySelectorAll(`.chk-leg-item[data-hist-name="${name}"]`).forEach(el => {
-    el.classList.toggle('off', !histStackedChart.isDatasetVisible(idx));
-  });
-}
+function buildHistChart() {
+  const gpArr  = HIST.sales.map((s,i) => Math.round(s * (0.22 + i/21 * 0.04)));
+  const gpRate = HIST.sales.map((s,i) => +(gpArr[i]/s*100).toFixed(1));
+  const opRate = HIST.op.map((o,i) => +(o/HIST.sales[i]*100).toFixed(1));
 
-function switchHistTab(btn, key) {
-  btn.closest('.sub-tab-bar').querySelectorAll('.sub-tab-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  histKey = key;
-  buildHistChart(key);
-}
-
-function buildHistChart(key) {
-  key = key || histKey;
-  const labelMap = { sales:'매출액 (억원)', gp:'매출총이익 (억원)', op:'영업이익 (억원)' };
-
-  const lineDatasets = Object.entries(BU_HIST).map(([name, d]) => ({
-    type            : 'line',
-    label           : name,
-    data            : d[key],
-    borderColor     : BU_COLORS[name],
-    backgroundColor : BU_COLORS[name] + '18',
-    borderWidth     : 2,
-    pointRadius     : 3,
-    pointHoverRadius: 5,
-    tension         : 0.3,
-    fill            : false,
-    yAxisID         : 'y',
-    order           : 1,
-  }));
-
-  document.getElementById('histLegend').innerHTML =
-    `<div class="chk-legend">` +
-    Object.entries(BU_COLORS).map(([name, color]) =>
-      `<span class="chk-leg-item" style="--lc:${color}" data-hist-name="${name}" onclick="toggleHistLine('${name}')">
-        <span class="chk-circle"></span>
-        <span class="chk-label">${name}</span>
-      </span>`
-    ).join('') + `</div>`;
+  const barLabelPlugin = {
+    id: 'histBarLabels',
+    afterDatasetsDraw(chart) {
+      const {ctx} = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        if (ds.type === 'line') return;
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, j) => {
+          const val = ds.data[j];
+          if (val == null) return;
+          ctx.save();
+          ctx.font = '700 8px sans-serif';
+          ctx.fillStyle = '#374151';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(val.toLocaleString(), bar.x, bar.y - 2);
+          ctx.restore();
+        });
+      });
+    }
+  };
 
   if (histStackedChart) histStackedChart.destroy();
   histStackedChart = new Chart(document.getElementById('chartHistStacked'), {
-    type: 'line',
-    data: { labels: HIST_YEARS, datasets: lineDatasets },
+    type: 'bar',
+    data: {
+      labels: HIST_YEARS,
+      datasets: [
+        {
+          label: '매출액',
+          data: HIST.sales,
+          backgroundColor: 'rgba(212,160,23,0.82)',
+          borderRadius: 2,
+          yAxisID: 'y',
+          order: 2
+        },
+        {
+          label: '매출총이익률(%)',
+          type: 'line',
+          data: gpRate,
+          borderColor: '#1a4a8a',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 2.5,
+          pointBackgroundColor: '#1a4a8a',
+          tension: 0.3,
+          yAxisID: 'y2',
+          order: 1
+        },
+        {
+          label: '영업이익률(%)',
+          type: 'line',
+          data: opRate,
+          borderColor: '#06b6a2',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          pointRadius: 2.5,
+          pointBackgroundColor: '#06b6a2',
+          tension: 0.3,
+          yAxisID: 'y2',
+          order: 1
+        }
+      ]
+    },
     options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode:'index', intersect:false },
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { display:false },
-        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}억` } }
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataset.yAxisID === 'y2'
+              ? ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
+              : ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}억`
+          }
+        }
       },
       scales: {
-        x: { ticks:{font:{size:10}}, grid:{display:false} },
+        x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
         y: {
           position: 'left',
-          ticks : { font:{size:10}, callback: v => v+'억' },
-          grid  : { color:'rgba(0,0,0,0.05)' },
-          title : { display:true, text:labelMap[key], font:{size:10}, color:'var(--text-3)' }
+          ticks: { font: { size: 9 }, callback: v => v.toLocaleString()+'억' },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        },
+        y2: {
+          position: 'right',
+          min: 0, max: 30,
+          ticks: { font: { size: 9 }, stepSize: 5, callback: v => v+'%' },
+          grid: { drawOnChartArea: false }
         }
       }
-    }
+    },
+    plugins: [barLabelPlugin]
   });
 }
 
@@ -2925,6 +2943,11 @@ function switchFinanceSub(btn, pane) {
   ['fin-overall','fin-deep'].forEach(id=>{
     document.getElementById(id).classList.toggle('hidden', id!==pane);
   });
+  if (pane === 'fin-deep' && !peerRadarChart) {
+    renderDeepAllCompTable();
+    drawPeerRadarMulti([]);
+    renderPeerRadarLegend([]);
+  }
 }
 
 let deepSalesChart = null, deepOpChart = null;
@@ -2979,23 +3002,23 @@ function switchPeerVs(btn) {
     activePeerCo = co;
   }
 
-  if (selectedPeerCos.size === 0) {
-    document.getElementById('deepCompContent').classList.add('hidden');
-    return;
-  }
-
-  document.getElementById('deepCompContent').classList.remove('hidden');
-
   renderDeepAllCompTable();
   /* 레이더 */
   const _peers = [...selectedPeerCos].map(c=>PEER_DATA[c]).filter(Boolean);
-  const _nameStr = _peers.map(d=>d.name).join(', ');
-  document.getElementById('peerRadarTitle').innerHTML =
-    `<strong style="color:#1a4a8a;">대림바스</strong> vs ${_nameStr} — 레이더`;
-  const _legendEl = document.querySelector('.legend');
-  if (_legendEl) _legendEl.style.display = _peers.length === 1 ? '' : 'none';
-  if (_peers.length === 1) document.getElementById('peerRadarPeerLabel').textContent = _peers[0].name;
   drawPeerRadarMulti([...selectedPeerCos]);
+  renderPeerRadarLegend([...selectedPeerCos]);
+}
+
+function renderPeerRadarLegend(peerCos) {
+  const el = document.getElementById('peerRadarLegend');
+  if (!el) return;
+  const items = [
+    {color:'#1a4a8a', name:'대림바스', bold:true},
+    ...peerCos.map(c=>({color: ALL_LINE_COLORS[c] || '#E05570', name: PEER_DATA[c]?.name || c, bold:false}))
+  ];
+  el.innerHTML = items.map(item=>
+    `<span><span class="leg-dot" style="background:${item.color};"></span>${item.bold ? `<strong style="color:${item.color};">${item.name}</strong>` : item.name}</span>`
+  ).join('');
 }
 
 
@@ -3023,7 +3046,7 @@ function drawPeerRadarMulti(peerCos) {
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display: peerCos.length > 1, labels:{font:{size:10},usePointStyle:true,pointStyle:'circle',boxWidth:6}}},
+      plugins:{legend:{display:false}},
       scales:{r:{
         min:0, max:100,
         ticks:{stepSize:25,font:{size:9},color:'#b8c4d8',backdropColor:'transparent'},
@@ -3106,11 +3129,11 @@ let allSalesTrendChart=null, allOpTrendChart=null;
 let _allTrendKey = 'trend_sales';
 
 const ALL_COMP_METRICS = [
-  {label:'매출액 (억원)',     get:d=>d.sales.toLocaleString()},
-  {label:'매출총이익 (억원)', get:d=>Math.round(d.sales*(d.opr/100+0.15)).toLocaleString()},
-  {label:'영업이익 (억원)',   get:d=>d.op.toLocaleString()},
-  {label:'CAPEX (억원)',      get:d=>d.capex.toLocaleString()},
-  {label:'순차입금 (억원)',   get:d=>d.netdebt.toLocaleString()},
+  {label:'매출액',     get:d=>d.sales.toLocaleString()},
+  {label:'매출총이익', get:d=>Math.round(d.sales*(d.opr/100+0.15)).toLocaleString()},
+  {label:'영업이익',   get:d=>d.op.toLocaleString()},
+  {label:'CAPEX',      get:d=>d.capex.toLocaleString()},
+  {label:'순차입금',   get:d=>d.netdebt.toLocaleString()},
 ];
 
 function renderAllCompTable() {
