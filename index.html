@@ -550,6 +550,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 
     <!-- 월별 실적 테이블 -->
     <div class="card tbl-fade-wrap" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 억원, %)</span></div>
       <div class="tbl-wrap">
         <table id="tbl26"><thead id="thead26"></thead><tbody id="tbody26"></tbody></table>
       </div>
@@ -575,7 +576,10 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 
     <!-- 월별 비교 차트 -->
     <div class="card card-sm" style="margin-bottom:20px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">월별 비교</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;">월별 비교</span>
+        <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+      </div>
       <div class="legend" id="legend-monthly">
         <span><span class="leg-dot" style="background:#C8D4E8;"></span>전년 실적</span>
         <span><span class="leg-dot" style="background:#A8C4E0;"></span>계획</span>
@@ -595,6 +599,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 
     <!-- 누계 실적 테이블 -->
     <div class="card tbl-fade-wrap" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 억원, %)</span></div>
       <div class="tbl-wrap">
         <table id="tblCumul"><thead id="theadCumul"></thead><tbody id="tbodyCumul"></tbody></table>
       </div>
@@ -613,7 +618,10 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 
     <!-- 누계 추이 차트 -->
     <div class="card card-sm" style="margin-bottom:20px;">
-      <div style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">누계 추이</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;">누계 추이</span>
+        <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+      </div>
       <div class="legend" id="legend-cumul">
         <span><span class="leg-dot" style="background:#C8D4E8;"></span>전년 누계</span>
         <span><span class="leg-dot" style="background:#A8C4E0;"></span>누계 계획</span>
@@ -634,14 +642,14 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
     <!-- 그래프 (위) -->
     <div class="card card-sm" style="margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:8px;gap:14px;">
-        <div class="legend" style="margin-bottom:0;">
+        <div class="legend" style="margin-bottom:0;font-size:13px;">
           <span><span class="leg-dot" style="background:rgba(212,160,23,0.85);"></span>매출액</span>
           <span><span class="leg-dot" style="background:#1a4a8a;border-radius:1px;"></span>매출총이익률(%)</span>
           <span><span class="leg-dot" style="background:#06b6a2;border-radius:1px;"></span>영업이익률(%)</span>
         </div>
-        <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+        <span style="font-size:12px;color:var(--text-3);">(단위: 억원)</span>
       </div>
-      <div style="position:relative;height:300px;"><canvas id="chartHistStacked"></canvas></div>
+      <div style="position:relative;height:360px;"><canvas id="chartHistStacked"></canvas></div>
     </div>
     <!-- 표 (아래) -->
     <div class="card card-sm" id="histCards" style="overflow-x:auto;margin-bottom:20px;"></div>
@@ -1483,7 +1491,7 @@ const PEER_DATA = {
 /* ═══════════════════════════
    HELPERS
 ═══════════════════════════ */
-const fmt  = v => v === null ? '—' : (v/10).toFixed(1)+'억';
+const fmt  = v => v === null ? '—' : (v/10).toFixed(1);
 const cumul = arr => arr.map((_,i) => arr.slice(0,i+1).reduce((s,x)=>(x?s+x:s),0));
 const BAR_OPTS = {categoryPercentage:0.55, barPercentage:0.65, borderRadius:2};
 const CHART_OPTS = {
@@ -1491,7 +1499,7 @@ const CHART_OPTS = {
   plugins:{legend:{display:false}},
   scales:{
     x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10}}, grid:{display:false}},
-    y:{ticks:{font:{size:10}, callback:v=>v%10===0?(v/10)+'억':null}, grid:{color:'rgba(0,0,0,0.04)'}}
+    y:{ticks:{font:{size:10}, callback:v=>v%10===0?(v/10):null}, grid:{color:'rgba(0,0,0,0.04)'}}
   }
 };
 
@@ -1723,7 +1731,9 @@ function renderCumulTable() {
   const ROW_DEFS = [
     {label:'매출액',            a:'sales',  p:'salesPlan',  prev25:'sales25',  group:null},
     {label:'매출총이익',        a:'gp',     p:'gpPlan',     prev25:'gp25',     group:null},
+    {label:'매출총이익률(%)',   rate:true,  num:'gp', den:'sales', group:null},
     {label:'영업이익',          a:'op',     p:'opPlan',     prev25:'op25',     group:null},
+    {label:'영업이익률(%)',     rate:true,  num:'op', den:'sales', group:null},
     {label:'수주액',            a:'orders', p:'ordersPlan', prev25:'orders25', group:null},
   ];
 
@@ -1757,21 +1767,30 @@ function renderCumulTable() {
     html += `<tr><td style="font-weight:${r.group==='sub'?'400':'700'};${indent}">${r.label}</td>`;
     months6.forEach((_, i) => {
       const c  = i===CUR?' class="td-cur"':'';
-      const a  = r.a && cD26[r.a]     ? cD26[r.a][i]     : null;
-      const p  = r.p && cD26[r.p]     ? cD26[r.p][i]     : null;
-      const pv = r.prev25 && cD26[r.prev25] ? cD26[r.prev25][i] : null;
+      let a, p, pv;
+      if (r.rate) {
+        const rt = (n,d) => (n!==null && n!==undefined && d) ? +(n/d*100).toFixed(1) : null;
+        a  = rt(cD26[r.num]?.[i],         cD26[r.den]?.[i]);
+        p  = rt(cD26[r.num+'Plan']?.[i],  cD26[r.den+'Plan']?.[i]);
+        pv = rt(cD26[r.num+'25']?.[i],    cD26[r.den+'25']?.[i]);
+      } else {
+        a  = r.a && cD26[r.a]     ? cD26[r.a][i]     : null;
+        p  = r.p && cD26[r.p]     ? cD26[r.p][i]     : null;
+        pv = r.prev25 && cD26[r.prev25] ? cD26[r.prev25][i] : null;
+      }
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : fmt(v));
 
-      html += `<td${c}>${pv !== null ? fmt(pv) : '—'}</td>`;
-      html += `<td${c}>${p  !== null ? fmt(p)  : '—'}</td>`;
-      html += `<td${c}>${a  !== null ? fmt(a)  : '—'}</td>`;
+      html += `<td${c}>${vfmt(pv)}</td>`;
+      html += `<td${c}>${vfmt(p)}</td>`;
+      html += `<td${c}>${vfmt(a)}</td>`;
       if (a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
       if (a !== null && pv) {
         const chg = ((a-pv)/pv*100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}%</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -2156,7 +2175,9 @@ function buildSegMonthlyTable(segName) {
   const ROW_DEFS = [
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
+    {label:'매출총이익률(%)',   rate:true, num:'gp', den:'sales', group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
+    {label:'영업이익률(%)',     rate:true, num:'op', den:'sales', group:null},
   ];
 
   const months6 = MONTHS;
@@ -2189,15 +2210,12 @@ function buildSegMonthlyTable(segName) {
       const c = i===CUR?' class="td-cur"':'';
       let a, p, pv;
 
-      if (r.ratio) {
-        /* 카펙스/차입금/현금: 전사 수치에 비율 적용 */
-        const totalA = D26[r.f] ? D26[r.f][i] : null;
-        const totalP = D26[r.f+'Plan'] ? D26[r.f+'Plan'][i] : null;
-        const total25 = D26[r.f+'25'] ? D26[r.f+'25'][i] : null;
-        a  = totalA  !== null && totalA  !== undefined ? Math.round(totalA  * ratio) : null;
-        p  = totalP  !== null && totalP  !== undefined ? Math.round(totalP  * ratio) : null;
-        pv = total25 !== null && total25 !== undefined ? Math.round(total25 * ratio)
-              : (a !== null ? Math.round(a / (1 + (YOY[r.f]||4)/100)) : null);
+      if (r.rate) {
+        /* 매출총이익률·영업이익률: num/den × 100 */
+        const rt = (n,d) => (n!==null && n!==undefined && d) ? +(n/d*100).toFixed(1) : null;
+        a  = rt(trend[r.num]?.[i],         trend[r.den]?.[i]);
+        p  = rt(trend[r.num+'Plan']?.[i],  trend[r.den+'Plan']?.[i]);
+        pv = rt(trend[r.num+'25']?.[i],    trend[r.den+'25']?.[i]);
       } else {
         a  = trend[r.f][i];
         p  = trend[r.f+'Plan'] ? trend[r.f+'Plan'][i] : null;
@@ -2205,22 +2223,23 @@ function buildSegMonthlyTable(segName) {
       }
 
       const isFut = i > CUR;
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : v);
       /* 전년실적 */
-      html += `<td${c}>${pv !== null ? pv+'억' : '—'}</td>`;
+      html += `<td${c}>${vfmt(pv)}</td>`;
       /* 계획 */
-      html += `<td${c}>${p !== null ? p+'억' : '—'}</td>`;
+      html += `<td${c}>${vfmt(p)}</td>`;
       /* 실적 */
-      html += `<td${c}>${(!isFut && a !== null) ? a+'억' : '—'}</td>`;
+      html += `<td${c}>${(!isFut && a !== null && a !== undefined) ? vfmt(a) : '—'}</td>`;
       /* 달성률 */
       if (!isFut && a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
       /* 증감률 */
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}%</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -2292,7 +2311,9 @@ function buildSegCumulTable(segName) {
   const ROW_DEFS = [
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
+    {label:'매출총이익률(%)',   rate:true, num:'gp', den:'sales', group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
+    {label:'영업이익률(%)',     rate:true, num:'op', den:'sales', group:null},
   ];
 
   const months6 = MONTHS;
@@ -2323,17 +2344,18 @@ function buildSegCumulTable(segName) {
       const isFut = i > CUR;
       let a, p, pv;
 
-      if (r.ratio) {
-        /* 카펙스/차입금/현금: 전사 누계에 비율 적용 */
-        const slice = isFut ? [] : D26[r.f] ? D26[r.f].slice(0,i+1).map(v=>v||0) : [];
-        const sliceP  = D26[r.f+'Plan'] ? D26[r.f+'Plan'].slice(0,i+1) : [];
-        const slice25 = D26[r.f+'25']   ? D26[r.f+'25'].slice(0,i+1)   : [];
-        const totalA  = !isFut && slice.length  ? cumul(slice).pop()  : null;
-        const totalP  = sliceP.length  ? cumul(sliceP).pop()  : null;
-        const total25 = slice25.length ? cumul(slice25).pop() : null;
-        a  = totalA  !== null ? Math.round(totalA  * ratio) : null;
-        p  = totalP  !== null ? Math.round(totalP  * ratio) : null;
-        pv = total25 !== null ? Math.round(total25 * ratio) : null;
+      if (r.rate) {
+        /* 매출총이익률·영업이익률: 누계 num/den × 100 */
+        const cumPop = (arr, useFut) => {
+          if (!arr) return null;
+          if (!useFut && isFut) return null;
+          const sl = arr.slice(0,i+1).map(v=>v||0);
+          return sl.length ? cumul(sl).pop() : null;
+        };
+        const rt = (n,d) => (n!==null && n!==undefined && d) ? +(n/d*100).toFixed(1) : null;
+        a  = rt(cumPop(trend[r.num], false),        cumPop(trend[r.den], false));
+        p  = rt(cumPop(trend[r.num+'Plan'], true),  cumPop(trend[r.den+'Plan'], true));
+        pv = rt(cumPop(trend[r.num+'25'], true),    cumPop(trend[r.den+'25'], true));
       } else {
         const acts = trend[r.f].map(v => v||0);
         a  = !isFut ? cumul(acts.slice(0,i+1)).pop() : null;
@@ -2341,22 +2363,23 @@ function buildSegCumulTable(segName) {
         pv = trend[r.f+'25']   ? cumul(trend[r.f+'25'].slice(0,i+1)).pop()   : null;
       }
 
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : v);
       /* 전년실적 */
-      html += `<td${c}>${pv !== null ? pv+'억' : '—'}</td>`;
+      html += `<td${c}>${vfmt(pv)}</td>`;
       /* 계획 */
-      html += `<td${c}>${p !== null ? p+'억' : '—'}</td>`;
+      html += `<td${c}>${vfmt(p)}</td>`;
       /* 실적 */
-      html += `<td${c}>${a !== null ? a+'억' : '—'}</td>`;
+      html += `<td${c}>${vfmt(a)}</td>`;
       /* 달성률 */
       if (!isFut && a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
       /* 증감률 */
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}%</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -2377,10 +2400,12 @@ function buildSegCumulTable(segName) {
 /* 2026 TABLE */
 function build26Table() {
   const ROW_DEFS = [
-    {label:'매출액',        a:'sales',  p:'salesPlan',  group:null},
-    {label:'매출총이익',    a:'gp',     p:'gpPlan',     group:null},
-    {label:'영업이익',      a:'op',     p:'opPlan',     group:null},
-    {label:'수주액',        a:'orders', p:'ordersPlan', group:null},
+    {label:'매출액',          a:'sales',  p:'salesPlan',  group:null},
+    {label:'매출총이익',      a:'gp',     p:'gpPlan',     group:null},
+    {label:'매출총이익률(%)', rate:true, num:'gp', den:'sales', group:null},
+    {label:'영업이익',        a:'op',     p:'opPlan',     group:null},
+    {label:'영업이익률(%)',   rate:true, num:'op', den:'sales', group:null},
+    {label:'수주액',          a:'orders', p:'ordersPlan', group:null},
   ];
 
   /* ── 헤더 2단 (5열/월: 전년실적·계획·실적·달성률·증감률) ── */
@@ -2413,23 +2438,32 @@ function build26Table() {
     html += `<tr><td style="font-weight:${r.group==='sub'?'400':'700'};${indent}">${r.label}</td>`;
 
     MONTHS.forEach((_, i) => {
-      const a   = r.a ? D26[r.a][i] : null;
-      const p   = r.p ? D26[r.p][i] : null;
-      const pv  = prevKey && D26[prevKey] ? D26[prevKey][i] : null;
+      let a, p, pv;
+      if (r.rate) {
+        const rt = (n,d) => (n!==null && n!==undefined && d) ? +(n/d*100).toFixed(1) : null;
+        a  = rt(D26[r.num][i],          D26[r.den][i]);
+        p  = rt(D26[r.num+'Plan'][i],   D26[r.den+'Plan'][i]);
+        pv = rt(D26[r.num+'25']?.[i],   D26[r.den+'25']?.[i]);
+      } else {
+        a  = r.a ? D26[r.a][i] : null;
+        p  = r.p ? D26[r.p][i] : null;
+        pv = prevKey && D26[prevKey] ? D26[prevKey][i] : null;
+      }
       const isFut = i > CUR;
       const tdCls = isFut ? ' class="td-fut"' : i === CUR ? ' class="td-cur"' : '';
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : fmt(v));
 
       /* 전년실적 */
-      html += `<td${tdCls}>${pv !== null && pv !== undefined ? fmt(pv) : '—'}</td>`;
+      html += `<td${tdCls}>${vfmt(pv)}</td>`;
       /* 계획 */
-      html += `<td${tdCls}>${fmt(p)}</td>`;
+      html += `<td${tdCls}>${vfmt(p)}</td>`;
       /* 실적 */
-      html += `<td${tdCls}>${isFut ? '—' : fmt(a)}</td>`;
+      html += `<td${tdCls}>${isFut ? '—' : vfmt(a)}</td>`;
       /* 달성률 */
       if (!isFut && a !== null && p) {
         const pct = (a / p * 100).toFixed(1);
         const achColor = parseFloat(pct) >= 100 ? '#1a4a8a' : '#1e293b';
-        html += `<td${tdCls}><span style="color:${achColor};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
+        html += `<td${tdCls}><span style="color:${achColor};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
       } else {
         html += `<td${tdCls}>—</td>`;
       }
@@ -2437,7 +2471,7 @@ function build26Table() {
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${tdCls}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}%</span></td>`;
+        html += `<td${tdCls}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
       } else {
         html += `<td${tdCls}>—</td>`;
       }
@@ -2562,10 +2596,10 @@ function switchTreemap(btn, key) {
 ═══════════════════════════ */
 function buildHistCards() {
   const el = document.getElementById('histCards');
-  const thStyle = 'padding:6px 10px;font-size:10px;font-weight:700;text-align:right;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);';
-  const tdStyle = 'padding:5px 10px;font-size:11px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);';
-  const th1Style = 'padding:6px 10px;font-size:10px;font-weight:700;text-align:left;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);position:sticky;left:0;z-index:1;';
-  const td1Style = 'padding:5px 10px;font-size:11px;font-weight:600;text-align:left;white-space:nowrap;color:var(--navy);background:var(--surface-2,#f5f7fb);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:1;';
+  const thStyle = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:right;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);';
+  const tdStyle = 'padding:8px 14px;font-size:13px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);';
+  const th1Style = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:left;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);position:sticky;left:0;z-index:1;';
+  const td1Style = 'padding:8px 14px;font-size:13px;font-weight:700;text-align:left;white-space:nowrap;color:var(--navy);background:var(--surface-2,#f5f7fb);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:1;';
   const gpArr  = HIST.sales.map((s,i) => Math.round(s * (0.22 + i/21 * 0.04)));
   const gpRate = gpArr.map((g,i) => (g / HIST.sales[i] * 100).toFixed(1));
   const opRate = HIST.op.map((o,i) => (o / HIST.sales[i] * 100).toFixed(1));
@@ -2612,7 +2646,7 @@ function buildHistChart() {
           const val = ds.data[j];
           if (val == null) return;
           ctx.save();
-          ctx.font = '700 8px sans-serif';
+          ctx.font = '700 10px sans-serif';
           ctx.fillStyle = '#374151';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
@@ -2680,16 +2714,16 @@ function buildHistChart() {
         }
       },
       scales: {
-        x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
+        x: { ticks: { font: { size: 11 }, maxRotation: 45 }, grid: { display: false } },
         y: {
           position: 'left',
-          ticks: { font: { size: 9 }, callback: v => v.toLocaleString()+'억' },
+          ticks: { font: { size: 11 }, callback: v => v.toLocaleString() },
           grid: { color: 'rgba(0,0,0,0.04)' }
         },
         y2: {
           position: 'right',
           min: 0, max: 30,
-          ticks: { font: { size: 9 }, stepSize: 5, callback: v => v+'%' },
+          ticks: { font: { size: 11 }, stepSize: 5, callback: v => v+'%' },
           grid: { drawOnChartArea: false }
         }
       }
