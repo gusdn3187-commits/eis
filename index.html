@@ -181,11 +181,6 @@ body { font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','A
 /* Table */
 .tbl-wrap { overflow-x:auto; position:relative; }
 .tbl-fade-wrap { position:relative; }
-.tbl-fade-wrap::before, .tbl-fade-wrap::after {
-  content:''; pointer-events:none; position:absolute; top:0; bottom:0; width:36px; z-index:10; border-radius:var(--r-lg);
-}
-.tbl-fade-wrap::before { left:0; background:linear-gradient(to right, #fff 0%, transparent 100%); }
-.tbl-fade-wrap::after  { right:0; background:linear-gradient(to left, #fff 0%, transparent 100%); }
 table { width:100%; border-collapse:collapse; min-width:820px; }
 #tbl26 { min-width:2800px; }
 #tbl26 thead th, #tblCumul thead th { padding:6px 8px; font-size:10px; border-radius:0 !important; text-align:center !important; white-space:nowrap; }
@@ -203,12 +198,19 @@ table { width:100%; border-collapse:collapse; min-width:820px; }
 #tbl26 tbody td, #tblCumul tbody td { padding:7px 8px; font-size:11px; text-align:center !important; white-space:nowrap; }
 #tbl26 tbody td:first-child, #tblCumul tbody td:first-child { text-align:left !important; font-weight:700; border-right:none; position:sticky; left:0; z-index:1; background:var(--surface); }
 #tbl26 thead th[rowspan], #tblCumul thead th[rowspan] { position:sticky; left:0; z-index:3; }
-#tblCumul { min-width:1800px; }
+#tblCumul { min-width:3600px; }
 /* 미래월 3열 회색 통일 */
 #tbl26 tbody td.td-fut { color:var(--text-3) !important; }
 thead th { background:var(--navy); color:#fff; padding:9px 10px; text-align:center; font-size:11px; font-weight:600; letter-spacing:.2px; border-bottom:none; white-space:nowrap; }
-thead th:first-child { text-align:left; min-width:88px; border-radius:8px 0 0 0; }
-thead th:last-child { border-radius:0 8px 0 0; }
+thead th:first-child { text-align:left; min-width:88px; }
+thead th:last-child { }
+/* 동적 생성 테이블(mktTotalTable/mktDalimTable)을 제외한 일반 테이블 헤더 모서리 */
+.seg-matrix thead th:first-child,
+#allCompTable thead th:first-child,
+#deepAllCompTable thead th:first-child { border-radius:8px 0 0 0; }
+.seg-matrix thead th:last-child,
+#allCompTable thead th:last-child,
+#deepAllCompTable thead th:last-child { border-radius:0 8px 0 0; }
 .comp-self-th { background:#1a4a8a !important; color:#fff !important; font-weight:700 !important; }
 .comp-self-td { background:#e8efff !important; color:#1a4a8a !important; font-weight:700 !important; }
 tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
@@ -223,11 +225,6 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 .achieve-row td { font-size:10px; font-weight:600; color:var(--text-3); }
 .achieve-row td:first-child { padding-left:20px; }
 
-/* ── TREEMAP / SUNBURST ── */
-#treemapCanvas { cursor:pointer; }
-.treemap-legend { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; font-size:11px; }
-.treemap-legend-item { display:flex; align-items:center; gap:4px; }
-.treemap-legend-dot { width:10px; height:10px; border-radius:2px; }
 
 /* ── HIST CARDS ── */
 .hist-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:12px; }
@@ -333,9 +330,9 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 .prof-tl-headline{font-size:12px;color:var(--text-1);line-height:1.5;font-weight:500;}
 .prof-tl-src{font-size:10px;color:var(--text-3);margin-top:3px;}
 /* MARKET SIZE */
-.market-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:12px; }
+.market-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
 .mkt-card { background:var(--bg); border-radius:var(--r-md); padding:12px 14px; border:0.5px solid var(--border-strong); }
-.mkt-cat { font-size:10px; font-weight:600; color:var(--text-3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; }
+.mkt-cat { font-size:15px; font-weight:700; color:var(--text-2); margin-bottom:6px; }
 .mkt-val { font-size:22px; font-weight:700; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--text-1); }
 .mkt-unit { font-size:12px; font-weight:500; color:var(--text-2); }
 .mkt-chg { font-size:11px; font-weight:600; margin-top:4px; }
@@ -410,9 +407,9 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 .nf-kpi-unit{font-size:13px;font-weight:500;color:var(--text-2);margin-left:2px;}
 .nf-kpi-sub{font-size:11px;color:var(--text-3);margin-top:5px;display:flex;align-items:center;gap:4px;}
 .nf-kpi-delta{font-size:11px;font-weight:700;}
-.nf-kpi-delta.up{color:#16a34a;}
-.nf-kpi-delta.dn{color:var(--red);}
-.nf-kpi-delta.neu{color:var(--text-3);}
+.nf-kpi-delta.up{color:var(--text-1);}
+.nf-kpi-delta.dn{color:var(--text-1);}
+.nf-kpi-delta.neu{color:var(--text-1);}
 /* ② 3컬럼 레이아웃 */
 .nf-layout{display:grid;grid-template-columns:168px 1fr 256px;gap:14px;align-items:start;}
 /* 좌측 필터 패널 */
@@ -428,6 +425,19 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 .nf-lp-item .nf-lp-cnt{font-size:10px;color:var(--text-3);font-weight:600;margin-left:auto;flex-shrink:0;}
 .nf-lp-reset{width:100%;padding:5px 0;margin-top:10px;border-radius:6px;border:1px solid var(--border-strong);background:transparent;font-size:11px;color:var(--text-3);cursor:pointer;font-family:inherit;transition:.12s;}
 .nf-lp-reset:hover{border-color:var(--navy);color:var(--navy);}
+/* ── 키워드 추가/삭제 (B안) ── */
+.nf-kw-del-btn{margin-left:auto;width:15px;height:15px;border-radius:50%;border:none;background:transparent;color:var(--text-3);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;transition:background .12s,color .12s;}
+.nf-kw-del-btn:hover{background:#fee2e2;color:#dc2626;}
+.nf-kw-add-trigger{display:flex;align-items:center;gap:5px;margin-top:6px;padding:5px 6px;border:1px dashed var(--border-strong);border-radius:6px;cursor:pointer;transition:background .15s,border-color .15s;}
+.nf-kw-add-trigger:hover{background:var(--blue-lt);border-color:var(--navy);}
+.nf-kw-add-trigger span:last-child{font-size:11px;color:var(--text-3);}
+.nf-kw-add-trigger:hover span{color:var(--navy);}
+.nf-kw-add-expanded{display:flex;gap:4px;margin-top:5px;align-items:center;}
+.nf-kw-input{flex:1;font-size:11px;padding:4px 7px;border:1px solid var(--navy);border-radius:6px;background:var(--surface);color:var(--text-1);outline:none;font-family:inherit;min-width:0;}
+.nf-kw-confirm-btn{padding:4px 8px;font-size:11px;background:var(--navy);color:#fff;border:none;border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
+.nf-kw-confirm-btn:hover{background:var(--sky);}
+.nf-kw-cancel-btn{padding:4px 6px;font-size:11px;background:transparent;color:var(--text-3);border:1px solid var(--border-strong);border-radius:6px;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;}
+.nf-kw-cancel-btn:hover{color:var(--text-1);border-color:var(--text-3);}
 /* 검색+정렬 바 (필터바 대체) */
 .nf-search-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
 /* ③ 사이드바 */
@@ -451,7 +461,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 .nf-comp-name{font-size:11px;font-weight:600;color:var(--text-1);}
 .nf-comp-cnt{font-size:11px;text-align:center;font-weight:700;color:var(--text-1);}
 .nf-comp-delta{text-align:right;font-size:10px;font-weight:700;}
-.nf-comp-delta.up{color:var(--red);} .nf-comp-delta.dn{color:var(--teal);} .nf-comp-delta.neu{color:var(--text-3);}
+.nf-comp-delta.up{color:var(--text-1);} .nf-comp-delta.dn{color:var(--text-1);} .nf-comp-delta.neu{color:var(--text-1);}
 .nf-kw-cloud{display:flex;flex-wrap:wrap;gap:5px;}
 .nf-kw-pill{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:600;background:var(--bg);color:var(--text-2);cursor:pointer;transition:background .12s;border:0.5px solid var(--border);}
 .nf-kw-pill:hover,.nf-kw-pill.active{background:var(--nav-bg);color:#fff;border-color:var(--nav-bg);}
@@ -543,14 +553,16 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
   <!-- ── 월간 ── -->
   <div id="kpi-monthly-pane">
     <div class="sec-head">
-      <span class="sec-label">사업부 KPI</span>
-      <span class="badge badge-gray">6월 당월 · 억원</span>
+      <div class="sec-head-left">
+        <span class="sec-label">사업부 KPI</span>
+        <span class="badge badge-gray">6월 당월 · 백만원</span>
+      </div>
     </div>
     <div id="kpiScopeSeg" style="margin-bottom:20px;"></div>
 
     <!-- 월별 실적 테이블 -->
     <div class="card tbl-fade-wrap" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 억원, %)</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 백만원)</span></div>
       <div class="tbl-wrap">
         <table id="tbl26"><thead id="thead26"></thead><tbody id="tbody26"></tbody></table>
       </div>
@@ -578,7 +590,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
     <div class="card card-sm" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;">월별 비교</span>
-        <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+        <span style="font-size:11px;color:var(--text-3);">(단위: 백만원)</span>
       </div>
       <div class="legend" id="legend-monthly">
         <span><span class="leg-dot" style="background:#C8D4E8;"></span>전년 실적</span>
@@ -592,35 +604,42 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
   <!-- ── 누계 ── -->
   <div id="kpi-cumul-pane" class="hidden">
     <div class="sec-head">
-      <span class="sec-label">사업부 KPI</span>
-      <span class="badge badge-gray">1~6월 누계 · 억원</span>
+      <div class="sec-head-left">
+        <span class="sec-label">사업부 KPI</span>
+        <span class="badge badge-gray">1~12월 누계 · 백만원</span>
+      </div>
     </div>
     <div id="kpiScopeSegCumul" style="margin-bottom:20px;"></div>
 
     <!-- 누계 실적 테이블 -->
     <div class="card tbl-fade-wrap" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 억원, %)</span></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="font-size:11px;color:var(--text-3);">(단위: 백만원)</span></div>
       <div class="tbl-wrap">
         <table id="tblCumul"><thead id="theadCumul"></thead><tbody id="tbodyCumul"></tbody></table>
       </div>
     </div>
 
     <!-- 누계 지표 선택 탭 -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
       <div class="sub-tab-bar" style="margin-bottom:0;" id="cumulMetricTabBar">
         <button class="sub-tab-btn active" onclick="switchCumulMetric(this,'sales')">매출액</button>
         <button class="sub-tab-btn" onclick="switchCumulMetric(this,'gp')">매출총이익</button>
         <button class="sub-tab-btn" onclick="switchCumulMetric(this,'op')">영업이익</button>
         <button class="sub-tab-btn" id="btnCumulOrders" onclick="switchCumulMetric(this,'orders')">수주액</button>
       </div>
-      <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+      <div class="toggle-wrap">
+        <label>
+          <input type="checkbox" id="toggleCumulPrevYear" checked onchange="toggleCumulPrevYear()">
+          전년 실적 보기
+        </label>
+      </div>
     </div>
 
     <!-- 누계 추이 차트 -->
     <div class="card card-sm" style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <span style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.06em;">누계 추이</span>
-        <span style="font-size:11px;color:var(--text-3);">(단위: 억원)</span>
+        <span style="font-size:11px;color:var(--text-3);">(단위: 백만원)</span>
       </div>
       <div class="legend" id="legend-cumul">
         <span><span class="leg-dot" style="background:#C8D4E8;"></span>전년 누계</span>
@@ -676,12 +695,12 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
           <div style="font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;">원자재 (달러/톤)</div>
           <div class="mat-row">
             <span class="mat-name"><span class="mat-dot" style="background:#d4a017;"></span>구리</span>
-            <span class="mat-vals"><span class="mat-cur">9,842</span><span class="chg up">▲1.3%</span></span>
+            <span class="mat-vals"><span class="mat-cur">9,842</span><span class="chg" style="color:#1e293b;">+1.3%</span></span>
             <span class="mat-mom">전월比 <strong>+125달러</strong></span>
           </div>
           <div class="mat-row">
             <span class="mat-name"><span class="mat-dot" style="background:#1a4a8a;"></span>아연</span>
-            <span class="mat-vals"><span class="mat-cur">2,714</span><span class="chg dn">▼0.8%</span></span>
+            <span class="mat-vals"><span class="mat-cur">2,714</span><span class="chg" style="color:var(--red);">▲0.8%</span></span>
             <span class="mat-mom">전월比 <strong>-22달러</strong></span>
           </div>
         </div>
@@ -690,7 +709,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
           <div style="font-size:10px;font-weight:700;color:var(--text-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;">환율 · 금리</div>
           <div class="mat-row">
             <span class="mat-name"><span class="mat-dot" style="background:#06b6a2;"></span>원/달러</span>
-            <span class="mat-vals"><span class="mat-cur">1,382</span><span class="chg up">▲0.4%</span></span>
+            <span class="mat-vals"><span class="mat-cur">1,382</span><span class="chg" style="color:#1e293b;">+0.4%</span></span>
             <span class="mat-mom"></span>
           </div>
           <div class="mat-row">
@@ -723,11 +742,11 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
     <div class="sec-head"><span class="sec-label">주택건설경기 지표</span></div>
     <div class="card card-sm" style="margin-bottom:10px;padding:12px 16px;">
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0 8px;">
-        <div class="h-item"><div class="h-label">인허가실적</div><div class="h-val">32,814</div><div class="h-chg dn">▼ -4.2%</div></div>
-        <div class="h-item"><div class="h-label">착공실적</div><div class="h-val">18,423</div><div class="h-chg dn">▼ -6.1%</div></div>
-        <div class="h-item"><div class="h-label">분양물량</div><div class="h-val">24,100</div><div class="h-chg up">▲ +2.3%</div></div>
-        <div class="h-item"><div class="h-label">미분양물량</div><div class="h-val">61,240</div><div class="h-chg dn">▼ -1.8%</div></div>
-        <div class="h-item"><div class="h-label">준공실적</div><div class="h-val">29,510</div><div class="h-chg up">▲ +3.4%</div></div>
+        <div class="h-item"><div class="h-label">인허가실적</div><div class="h-val">32,814</div><div class="h-chg" style="color:var(--red);">▲4.2%</div></div>
+        <div class="h-item"><div class="h-label">착공실적</div><div class="h-val">18,423</div><div class="h-chg" style="color:var(--red);">▲6.1%</div></div>
+        <div class="h-item"><div class="h-label">분양물량</div><div class="h-val">24,100</div><div class="h-chg" style="color:#1e293b;">+2.3%</div></div>
+        <div class="h-item"><div class="h-label">미분양물량</div><div class="h-val">61,240</div><div class="h-chg" style="color:var(--red);">▲1.8%</div></div>
+        <div class="h-item"><div class="h-label">준공실적</div><div class="h-val">29,510</div><div class="h-chg" style="color:#1e293b;">+3.4%</div></div>
       </div>
     </div>
     <div class="card card-sm" style="margin-bottom:12px;">
@@ -867,22 +886,39 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
         </div>
         <!-- 유형 섹션 -->
         <div class="nf-lp-section">
-          <div class="nf-lp-title">유형 <span class="nf-lp-toggle" onclick="newsToggleAll('type')">전체취소</span></div>
-          <div class="nf-lp-item">
-            <input type="checkbox" id="nfty-order" checked onchange="newsFilterChange()">
-            <label for="nfty-order">수주</label>
+          <div class="nf-lp-title">키워드 <span class="nf-lp-toggle" onclick="newsToggleAll('type')">전체취소</span></div>
+          <div id="nfty-list">
+            <div class="nf-lp-item" data-kw-id="nfty-order">
+              <input type="checkbox" id="nfty-order" checked onchange="newsFilterChange()">
+              <label for="nfty-order">수주</label>
+              <button class="nf-kw-del-btn" onclick="deleteKeyword('nfty-order')" title="삭제">×</button>
+            </div>
+            <div class="nf-lp-item" data-kw-id="nfty-result">
+              <input type="checkbox" id="nfty-result" checked onchange="newsFilterChange()">
+              <label for="nfty-result">실적</label>
+              <button class="nf-kw-del-btn" onclick="deleteKeyword('nfty-result')" title="삭제">×</button>
+            </div>
+            <div class="nf-lp-item" data-kw-id="nfty-news">
+              <input type="checkbox" id="nfty-news" checked onchange="newsFilterChange()">
+              <label for="nfty-news">뉴스</label>
+              <button class="nf-kw-del-btn" onclick="deleteKeyword('nfty-news')" title="삭제">×</button>
+            </div>
+            <div class="nf-lp-item" data-kw-id="nfty-notice">
+              <input type="checkbox" id="nfty-notice" checked onchange="newsFilterChange()">
+              <label for="nfty-notice">공시</label>
+              <button class="nf-kw-del-btn" onclick="deleteKeyword('nfty-notice')" title="삭제">×</button>
+            </div>
           </div>
-          <div class="nf-lp-item">
-            <input type="checkbox" id="nfty-result" checked onchange="newsFilterChange()">
-            <label for="nfty-result">실적</label>
+          <!-- 추가 버튼 (B안) -->
+          <div class="nf-kw-add-trigger" id="nfKwTrigger" onclick="toggleKwInput()">
+            <span style="font-size:13px;color:var(--text-3);line-height:1;">+</span>
+            <span>키워드 추가...</span>
           </div>
-          <div class="nf-lp-item">
-            <input type="checkbox" id="nfty-news" checked onchange="newsFilterChange()">
-            <label for="nfty-news">뉴스</label>
-          </div>
-          <div class="nf-lp-item">
-            <input type="checkbox" id="nfty-notice" checked onchange="newsFilterChange()">
-            <label for="nfty-notice">공시</label>
+          <div class="nf-kw-add-expanded hidden" id="nfKwExpanded">
+            <input type="text" id="nfKwInput" class="nf-kw-input" placeholder="새 키워드" maxlength="12"
+              onkeydown="if(event.key==='Enter')addKeyword();if(event.key==='Escape')closeKwInput();">
+            <button class="nf-kw-confirm-btn" onclick="addKeyword()">추가</button>
+            <button class="nf-kw-cancel-btn" onclick="closeKwInput()">취소</button>
           </div>
         </div>
         <button class="nf-lp-reset" onclick="newsFilterReset()">전체 초기화</button>
@@ -912,18 +948,18 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
         <div class="nf-kpi-row">
           <div class="nf-kpi k1">
             <div class="nf-kpi-lbl">대림바스 뉴스</div>
-            <div class="nf-kpi-val">5<span class="nf-kpi-unit">건</span></div>
-            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">▲ 1건</span></div>
+            <div class="nf-kpi-val"><span id="nfKpiSelf">—</span><span class="nf-kpi-unit">건</span></div>
+            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">+1건</span></div>
           </div>
           <div class="nf-kpi k2">
             <div class="nf-kpi-lbl">경쟁사 뉴스</div>
-            <div class="nf-kpi-val">25<span class="nf-kpi-unit">건</span></div>
-            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">▲ 5건</span></div>
+            <div class="nf-kpi-val"><span id="nfKpiComp">—</span><span class="nf-kpi-unit">건</span></div>
+            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">+5건</span></div>
           </div>
           <div class="nf-kpi k3">
             <div class="nf-kpi-lbl">총 수집</div>
-            <div class="nf-kpi-val">30<span class="nf-kpi-unit">건</span></div>
-            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">▲ 6건</span></div>
+            <div class="nf-kpi-val"><span id="nfKpiTotal">—</span><span class="nf-kpi-unit">건</span></div>
+            <div class="nf-kpi-sub">전주 대비 <span class="nf-kpi-delta up">+6건</span></div>
           </div>
         </div>
 
@@ -935,7 +971,6 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
           </div>
           <select class="nf-sort" id="newsSortSel" onchange="renderNews()">
             <option value="date">최신순</option>
-            <option value="imp">중요도순</option>
           </select>
         </div>
 
@@ -970,23 +1005,23 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
           <div class="nf-wb-rows">
             <div class="nf-wb-row">
               <span class="nf-wb-lbl">대림바스</span>
-              <div class="nf-wb-bg"><div class="nf-wb-fill" style="width:29%;background:var(--amber);"></div></div>
-              <span class="nf-wb-val">5</span>
+              <div class="nf-wb-bg"><div id="nfBarSelf" class="nf-wb-fill" style="width:0%;background:var(--amber);"></div></div>
+              <span class="nf-wb-val" id="nfValSelf">—</span>
             </div>
             <div class="nf-wb-row">
               <span class="nf-wb-lbl">경쟁사</span>
-              <div class="nf-wb-bg"><div class="nf-wb-fill" style="width:100%;background:var(--teal);"></div></div>
-              <span class="nf-wb-val">25</span>
+              <div class="nf-wb-bg"><div id="nfBarComp" class="nf-wb-fill" style="width:0%;background:var(--teal);"></div></div>
+              <span class="nf-wb-val" id="nfValComp">—</span>
             </div>
             <div class="nf-wb-row">
               <span class="nf-wb-lbl">수주</span>
-              <div class="nf-wb-bg"><div class="nf-wb-fill" style="width:43%;background:var(--blue);"></div></div>
-              <span class="nf-wb-val">13</span>
+              <div class="nf-wb-bg"><div id="nfBarOrder" class="nf-wb-fill" style="width:0%;background:var(--blue);"></div></div>
+              <span class="nf-wb-val" id="nfValOrder">—</span>
             </div>
             <div class="nf-wb-row">
               <span class="nf-wb-lbl">실적</span>
-              <div class="nf-wb-bg"><div class="nf-wb-fill" style="width:30%;background:var(--purple);"></div></div>
-              <span class="nf-wb-val">9</span>
+              <div class="nf-wb-bg"><div id="nfBarResult" class="nf-wb-fill" style="width:0%;background:var(--purple);"></div></div>
+              <span class="nf-wb-val" id="nfValResult">—</span>
             </div>
           </div>
         </div>
@@ -1000,7 +1035,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
             <div class="nf-comp-row">
               <span class="nf-comp-name">한샘</span>
               <span class="nf-comp-cnt">3</span>
-              <span class="nf-comp-delta up">▲ 1</span>
+              <span class="nf-comp-delta up">+1</span>
             </div>
             <div class="nf-comp-row">
               <span class="nf-comp-name">리바트</span>
@@ -1015,12 +1050,12 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
             <div class="nf-comp-row">
               <span class="nf-comp-name">영림임업</span>
               <span class="nf-comp-cnt">2</span>
-              <span class="nf-comp-delta dn">▼ 1</span>
+              <span class="nf-comp-delta dn">-1</span>
             </div>
             <div class="nf-comp-row">
               <span class="nf-comp-name">이누스</span>
               <span class="nf-comp-cnt">2</span>
-              <span class="nf-comp-delta up">▲ 1</span>
+              <span class="nf-comp-delta up">+1</span>
             </div>
           </div>
         </div>
@@ -1057,23 +1092,32 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
 
     <!-- ════ 전체 비교 탭 ════ -->
     <div id="fin-overall">
-      <div class="sec-head"><span class="sec-label">전체 비교 — 대림바스 vs 경쟁사</span><span class="badge badge-blue">2025년 기준</span></div>
-      <div class="card tbl-wrap card-sm" style="margin-bottom:18px;">
-        <div class="card-title" style="margin-bottom:10px;">재무지표 비교 <span style="font-weight:400;font-size:10px;">(2025년 기준, 억원)</span></div>
-        <table id="allCompTable">
-          <thead id="allCompHead"></thead>
-          <tbody id="allCompBody"></tbody>
-        </table>
+      <div class="sec-head"><span class="sec-label">전체 비교 — 대림바스 vs 경쟁사 <span class="badge badge-blue" style="margin-left:8px;vertical-align:middle;">2025년 기준</span></span></div>
+      <div class="card card-sm" style="margin-bottom:18px;padding-bottom:4px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span class="card-title" style="margin-bottom:0;">재무지표 비교</span>
+          <span style="font-size:11px;color:var(--text-3);">(억원)</span>
+        </div>
+        <div class="tbl-fade-wrap">
+          <div class="tbl-wrap">
+            <table id="allCompTable">
+              <thead id="allCompHead"></thead>
+              <tbody id="allCompBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div class="sec-head"><span class="sec-label">재무 추이</span><span class="badge badge-gray">연도별 변화</span></div>
+      <div class="sec-head"><span class="sec-label">연도별 재무추이</span></div>
       <!-- 지표 탭 -->
-      <div style="display:flex;gap:6px;margin-bottom:10px;">
+      <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
         <button class="mkt-year-btn active" id="allTrendBtn0" onclick="switchAllTrendKey('trend_sales',0)">매출액</button>
         <button class="mkt-year-btn" id="allTrendBtn1" onclick="switchAllTrendKey('trend_gp',1)">매출총이익</button>
-        <button class="mkt-year-btn" id="allTrendBtn2" onclick="switchAllTrendKey('trend_op',2)">영업이익</button>
-        <button class="mkt-year-btn" id="allTrendBtn3" onclick="switchAllTrendKey('trend_capex',3)">CAPEX</button>
-        <button class="mkt-year-btn" id="allTrendBtn4" onclick="switchAllTrendKey('trend_debt',4)">순차입금</button>
+        <button class="mkt-year-btn" id="allTrendBtn2" onclick="switchAllTrendKey('trend_gp_rate',2)">매출총이익률(%)</button>
+        <button class="mkt-year-btn" id="allTrendBtn3" onclick="switchAllTrendKey('trend_op',3)">영업이익</button>
+        <button class="mkt-year-btn" id="allTrendBtn4" onclick="switchAllTrendKey('trend_op_rate',4)">영업이익률(%)</button>
+        <button class="mkt-year-btn" id="allTrendBtn5" onclick="switchAllTrendKey('trend_capex',5)">CAPEX</button>
+        <button class="mkt-year-btn" id="allTrendBtn6" onclick="switchAllTrendKey('trend_debt',6)">순차입금</button>
       </div>
       <!-- 범례 -->
       <div style="overflow-x:auto;margin-bottom:8px;padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;">
@@ -1081,7 +1125,9 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
       </div>
       <!-- 차트 -->
       <div class="card card-sm" style="margin-bottom:20px;">
-        <div class="card-title" id="allTrendChartTitle">매출액 추이 (억원)</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div class="card-title" id="allTrendChartTitle" style="margin-bottom:0;">매출액 추이 (억원)</div>
+        </div>
         <div style="position:relative;height:240px;"><canvas id="chartAllSalesTrend"></canvas></div>
       </div>
     </div>
@@ -1114,15 +1160,22 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
       <!-- 비교 콘텐츠 -->
       <div id="deepCompContent">
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;">
 
           <!-- ② 전체 비교표 (선택된 회사만) -->
-          <div class="card tbl-wrap card-sm">
-            <div class="card-title" style="margin-bottom:10px;">재무지표 비교 <span style="font-weight:400;font-size:10px;">(2025년 기준, 억원)</span></div>
-            <table id="deepAllCompTable">
-              <thead id="deepAllCompHead"></thead>
-              <tbody id="deepAllCompBody"></tbody>
-            </table>
+          <div class="card card-sm" style="min-width:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span class="card-title" style="margin-bottom:0;">재무지표 비교</span>
+              <span style="font-size:11px;color:var(--text-3);">(억원)</span>
+            </div>
+            <div class="tbl-fade-wrap">
+              <div class="tbl-wrap" style="overflow-x:auto;max-width:100%;">
+                <table id="deepAllCompTable" style="min-width:max-content;">
+                  <thead id="deepAllCompHead"></thead>
+                  <tbody id="deepAllCompBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <!-- ⑤ 레이더 그래프 -->
@@ -1145,7 +1198,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
   <div id="news-market" class="hidden">
     <div class="sec-head">
       <span class="sec-label">국내 시장 규모</span>
-      <span class="badge badge-gray" id="mktYearBadge">2025년 기준</span>
+      <span class="badge badge-gray" id="mktYearBadge" style="display:none;">2025년 기준</span>
     </div>
     <!-- 연도 슬라이더 -->
     <div style="display:flex;gap:6px;margin-bottom:14px;">
@@ -1160,8 +1213,21 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
     <div class="market-grid" id="mktCards"></div>
     <div class="card card-sm" style="margin-bottom:16px;">
       <div class="card-title" style="margin-bottom:10px;">시장 점유율 비교 (%)</div>
-      <div id="mktShareLegend" class="chk-legend" style="margin-bottom:10px;"></div>
-      <div style="position:relative;height:200px;"><canvas id="chartMarketShare"></canvas></div>
+      <div id="mktShareLegend" class="chk-legend" style="margin-bottom:10px;flex-wrap:wrap;gap:8px;"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:6px;">SW (욕실가구)</div>
+          <div style="position:relative;height:200px;"><canvas id="chartMktSW"></canvas></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:6px;">수전금구</div>
+          <div style="position:relative;height:200px;"><canvas id="chartMktFaucet"></canvas></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:600;color:var(--navy);margin-bottom:6px;">비데</div>
+          <div style="position:relative;height:200px;"><canvas id="chartMktBidet"></canvas></div>
+        </div>
+      </div>
     </div>
     <!-- 시장규모 표 -->
     <div id="mktTotalTable"></div>
@@ -1226,47 +1292,8 @@ const SEGMENTS = [
   {group:'Care', name:'Care',   sm:28, gm: 6, om:1,  sp:30, gp: 7, op: 2},
 ];
 
-// Cumul segments (×6 approx)
-const SEG_CUMUL = SEGMENTS.map(s=>({
-  ...s, sm:s.sm*6, gm:s.gm*6, om:s.om*6, sp:s.sp*6, gp:s.gp*6, op:s.op*6
-}));
+/* SEG_CUMUL 제거 (2026-06-18) — 누계 KPI·표·차트 모두 BU_TREND 단일 소스로 통합 */
 
-/* ── 사업부별 연도별 더미데이터 (2004~2025) ── */
-const BU_HIST = {
-  // 2004~2018(15개) + 2019~2025(7개) = 22개
-  '창원SW': {
-    sales:[320,344,368,392,400,380,420,449,480,500,521,548,571,601,631, 680,780,820,870,920,960,1008],
-    gp:   [ 80, 86, 92, 98,101, 96,105,113,121,127,133,140,146,154,162, 170,200,210,225,238,250,263],
-    op:   [ 29, 31, 33, 35, 34, 31, 37, 40, 44, 46, 49, 52, 55, 58, 60,  61, 70, 75, 82, 87, 91, 96]},
-  '제천SW': {
-    sales:[296,319,341,364,374,355,393,421,451,470,490,516,537,564,587, 630,720,760,800,850,890,935],
-    gp:   [ 74, 80, 85, 91, 94, 89, 98,105,113,118,124,130,135,141,147, 157,184,194,205,218,229,241],
-    op:   [ 27, 29, 31, 33, 32, 30, 35, 37, 40, 42, 44, 47, 49, 52, 54,  57, 65, 69, 74, 79, 83, 88]},
-  '상품SW': {
-    sales:[263,283,303,323,332,315,349,373,398,415,433,455,474,497,518, 560,640,680,715,750,785,824],
-    gp:   [ 63, 68, 72, 77, 79, 75, 83, 89, 95, 99,104,109,114,119,124, 134,154,163,172,181,190,200],
-    op:   [ 24, 25, 27, 29, 28, 27, 30, 32, 34, 36, 38, 40, 42, 44, 47,  50, 58, 62, 65, 68, 71, 75]},
-  'SW OEM': {
-    sales:[212,228,244,260,267,253,280,300,320,334,349,367,382,401,418, 450,515,545,575,605,635,667],
-    gp:   [ 51, 55, 58, 62, 64, 61, 67, 72, 77, 80, 84, 88, 92, 97,101, 108,124,131,139,147,154,162],
-    op:   [ 19, 20, 22, 23, 23, 22, 25, 26, 29, 30, 32, 34, 36, 38, 39,  40, 46, 49, 52, 55, 58, 61]},
-  '수전'  : {
-    sales:[183,197,211,225,231,219,242,259,277,289,301,317,330,346,362, 390,450,475,500,530,560,588],
-    gp:   [ 44, 47, 51, 54, 56, 53, 58, 62, 67, 70, 73, 77, 80, 84, 88,  94,109,115,121,129,136,143],
-    op:   [ 16, 17, 19, 20, 20, 19, 21, 23, 25, 26, 28, 29, 31, 32, 34,  35, 40, 43, 45, 48, 51, 54]},
-  '비데'  : {
-    sales:[165,177,190,202,208,197,218,233,249,259,271,285,296,311,324, 350,400,425,450,475,500,525],
-    gp:   [ 39, 43, 46, 48, 50, 47, 52, 56, 60, 63, 65, 69, 72, 75, 79,  84, 96,102,108,115,121,127],
-    op:   [ 15, 16, 17, 18, 18, 17, 19, 21, 22, 24, 25, 26, 28, 29, 30,  31, 36, 38, 41, 43, 45, 48]},
-  '타일'  : {
-    sales:[ 73, 78, 84, 90, 92, 87, 97,103,110,115,120,126,131,138,144, 155,175,185,200,210,220,231],
-    gp:   [ 17, 19, 20, 21, 22, 21, 23, 25, 26, 28, 29, 30, 32, 33, 35,  37, 42, 44, 48, 51, 53, 56],
-    op:   [  7,  7,  8,  8,  8,  8,  9,  9, 10, 10, 11, 11, 12, 13, 13,  14, 16, 17, 18, 19, 20, 21]},
-  '임대'  : {
-    sales:[ 85, 91, 97,104,107,101,112,120,128,134,140,147,153,161,168, 180,205,215,230,240,252,265],
-    gp:   [ 20, 22, 23, 25, 26, 24, 27, 29, 31, 32, 34, 35, 37, 39, 41,  43, 49, 52, 56, 58, 61, 64],
-    op:   [  8,  8,  9,  9,  9,  9, 10, 11, 12, 12, 13, 13, 14, 15, 15,  16, 18, 19, 21, 22, 23, 24]},
-};
 
 /* ── 사업부별 월간 추이 더미데이터 (1~6월) ── */
 const BU_MONTHS = ['1월','2월','3월','4월','5월','6월'];
@@ -1406,15 +1433,15 @@ const MKT_GROWTH = {
   faucet: [+1.2,+0.5,+3.6,+2.3,+2.2,+2.9,+1.8],
   bidet : [+0.8,+1.2,-1.6,-1.6,-1.0,-1.3,-0.4],
 };
-// MKT_SHARE 순서: [대림바스, ASK, 대림통상, 계림, 이누스, 로얄앤컴퍼니, 콜러노비타, 기타]
+// MKT_SHARE 순서: [self,ask,dtong,kryo,hwas,bobo,inus,royc,selim,dada,dskb,kolr,aize,lsdw,hans,riba,enex,ylim]
 const MKT_SHARE  = {
-  2019:{ sw:[26,18,13,12, 5, 3, 2,21], faucet:[23,15,21,10, 2, 8, 2,19], bidet:[19,19,10,17, 5, 2,10,18] },
-  2020:{ sw:[28,18,14,12, 5, 3, 2,18], faucet:[24,15,21,10, 3, 8, 2,17], bidet:[20,19,10,17, 6, 2,11,15] },
-  2021:{ sw:[29,18,14,12, 6, 3, 2,16], faucet:[25,15,21,10, 3, 9, 2,15], bidet:[21,19,10,17, 6, 3,12,12] },
-  2022:{ sw:[30,17,14,11, 6, 4, 2,16], faucet:[26,15,22,10, 3, 9, 2,13], bidet:[22,19,10,18, 7, 3,12, 9] },
-  2023:{ sw:[31,18,14,11, 6, 4, 2,14], faucet:[27,15,22,10, 3, 9, 2,12], bidet:[23,20,10,18, 7, 3,12, 7] },
-  2024:{ sw:[31,18,14,12, 6, 4, 2,13], faucet:[27,15,22,10, 3, 9, 2,12], bidet:[23,20,10,18, 7, 3,13, 6] },
-  2025:{ sw:[32,18,14,12, 6, 4, 2,12], faucet:[28,15,22,10, 3,10, 2,10], bidet:[24,20,10,18, 7, 3,14, 4] },
+  2019:{ sw:[26,18,13,12,2,1, 5, 3,1,1,0,2,0,0, 7,5,2,2], faucet:[23,15,21,10,3,1,2, 8,0,0,0,2,0,0,5,4,3,3], bidet:[19,19,10,17,0,0, 5, 2,0,0,0,10,0,0,7,5,3,3] },
+  2020:{ sw:[28,18,14,12,2,1, 5, 3,1,1,0,2,0,0, 6,4,2,1], faucet:[24,15,21,10,3,1,3, 8,0,0,0,2,0,0,4,4,3,2], bidet:[20,19,10,17,0,0, 6, 2,0,0,0,11,0,0,6,4,3,2] },
+  2021:{ sw:[29,18,14,12,2,1, 6, 3,1,1,0,2,0,0, 5,3,2,1], faucet:[25,15,21,10,3,1,3, 9,0,0,0,2,0,0,4,3,2,2], bidet:[21,19,10,17,0,0, 6, 3,0,0,0,12,0,0,5,3,2,2] },
+  2022:{ sw:[30,17,14,11,2,1, 6, 4,1,1,0,2,0,0, 5,3,2,1], faucet:[26,15,22,10,2,1,3, 9,0,0,0,2,0,0,4,3,2,1], bidet:[22,19,10,18,0,0, 7, 3,0,0,0,12,0,0,4,2,2,1] },
+  2023:{ sw:[31,18,14,11,2,1, 6, 4,1,1,0,2,0,0, 4,3,2,0], faucet:[27,15,22,10,2,1,3, 9,0,0,0,2,0,0,3,3,2,1], bidet:[23,20,10,18,0,0, 7, 3,0,0,0,12,0,0,3,2,1,1] },
+  2024:{ sw:[31,18,14,12,2,1, 6, 4,1,1,0,2,0,0, 3,3,2,0], faucet:[27,15,22,10,2,1,3, 9,0,0,0,2,0,0,3,3,2,1], bidet:[23,20,10,18,0,0, 7, 3,0,0,0,13,0,0,3,2,1,0] },
+  2025:{ sw:[32,18,14,12,2,1, 6, 4,1,0,0,2,0,0, 3,2,2,1], faucet:[28,15,22,10,2,1,3,10,0,0,0,2,0,0,3,2,1,1], bidet:[24,20,10,18,0,0, 7, 3,0,0,0,14,0,0,2,1,1,0] },
 };
 
 const NEWS_ALL = [
@@ -1491,7 +1518,7 @@ const PEER_DATA = {
 /* ═══════════════════════════
    HELPERS
 ═══════════════════════════ */
-const fmt  = v => v === null ? '—' : (v/10).toFixed(1);
+const fmt  = v => v === null ? '—' : Math.round(v * 100).toLocaleString();
 const cumul = arr => arr.map((_,i) => arr.slice(0,i+1).reduce((s,x)=>(x?s+x:s),0));
 const BAR_OPTS = {categoryPercentage:0.55, barPercentage:0.65, borderRadius:2};
 const CHART_OPTS = {
@@ -1499,7 +1526,7 @@ const CHART_OPTS = {
   plugins:{legend:{display:false}},
   scales:{
     x:{ticks:{autoSkip:false,maxRotation:0,font:{size:10}}, grid:{display:false}},
-    y:{ticks:{font:{size:10}, callback:v=>v%10===0?(v/10):null}, grid:{color:'rgba(0,0,0,0.04)'}}
+    y:{ticks:{font:{size:10}, callback:v=>v%10===0?(v*100).toLocaleString():null}, grid:{color:'rgba(0,0,0,0.04)'}}
   }
 };
 
@@ -1557,95 +1584,12 @@ function switchKpiSub(btn, pane) {
 /* ═══════════════════════════════════
    누계 탭 — 차트 & 테이블
 ═══════════════════════════════════ */
-const CUMUL_BU = ['장원SW','제진SW','상공SW','SW OEM','수관','바레','타일','원대'];
-const CUMUL_BU_COLORS = ['#1a4a8a','#06b6a2','#2563EB','#d4a017','#7c3aed','#E05570','#16A34A','#f97316'];
-
-const CUMUL_DATA = {
-  sales: {
-    prev:   [420,  95, 130,  60, 185,  80, 110,  45],
-    plan:   [445, 100, 140,  65, 195,  85, 120,  50],
-    actual: [458, 102, 145,  62, 198,  88, 115,  48],
-    monthly:{
-      prev:   [380,410,420,435,440,420],
-      plan:   [395,420,435,445,450,445],
-      actual: [402,428,442,451,458,458],
-      bu:{
-        '장원SW': [76,78,79,81,82,62],
-        '제진SW': [17,17,18,17,17,16],
-        '상공SW': [24,24,25,25,24,23],
-        'SW OEM': [10,11,10,11,10,10],
-        '수관':   [33,33,34,34,33,31],
-        '바레':   [14,15,14,15,15,15],
-        '타일':   [19,19,20,20,19,18],
-        '원대':   [8, 8, 8, 8, 8, 8],
-      }
-    }
-  },
-  gp: {
-    prev:   [112, 28,  38,  15,  50,  18,  30,  12],
-    plan:   [120, 30,  40,  17,  54,  20,  33,  13],
-    actual: [124, 31,  42,  16,  55,  21,  32,  13],
-    monthly:{
-      prev:   [105,110,112,116,118,112],
-      plan:   [110,115,118,121,123,120],
-      actual: [113,118,122,126,130,124],
-      bu:{
-        '장원SW': [21,21,22,22,22,16],
-        '제진SW': [5, 5, 5, 5, 5, 6],
-        '상공SW': [7, 7, 7, 7, 7, 7],
-        'SW OEM': [3, 3, 3, 3, 3, 1],
-        '수관':   [9, 9, 9, 9, 9, 10],
-        '바레':   [4, 4, 4, 4, 4, 5],
-        '타일':   [5, 5, 5, 6, 6, 5],
-        '원대':   [2, 2, 2, 2, 2, 3],
-      }
-    }
-  },
-  op: {
-    prev:   [ 30,  8,  10,   4,  14,   4,   8,   3],
-    plan:   [ 33,  9,  11,   5,  16,   5,   9,   4],
-    actual: [ 36,  9,  12,   4,  16,   5,   8,   4],
-    monthly:{
-      prev:   [28,30,31,33,34,30],
-      plan:   [30,32,33,35,36,33],
-      actual: [31,33,35,37,39,36],
-      bu:{
-        '장원SW': [6, 6, 6, 6, 7, 5],
-        '제진SW': [1, 2, 2, 2, 2, 0],
-        '상공SW': [2, 2, 2, 2, 2, 2],
-        'SW OEM': [1, 1, 1, 1, 1, -1],
-        '수관':   [3, 3, 3, 3, 3, 3],
-        '바레':   [1, 1, 1, 1, 1, 0],
-        '타일':   [1, 1, 2, 2, 2, 1],
-        '원대':   [1, 1, 1, 1, 1, 0],
-      }
-    }
-  },
-  orders: {
-    prev:   [195,  45,  65,  28,  82,  38,  52,  20],
-    plan:   [208,  48,  70,  30,  88,  40,  56,  22],
-    actual: [218,  50,  72,  29,  90,  42,  54,  23],
-    monthly:{
-      prev:   [172,185,195,202,208,195],
-      plan:   [180,195,205,212,218,208],
-      actual: [188,202,212,218,222,218],
-      bu:{
-        '장원SW': [36,37,38,38,39,30],
-        '제진SW': [8, 8, 9, 8, 9, 8],
-        '상공SW': [12,12,12,12,12,12],
-        'SW OEM': [5, 5, 5, 5, 5, 4],
-        '수관':   [15,15,16,15,15,14],
-        '바레':   [7, 7, 7, 7, 7, 7],
-        '타일':   [9, 9, 9, 9, 9, 9],
-        '원대':   [4, 4, 4, 4, 4, 3],
-      }
-    }
-  }
-};
-
-let cumulMetric = 'sales';
-let cumulBarChart = null;
-let cumulTrendChart = null;
+/* ═══════════════════════════════════
+   누계 탭 — 차트 & 테이블
+═══════════════════════════════════ */
+/* CUMUL_DATA·drawCumulBarChart·drawCumulTrendChart 제거 (2026-06-18)
+   — 미사용 데드코드: 해당 canvas ID(chartCumulBuBar/chartCumulTrend)가
+     HTML에 없고 호출 경로도 없었음. 누계 렌더링은 D26→cumul() 단일 소스로 통합. */
 
 function initCumulCharts() {
   renderCumulDisplay(currentCumulSegment, currentCumulKey);
@@ -1656,71 +1600,7 @@ function switchCumulMetric(btn, metric) {
     .forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentCumulKey = metric;
-  cumulMetric = metric;
   renderCumulDisplay(currentCumulSegment, metric);
-}
-
-function drawCumulBarChart() {
-  const d = CUMUL_DATA[cumulMetric];
-  const ctx = document.getElementById('chartCumulBuBar');
-  if (!ctx) return;
-  if (cumulBarChart) cumulBarChart.destroy();
-  cumulBarChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: CUMUL_BU,
-      datasets: [
-        { label:'전년 누계', data: d.prev,   backgroundColor:'#C8D4E8', borderRadius:3 },
-        { label:'누계 계획', data: d.plan,   backgroundColor:'#A8C4E0', borderRadius:3 },
-        { label:'누계 실적', data: d.actual, backgroundColor:'#1a4a8a', borderRadius:3 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid:{ display:false }, ticks:{ font:{size:11} } },
-        y: { grid:{ color:'#f0f4f8' }, ticks:{ font:{size:11} } }
-      }
-    }
-  });
-}
-
-function drawCumulTrendChart() {
-  const d = CUMUL_DATA[cumulMetric];
-  const labels = ['1월','2월','3월','4월','5월','6월'];
-  const ctx = document.getElementById('chartCumulTrend');
-  if (!ctx) return;
-  if (cumulTrendChart) cumulTrendChart.destroy();
-
-  /* 범례 */
-  const legendEl = document.getElementById('cumulTrendLegend');
-  if (legendEl) {
-    legendEl.innerHTML = `
-      <span><span class="leg-dot" style="background:#C8D4E8;"></span>전년 누계</span>
-      <span><span class="leg-dot" style="background:#A8C4E0;"></span>누계 계획</span>
-      <span><span class="leg-dot" style="background:#1a4a8a;"></span>누계 실적</span>`;
-  }
-
-  cumulTrendChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label:'전년 누계', data: d.monthly.prev,   backgroundColor:'#C8D4E8', borderRadius:3 },
-        { label:'누계 계획', data: d.monthly.plan,   backgroundColor:'#A8C4E0', borderRadius:3 },
-        { label:'누계 실적', data: d.monthly.actual, backgroundColor:'#1a4a8a', borderRadius:3 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid:{ display:false }, ticks:{ font:{size:11} } },
-        y: { grid:{ color:'#f0f4f8' }, ticks:{ font:{size:11} } }
-      }
-    }
-  });
 }
 
 function renderCumulTable() {
@@ -1731,66 +1611,66 @@ function renderCumulTable() {
   const ROW_DEFS = [
     {label:'매출액',            a:'sales',  p:'salesPlan',  prev25:'sales25',  group:null},
     {label:'매출총이익',        a:'gp',     p:'gpPlan',     prev25:'gp25',     group:null},
-    {label:'매출총이익률(%)',   rate:true,  num:'gp', den:'sales', group:null},
+    {label:'매출총이익률',     rate:true,  num:'gp', den:'sales', group:null},
     {label:'영업이익',          a:'op',     p:'opPlan',     prev25:'op25',     group:null},
-    {label:'영업이익률(%)',     rate:true,  num:'op', den:'sales', group:null},
+    {label:'영업이익률',        rate:true,  num:'op', den:'sales', group:null},
     {label:'수주액',            a:'orders', p:'ordersPlan', prev25:'orders25', group:null},
   ];
 
-  const months6 = ['1월','2월','3월','4월','5월','6월'];
   let h1 = '<tr><th rowspan="2" style="text-align:left;vertical-align:middle;min-width:90px;">항목</th>';
-  months6.forEach((m, i) => {
+  MONTHS.forEach((m, i) => {
     h1 += `<th colspan="5"${i===CUR?' class="th-cur"':''}>${m}</th>`;
   });
   h1 += '</tr><tr>';
-  months6.forEach((_, i) => {
+  MONTHS.forEach((_, i) => {
     const c = i===CUR?' class="th-cur"':'';
     h1 += `<th${c}>전년실적</th><th${c}>계획</th><th${c}>실적</th><th${c}>달성률</th><th${c}>증감률</th>`;
   });
   h1 += '</tr>';
   thead.innerHTML = h1;
 
-  /* D26 누계값 생성 (6개월분) */
+  /* D26 누계값 생성 (12개월분, null → 0 처리 후 누계) */
   const cD26 = {};
   ['sales','salesPlan','sales25','gp','gpPlan','gp25','op','opPlan','op25',
    'orders','ordersPlan','orders25','capex','capexPlan','debt','debtPlan','cash','cashPlan'].forEach(k => {
-    if (D26[k]) cD26[k] = cumul(D26[k].slice(0,6).map(v=>v||0));
+    if (D26[k]) cD26[k] = cumul(D26[k].map(v=>v||0));
   });
 
   let html = '';
   ROW_DEFS.forEach(r => {
     if (r.group === 'header') {
-      html += `<tr style="background:var(--bg-2);"><td style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;position:sticky;left:0;z-index:2;background:var(--bg-2);">${r.label}</td><td colspan="${months6.length * 5}" style="background:var(--bg-2);"></td></tr>`;
+      html += `<tr style="background:var(--bg-2);"><td style="font-weight:700;font-size:11px;color:var(--navy);padding:5px 8px;text-align:left;position:sticky;left:0;z-index:2;background:var(--bg-2);">${r.label}</td><td colspan="${MONTHS.length * 5}" style="background:var(--bg-2);"></td></tr>`;
       return;
     }
     const indent = r.group === 'sub' ? 'padding-left:18px;' : '';
     html += `<tr><td style="font-weight:${r.group==='sub'?'400':'700'};${indent}">${r.label}</td>`;
-    months6.forEach((_, i) => {
-      const c  = i===CUR?' class="td-cur"':'';
+    MONTHS.forEach((_, i) => {
+      const isFut = i > CUR;
+      const c  = i===CUR?' class="td-cur"':(isFut?' class="td-fut"':'');
       let a, p, pv;
       if (r.rate) {
         const rt = (n,d) => (n!==null && n!==undefined && d) ? +(n/d*100).toFixed(1) : null;
-        a  = rt(cD26[r.num]?.[i],         cD26[r.den]?.[i]);
-        p  = rt(cD26[r.num+'Plan']?.[i],  cD26[r.den+'Plan']?.[i]);
-        pv = rt(cD26[r.num+'25']?.[i],    cD26[r.den+'25']?.[i]);
+        a  = isFut ? null : rt(cD26[r.num]?.[i],        cD26[r.den]?.[i]);
+        p  = rt(cD26[r.num+'Plan']?.[i], cD26[r.den+'Plan']?.[i]);
+        pv = rt(cD26[r.num+'25']?.[i],   cD26[r.den+'25']?.[i]);
       } else {
-        a  = r.a && cD26[r.a]     ? cD26[r.a][i]     : null;
-        p  = r.p && cD26[r.p]     ? cD26[r.p][i]     : null;
-        pv = r.prev25 && cD26[r.prev25] ? cD26[r.prev25][i] : null;
+        a  = isFut ? null : (r.a && cD26[r.a] ? cD26[r.a][i] : null);
+        p  = r.p && cD26[r.p]           ? cD26[r.p][i]       : null;
+        pv = r.prev25 && cD26[r.prev25] ? cD26[r.prev25][i]  : null;
       }
-      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : fmt(v));
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1)+'%' : fmt(v));
 
       html += `<td${c}>${vfmt(pv)}</td>`;
       html += `<td${c}>${vfmt(p)}</td>`;
       html += `<td${c}>${vfmt(a)}</td>`;
-      if (a !== null && p) {
+      if (!isFut && a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
-      if (a !== null && pv) {
+      if (!isFut && a !== null && pv) {
         const chg = ((a-pv)/pv*100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+'+chg:'▲'+Math.abs(parseFloat(chg)).toFixed(1)}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -1898,15 +1778,28 @@ function renderSegKpiCards(btn, segName, ctxKey){
       op:     {val:totalData.op.val,     plan:totalData.op.plan,     prev:totalData.op.prev},
       orders: {val:totalData.orders.val, plan:totalData.orders.plan, prev:totalData.orders.prev}
     };
+  } else if (ctxKey === '_SEG_KPI_CTX_CUMUL' && BU_TREND[segName]) {
+    /* 누계 사업부: BU_TREND 월별 합산 → 표·차트와 동일 소스 */
+    const trend = BU_TREND[segName];
+    const sum  = k => trend[k].slice(0, CUR + 1).reduce((a, v) => a + (v || 0), 0);
+    const sump = k => trend[k].reduce((a, v) => a + (v || 0), 0);
+    const s = SEGS.find(seg => seg.name === segName);
+    if (!s) return;
+    metrics = {
+      sales: {val: sum('sales'),  plan: sump('salesPlan'), prev: sump('sales25')},
+      gp:    {val: sum('gp'),     plan: sump('gpPlan'),    prev: sump('gp25')},
+      op:    {val: sum('op'),     plan: sump('opPlan'),    prev: sump('op25')},
+    };
   } else {
+    /* 월간 사업부: SEGMENTS 당월 실적 */
     const s = SEGS.find(seg=>seg.name===segName);
     if (!s) return;
     const ordersM    = Math.round(totalOrders * s.sm / totalSalesM);
     const ordersPlan = Math.round(ordersM / 0.977);
     metrics = {
-      sales:  {val:s.sm, plan:s.sp,        prev:null},
-      gp:     {val:s.gm, plan:s.gp,        prev:null},
-      op:     {val:s.om, plan:s.op,        prev:null},
+      sales:  {val:s.sm, plan:s.sp,          prev:null},
+      gp:     {val:s.gm, plan:s.gp,          prev:null},
+      op:     {val:s.om, plan:s.op,          prev:null},
       orders: {val:ordersM, plan:ordersPlan, prev:null}
     };
   }
@@ -1952,16 +1845,16 @@ function renderSegKpiCards(btn, segName, ctxKey){
     html += `
     <div class="kpi-cell" style="border-top-color:${accent[k]};">
       <div class="kpi-name">${names[k]}</div>
-      <div class="kpi-main-num">${m.val}<span class="kpi-main-unit">억</span></div>
+      <div class="kpi-main-num">${Math.round(m.val * 100).toLocaleString()}<span class="kpi-main-unit">백만</span></div>
       <div class="bullet-chart">
         <div class="bullet-track">
           <div class="bullet-fill" style="width:${fillW}%;background:${accent[k]};"></div>
           ${overBar}
-          <div class="bullet-dot" style="left:${prevPct}%;">${yoyLabel.prev} ${py}억</div>
+          <div class="bullet-dot" style="left:${prevPct}%;">${yoyLabel.prev} ${Math.round(py*100).toLocaleString()}백만</div>
         </div>
         <div class="bullet-info">
           <span class="bullet-pct" style="color:${achColor};font-weight:${isExceed?'700':'400'};">달성률 ${pct}%</span>
-          <span>${yoyLabel.plan} ${m.plan}억</span>
+          <span>${yoyLabel.plan} ${Math.round(m.plan*100).toLocaleString()}백만</span>
         </div>
       </div>
       ${footer}
@@ -1984,6 +1877,7 @@ function renderSegKpiCards(btn, segName, ctxKey){
 ═══════════════════════════ */
 let inst26m=null, inst26c=null;
 let showPrevYear = true;
+let showCumulPrevYear = true;
 let currentChartKey = 'sales';
 let currentCumulKey = 'sales';
 let currentMonthlySegment = '전사';
@@ -1998,24 +1892,30 @@ const CHART26_KEYS = {
   debt:   {a:D26.debt,   p:D26.debtPlan,   prev:D26.debt.map(v=>v!==null?Math.round(v/1.03):null)},
 };
 
-buildSegKpiCards(SEGMENTS, 'kpiScopeSeg', '_SEG_KPI_CTX', 215,
+/* ── 월간 KPI 카드: D26 당월 값 직접 참조 (하드코딩 제거 2026-06-18) ── */
+buildSegKpiCards(SEGMENTS, 'kpiScopeSeg', '_SEG_KPI_CTX', D26.orders[CUR],
   {sales:5.2, gp:6.8, op:8.6, orders:8.6},
   {plan:'계획', yoy:'전년동월대비', prev:'전년동월'},
   {
     sales:  {val:D26.sales[CUR],  plan:D26.salesPlan[CUR],  prev:D26.sales25[CUR]},
-    gp:     {val:138,              plan:D26.gpPlan[CUR],    prev:D26.gp25[CUR]},
-    op:     {val:30,               plan:D26.opPlan[CUR],    prev:D26.op25[CUR]},
-    orders: {val:D26.orders[CUR],plan:D26.ordersPlan[CUR],prev:D26.orders25[CUR]}
+    gp:     {val:D26.gp[CUR],     plan:D26.gpPlan[CUR],     prev:D26.gp25[CUR]},
+    op:     {val:D26.op[CUR],     plan:D26.opPlan[CUR],     prev:D26.op25[CUR]},
+    orders: {val:D26.orders[CUR], plan:D26.ordersPlan[CUR], prev:D26.orders25[CUR]},
   });
-buildSegKpiCards(SEG_CUMUL, 'kpiScopeSegCumul', '_SEG_KPI_CTX_CUMUL', 1208,
+
+/* ── 누계 KPI 카드: D26 → cumul() 자동 계산 (하드코딩 제거 2026-06-18) ── */
+const _c  = k => D26[k].slice(0, CUR + 1).reduce((a, v) => a + (v || 0), 0);
+const _cp = k => D26[k].slice(0, CUR + 1).reduce((a, v) => a + (v || 0), 0);
+const cumulKpi = {
+  sales:  {val:_c('sales'),  plan:_cp('salesPlan'),  prev:_cp('sales25')},
+  gp:     {val:_c('gp'),     plan:_cp('gpPlan'),     prev:_cp('gp25')},
+  op:     {val:_c('op'),     plan:_cp('opPlan'),     prev:_cp('op25')},
+  orders: {val:_c('orders'), plan:_cp('ordersPlan'), prev:_cp('orders25')},
+};
+buildSegKpiCards(SEGMENTS, 'kpiScopeSegCumul', '_SEG_KPI_CTX_CUMUL', cumulKpi.orders.val,
   {sales:5.2, gp:5.9, op:9.2, orders:6.6},
   {plan:'누계계획', yoy:'전년동기대비', prev:'전년동기'},
-  {
-    sales:  {val:2748, plan:2840, prev:2613},
-    gp:     {val:790,  plan:743,  prev:679},
-    op:     {val:214,  plan:230,  prev:196},
-    orders: {val:1208, plan:1235, prev:1133}
-  });
+  cumulKpi);
 
 function initPerfCharts() {
   buildHistCards();
@@ -2025,6 +1925,11 @@ function initPerfCharts() {
 function togglePrevYear() {
   showPrevYear = document.getElementById('togglePrevYear').checked;
   renderMonthlyDisplay(currentMonthlySegment, currentChartKey);
+}
+
+function toggleCumulPrevYear() {
+  showCumulPrevYear = document.getElementById('toggleCumulPrevYear').checked;
+  renderCumulDisplay(currentCumulSegment, currentCumulKey);
 }
 
 function switchChart26(btn, key) {
@@ -2057,7 +1962,7 @@ function renderCumulChart(key) {
   const aCum  = cumul(d.a.map(v=>v||0));
   const pCum  = cumul(d.p);
   const pvCum = cumul(d.prev);
-  const cumulDatasets = showPrevYear
+  const cumulDatasets = showCumulPrevYear
     ? [{label:'전년 누계',data:pvCum,backgroundColor:'#C8D4E8',...BAR_OPTS},{label:'누계 계획',data:pCum,backgroundColor:'#A8C4E0',...BAR_OPTS},{label:'누계 실적',data:aCum,backgroundColor:'#1a4a8a',...BAR_OPTS}]
     : [{label:'누계 계획',data:pCum,backgroundColor:'#A8C4E0',...BAR_OPTS},{label:'누계 실적',data:aCum,backgroundColor:'#1a4a8a',...BAR_OPTS}];
   if(inst26c) inst26c.destroy();
@@ -2175,9 +2080,9 @@ function buildSegMonthlyTable(segName) {
   const ROW_DEFS = [
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
-    {label:'매출총이익률(%)',   rate:true, num:'gp', den:'sales', group:null},
+    {label:'매출총이익률',      rate:true, num:'gp', den:'sales', group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
-    {label:'영업이익률(%)',     rate:true, num:'op', den:'sales', group:null},
+    {label:'영업이익률',        rate:true, num:'op', den:'sales', group:null},
   ];
 
   const months6 = MONTHS;
@@ -2223,7 +2128,7 @@ function buildSegMonthlyTable(segName) {
       }
 
       const isFut = i > CUR;
-      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : v);
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1)+'%' : Math.round(v * 100).toLocaleString());
       /* 전년실적 */
       html += `<td${c}>${vfmt(pv)}</td>`;
       /* 계획 */
@@ -2233,13 +2138,13 @@ function buildSegMonthlyTable(segName) {
       /* 달성률 */
       if (!isFut && a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
       /* 증감률 */
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+'+chg:'▲'+Math.abs(parseFloat(chg)).toFixed(1)}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -2281,7 +2186,7 @@ function renderSegCumulChart(segName, key) {
     pvCum = cumul(srcA.map(v=>v||0)).map(v=>Math.round(v*ratio/(1+yoyVal/100)));
   }
 
-  const datasets = showPrevYear
+  const datasets = showCumulPrevYear
     ? [{label:'전년 누계', data:pvCum, backgroundColor:'#C8D4E8',...BAR_OPTS},
        {label:'누계 계획', data:pCum,  backgroundColor:'#A8C4E0',...BAR_OPTS},
        {label:'누계 실적', data:aCum,  backgroundColor:'#1a4a8a',...BAR_OPTS}]
@@ -2297,7 +2202,7 @@ function renderSegCumulChart(segName, key) {
 
 /* ── 세그먼트 누계 표 ── */
 function buildSegCumulTable(segName) {
-  const seg   = SEG_CUMUL.find(s => s.name === segName);
+  const seg   = SEGMENTS.find(s => s.name === segName);
   const trend = BU_TREND[segName];
   if (!seg || !trend) return;
 
@@ -2311,9 +2216,9 @@ function buildSegCumulTable(segName) {
   const ROW_DEFS = [
     {label:'매출액',            f:'sales', plan:seg.sp, group:null},
     {label:'매출총이익',        f:'gp',    plan:seg.gp, group:null},
-    {label:'매출총이익률(%)',   rate:true, num:'gp', den:'sales', group:null},
+    {label:'매출총이익률',      rate:true, num:'gp', den:'sales', group:null},
     {label:'영업이익',          f:'op',    plan:seg.op, group:null},
-    {label:'영업이익률(%)',     rate:true, num:'op', den:'sales', group:null},
+    {label:'영업이익률',        rate:true, num:'op', den:'sales', group:null},
   ];
 
   const months6 = MONTHS;
@@ -2363,7 +2268,7 @@ function buildSegCumulTable(segName) {
         pv = trend[r.f+'25']   ? cumul(trend[r.f+'25'].slice(0,i+1)).pop()   : null;
       }
 
-      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : v);
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1)+'%' : Math.round(v * 100).toLocaleString());
       /* 전년실적 */
       html += `<td${c}>${vfmt(pv)}</td>`;
       /* 계획 */
@@ -2373,13 +2278,13 @@ function buildSegCumulTable(segName) {
       /* 달성률 */
       if (!isFut && a !== null && p) {
         const pct = (a/p*100).toFixed(1);
-        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
+        html += `<td${c}><span style="color:${parseFloat(pct)>=100?'#1a4a8a':'#1e293b'};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
       /* 증감률 */
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
+        html += `<td${c}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+'+chg:'▲'+Math.abs(parseFloat(chg)).toFixed(1)}%</span></td>`;
       } else { html += `<td${c}>—</td>`; }
     });
     html += '</tr>';
@@ -2402,9 +2307,9 @@ function build26Table() {
   const ROW_DEFS = [
     {label:'매출액',          a:'sales',  p:'salesPlan',  group:null},
     {label:'매출총이익',      a:'gp',     p:'gpPlan',     group:null},
-    {label:'매출총이익률(%)', rate:true, num:'gp', den:'sales', group:null},
+    {label:'매출총이익률',   rate:true, num:'gp', den:'sales', group:null},
     {label:'영업이익',        a:'op',     p:'opPlan',     group:null},
-    {label:'영업이익률(%)',   rate:true, num:'op', den:'sales', group:null},
+    {label:'영업이익률',     rate:true, num:'op', den:'sales', group:null},
     {label:'수주액',          a:'orders', p:'ordersPlan', group:null},
   ];
 
@@ -2451,7 +2356,7 @@ function build26Table() {
       }
       const isFut = i > CUR;
       const tdCls = isFut ? ' class="td-fut"' : i === CUR ? ' class="td-cur"' : '';
-      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1) : fmt(v));
+      const vfmt = v => (v === null || v === undefined) ? '—' : (r.rate ? v.toFixed(1)+'%' : fmt(v));
 
       /* 전년실적 */
       html += `<td${tdCls}>${vfmt(pv)}</td>`;
@@ -2463,7 +2368,7 @@ function build26Table() {
       if (!isFut && a !== null && p) {
         const pct = (a / p * 100).toFixed(1);
         const achColor = parseFloat(pct) >= 100 ? '#1a4a8a' : '#1e293b';
-        html += `<td${tdCls}><span style="color:${achColor};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}</span></td>`;
+        html += `<td${tdCls}><span style="color:${achColor};font-weight:${parseFloat(pct)>=100?'700':'400'};">${pct}%</span></td>`;
       } else {
         html += `<td${tdCls}>—</td>`;
       }
@@ -2471,7 +2376,7 @@ function build26Table() {
       if (!isFut && a !== null && pv) {
         const chg = ((a - pv) / pv * 100).toFixed(1);
         const isUp = parseFloat(chg) >= 0;
-        html += `<td${tdCls}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+':''}${chg}</span></td>`;
+        html += `<td${tdCls}><span style="color:${isUp?'#1e293b':'var(--red)'};">${isUp?'+'+chg:'▲'+Math.abs(parseFloat(chg)).toFixed(1)}%</span></td>`;
       } else {
         html += `<td${tdCls}>—</td>`;
       }
@@ -2491,15 +2396,6 @@ function build26Table() {
   });
 }
 
-/* ═══════════════════════════
-   TREEMAP (Canvas)
-═══════════════════════════ */
-const TREEMAP_COLORS = {
-  Bath:'#1a4a8a', BK:'#06b6a2', Care:'#d4a017',
-  창원SW:'#3B82F6', 제천SW:'#60A5FA', 상품SW:'#93C5FD',
-  'SW OEM':'#BFDBFE', 수전:'#A5F3FC', 비데:'#67E8F9',
-  타일:'#A7F3D0', 임대:'#34D399', BK:'#06b6a2', Care:'#d4a017'
-};
 
 let buTrendChart = null;
 
@@ -2596,36 +2492,42 @@ function switchTreemap(btn, key) {
 ═══════════════════════════ */
 function buildHistCards() {
   const el = document.getElementById('histCards');
-  const thStyle = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:right;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);';
-  const tdStyle = 'padding:8px 14px;font-size:13px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);';
-  const th1Style = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:left;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);position:sticky;left:0;z-index:1;';
+  const thStyle  = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:right;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);';
+  const tdStyle  = 'padding:8px 14px;font-size:13px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);';
+  const th1Style = 'padding:9px 14px;font-size:13px;font-weight:700;text-align:left;white-space:nowrap;color:#fff;border-bottom:none;background:var(--navy);position:sticky;left:0;z-index:3;';
   const td1Style = 'padding:8px 14px;font-size:13px;font-weight:700;text-align:left;white-space:nowrap;color:var(--navy);background:var(--surface-2,#f5f7fb);border-bottom:1px solid var(--border);position:sticky;left:0;z-index:1;';
   const gpArr  = HIST.sales.map((s,i) => Math.round(s * (0.22 + i/21 * 0.04)));
   const gpRate = gpArr.map((g,i) => (g / HIST.sales[i] * 100).toFixed(1));
   const opRate = HIST.op.map((o,i) => (o / HIST.sales[i] * 100).toFixed(1));
   const rows = [
-    { label:'매출액 (억원)',      data: HIST.sales, fmt: v => v.toLocaleString() },
-    { label:'매출총이익 (억원)',  data: gpArr,       fmt: v => v.toLocaleString() },
-    { label:'매출총이익률 (%)',   data: gpRate,      fmt: v => v+'%' },
-    { label:'영업이익 (억원)',    data: HIST.op,     fmt: v => v.toLocaleString() },
-    { label:'영업이익률 (%)',     data: opRate,      fmt: v => v+'%' },
+    { label:'매출액',        data: HIST.sales, fmt: v => v.toLocaleString() },
+    { label:'매출총이익',    data: gpArr,       fmt: v => v.toLocaleString() },
+    { label:'매출총이익률', data: gpRate,    fmt: v => v+'%' },
+    { label:'영업이익',      data: HIST.op,     fmt: v => v.toLocaleString() },
+    { label:'영업이익률', data: opRate,      fmt: v => v+'%' },
   ];
   el.innerHTML = `
-    <table style="border-collapse:collapse;width:100%;min-width:max-content;">
-      <thead>
-        <tr>
-          <th style="${th1Style}">지표</th>
-          ${HIST_YEARS.map(y=>`<th style="${thStyle}">${y}</th>`).join('')}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map(r=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <span style="font-size:12px;font-weight:600;color:var(--text-1);"></span>
+      <span style="font-size:11px;color:var(--text-3);">(억원)</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="border-collapse:collapse;width:100%;min-width:max-content;">
+        <thead>
           <tr>
-            <td style="${td1Style}">${r.label}</td>
-            ${r.data.map(v=>`<td style="${tdStyle}">${r.fmt(v)}</td>`).join('')}
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+            <th style="${th1Style}">지표</th>
+            ${HIST_YEARS.map(y=>`<th style="${thStyle}">${y}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r=>`
+            <tr>
+              <td style="${td1Style}">${r.label}</td>
+              ${r.data.map(v=>`<td style="${tdStyle}">${r.fmt(v)}</td>`).join('')}
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 let histStackedChart = null;
@@ -2634,28 +2536,6 @@ function buildHistChart() {
   const gpArr  = HIST.sales.map((s,i) => Math.round(s * (0.22 + i/21 * 0.04)));
   const gpRate = HIST.sales.map((s,i) => +(gpArr[i]/s*100).toFixed(1));
   const opRate = HIST.op.map((o,i) => +(o/HIST.sales[i]*100).toFixed(1));
-
-  const barLabelPlugin = {
-    id: 'histBarLabels',
-    afterDatasetsDraw(chart) {
-      const {ctx} = chart;
-      chart.data.datasets.forEach((ds, di) => {
-        if (ds.type === 'line') return;
-        const meta = chart.getDatasetMeta(di);
-        meta.data.forEach((bar, j) => {
-          const val = ds.data[j];
-          if (val == null) return;
-          ctx.save();
-          ctx.font = '700 10px sans-serif';
-          ctx.fillStyle = '#374151';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(val.toLocaleString(), bar.x, bar.y - 2);
-          ctx.restore();
-        });
-      });
-    }
-  };
 
   if (histStackedChart) histStackedChart.destroy();
   histStackedChart = new Chart(document.getElementById('chartHistStacked'), {
@@ -2728,7 +2608,6 @@ function buildHistChart() {
         }
       }
     },
-    plugins: [barLabelPlugin]
   });
 }
 
@@ -2767,16 +2646,16 @@ function initExtCharts() {
         {
           label:'원/달러', type:'line',
           data:[1380,1372,1365,1375,1378,1382],
-          borderColor:'#06b6a2', backgroundColor:'rgba(6,182,162,0.12)',
+          borderColor:'#06b6a2', backgroundColor:'transparent',
           borderWidth:2, pointRadius:3, pointBackgroundColor:'#06b6a2',
-          fill:true, tension:0.35, yAxisID:'y2', order:1
+          fill:false, tension:0.35, yAxisID:'y2', order:1
         },
         {
           label:'기준금리(%)', type:'line',
           data:[3.50,3.50,3.25,3.25,3.25,3.25],
-          borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,0.07)',
+          borderColor:'#7c3aed', backgroundColor:'transparent',
           borderWidth:2, pointRadius:3, pointBackgroundColor:'#7c3aed',
-          fill:true, tension:0, stepped:'before', yAxisID:'y3', order:1
+          fill:false, tension:0, stepped:'before', yAxisID:'y3', order:1
         }
       ]
     },
@@ -2855,7 +2734,6 @@ let _newsPage = 0;
 const _PAGE_SIZE = 8;
 
 const _typeLabel = {order:'수주', result:'실적', news:'뉴스', notice:'공시'};
-const _impLabel  = {high:'긴급', mid:'주의'};
 const _impOrder  = {high:0, mid:1, low:2};
 
 const _CO_KEYS = ['self','hans','riba','enex','ylim','inus','royc','ask','kolr','dtong','hwas','kryo','bobo','selim','dada','lsdw','dskb','aize'];
@@ -2876,10 +2754,53 @@ function newsFilterChange() {
 function newsFilterReset() {
   _CO_KEYS.forEach(k => { const el = document.getElementById('nfco-'+k); if(el) el.checked = true; });
   _TYPE_KEYS.forEach(k => { const el = document.getElementById('nfty-'+k); if(el) el.checked = true; });
-  /* 버튼 텍스트 원상복구 */
   document.querySelectorAll('.nf-lp-toggle').forEach(el => el.textContent = '전체취소');
   _newsPage = 0;
   renderNews();
+}
+
+/* ── 키워드 추가/삭제 (B안) ── */
+let _kwCounter = 0;
+
+function toggleKwInput() {
+  const trigger  = document.getElementById('nfKwTrigger');
+  const expanded = document.getElementById('nfKwExpanded');
+  const input    = document.getElementById('nfKwInput');
+  trigger.classList.add('hidden');
+  expanded.classList.remove('hidden');
+  input.value = '';
+  input.focus();
+}
+
+function closeKwInput() {
+  document.getElementById('nfKwTrigger').classList.remove('hidden');
+  document.getElementById('nfKwExpanded').classList.add('hidden');
+  document.getElementById('nfKwInput').value = '';
+}
+
+function addKeyword() {
+  const input = document.getElementById('nfKwInput');
+  const val   = input.value.trim();
+  if (!val) { input.focus(); return; }
+
+  const id   = 'nfty-custom-' + (++_kwCounter);
+  const list = document.getElementById('nfty-list');
+
+  const item = document.createElement('div');
+  item.className = 'nf-lp-item';
+  item.dataset.kwId = id;
+  item.innerHTML = `
+    <input type="checkbox" id="${id}" checked onchange="newsFilterChange()">
+    <label for="${id}">${val}</label>
+    <button class="nf-kw-del-btn" onclick="deleteKeyword('${id}')" title="삭제">×</button>`;
+  list.appendChild(item);
+
+  closeKwInput();
+}
+
+function deleteKeyword(id) {
+  const item = document.querySelector(`.nf-lp-item[data-kw-id="${id}"]`);
+  if (item) item.remove();
 }
 
 function newsToggleAll(group) {
@@ -2900,6 +2821,36 @@ function setNewsPage(page) {
   _newsPage = page;
   renderNews();
   document.getElementById('news-feed').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ── 뉴스 통계: NEWS_ALL 집계 → KPI 카드·사이드바·수집바 동기화 ── */
+function renderNewsStats() {
+  const cntSelf   = NEWS_ALL.filter(n => n.cat === 'self').length;
+  const cntComp   = NEWS_ALL.filter(n => n.cat === 'comp').length;
+  const cntTotal  = NEWS_ALL.length;
+  const cntOrder  = NEWS_ALL.filter(n => n.type === 'order').length;
+  const cntResult = NEWS_ALL.filter(n => n.type === 'result').length;
+
+  /* KPI 카드 */
+  const s = id => document.getElementById(id);
+  if (s('nfKpiSelf'))  s('nfKpiSelf').textContent  = cntSelf;
+  if (s('nfKpiComp'))  s('nfKpiComp').textContent  = cntComp;
+  if (s('nfKpiTotal')) s('nfKpiTotal').textContent = cntTotal;
+
+  /* 수집 현황 바 총건수 */
+  if (s('nfTotalCount')) s('nfTotalCount').textContent = cntTotal;
+
+  /* 사이드바 분류별 현황 — 최대값 기준 bar width 비율 계산 */
+  const maxCat  = Math.max(cntSelf, cntComp);
+  const maxType = Math.max(cntOrder, cntResult);
+  if (s('nfValSelf'))    s('nfValSelf').textContent    = cntSelf;
+  if (s('nfValComp'))    s('nfValComp').textContent    = cntComp;
+  if (s('nfValOrder'))   s('nfValOrder').textContent   = cntOrder;
+  if (s('nfValResult'))  s('nfValResult').textContent  = cntResult;
+  if (s('nfBarSelf'))    s('nfBarSelf').style.width    = Math.round(cntSelf  / maxCat  * 100) + '%';
+  if (s('nfBarComp'))    s('nfBarComp').style.width    = Math.round(cntComp  / maxCat  * 100) + '%';
+  if (s('nfBarOrder'))   s('nfBarOrder').style.width   = Math.round(cntOrder / maxType * 100) + '%';
+  if (s('nfBarResult'))  s('nfBarResult').style.width  = Math.round(cntResult/ maxType * 100) + '%';
 }
 
 function renderNews() {
@@ -2936,7 +2887,6 @@ function renderNews() {
         <div class="ni-badges">
           <span class="ni-badge b-${n.cat}">${n.cat === 'self' ? '대림바스' : '경쟁사'}</span>
           <span class="ni-badge b-${n.type}">${_typeLabel[n.type]}</span>
-          ${n.imp !== 'low' ? `<span class="ni-badge b-${n.imp}">${_impLabel[n.imp]}</span>` : ''}
         </div>
         <span class="ni-title">${n.title}</span>
       </div>
@@ -2963,6 +2913,7 @@ function renderNews() {
   pg.innerHTML = pgHtml;
 }
 renderNews();
+renderNewsStats();
 
 /* ═══════════════════════════
    PEER / FINANCIAL
@@ -2992,8 +2943,8 @@ function renderDeepTrend() {
     label: PEER_DATA[c].name,
     data: PEER_DATA[c][key],
     borderColor: ALL_LINE_COLORS[c],
-    backgroundColor: c==='self' ? 'rgba(15,42,82,0.08)' : 'transparent',
-    fill: c==='self' ? 'origin' : false,
+    backgroundColor: 'transparent',
+    fill: false,
     borderWidth: c==='self' ? 2.5 : 1.5,
     pointRadius: c==='self' ? 4 : 2.5,
     pointHoverRadius: c==='self' ? 6 : 4,
@@ -3132,20 +3083,24 @@ const TREND_YEARS = [2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015
     d.trend_op    = ext(d.trend_op);
     // 매출총이익: trend_sales * gp_ratio
     const gpR = (d.sales*(d.opr/100+0.15))/d.sales;
-    d.trend_gp    = d.trend_sales.map(s=>Math.round(s*gpR));
+    d.trend_gp      = d.trend_sales.map(s=>Math.round(s*gpR));
+    d.trend_gp_rate = d.trend_gp.map((g,i)=>+( g/d.trend_sales[i]*100).toFixed(1));
     // CAPEX / 순차입금: trend_sales * ratio
     const cR = d.capex/d.sales, nR = d.netdebt/d.sales;
-    d.trend_capex = d.trend_sales.map(s=>Math.round(s*cR));
-    d.trend_debt  = d.trend_sales.map(s=>Math.round(s*nR));
+    d.trend_capex   = d.trend_sales.map(s=>Math.round(s*cR));
+    d.trend_debt    = d.trend_sales.map(s=>Math.round(s*nR));
+    d.trend_op_rate = d.trend_op.map((o,i)=>+( o/d.trend_sales[i]*100).toFixed(1));
   });
   // self는 실제 HIST 사용
   PEER_DATA.self.trend_sales = [2000,2150,2310,2480,2550,2420,2680,2870,3050,3180,3320,3490,3640,3820,4010,4218,4820,5102,5380,5660,5890,6180];
   PEER_DATA.self.trend_op    = [118,128,142,158,152,138,168,188,208,222,242,258,275,288,300,310,380,420,450,495,536,578];
   const selfGpR = (PEER_DATA.self.sales*(PEER_DATA.self.opr/100+0.15))/PEER_DATA.self.sales;
-  PEER_DATA.self.trend_gp    = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfGpR));
+  PEER_DATA.self.trend_gp      = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfGpR));
+  PEER_DATA.self.trend_gp_rate = PEER_DATA.self.trend_gp.map((g,i)=>+(g/PEER_DATA.self.trend_sales[i]*100).toFixed(1));
   const selfCR = PEER_DATA.self.capex/PEER_DATA.self.sales, selfNR = PEER_DATA.self.netdebt/PEER_DATA.self.sales;
-  PEER_DATA.self.trend_capex = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfCR));
-  PEER_DATA.self.trend_debt  = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfNR));
+  PEER_DATA.self.trend_capex   = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfCR));
+  PEER_DATA.self.trend_debt    = PEER_DATA.self.trend_sales.map(s=>Math.round(s*selfNR));
+  PEER_DATA.self.trend_op_rate = PEER_DATA.self.trend_op.map((o,i)=>+(o/PEER_DATA.self.trend_sales[i]*100).toFixed(1));
 })();
 
 
@@ -3162,29 +3117,34 @@ const ALL_LINE_COLORS = {
 let allSalesTrendChart=null, allOpTrendChart=null;
 let _allTrendKey = 'trend_sales';
 
+
 const ALL_COMP_METRICS = [
-  {label:'매출액',     get:d=>d.sales.toLocaleString()},
-  {label:'매출총이익', get:d=>Math.round(d.sales*(d.opr/100+0.15)).toLocaleString()},
-  {label:'영업이익',   get:d=>d.op.toLocaleString()},
-  {label:'CAPEX',      get:d=>d.capex.toLocaleString()},
-  {label:'순차입금',   get:d=>d.netdebt.toLocaleString()},
+  {label:'매출액',          get:d=>d.sales.toLocaleString()},
+  {label:'매출총이익',      get:d=>Math.round(d.sales*(d.opr/100+0.15)).toLocaleString()},
+  {label:'매출총이익률', get:d=>(d.opr/100+0.15)*100 < 0 ? '-' : ((d.opr/100+0.15)*100).toFixed(1)+'%'},
+  {label:'영업이익',     get:d=>d.op.toLocaleString()},
+  {label:'영업이익률',   get:d=>d.opr.toFixed(1)+'%'},
+  {label:'CAPEX',           get:d=>d.capex.toLocaleString()},
+  {label:'순차입금',        get:d=>d.netdebt.toLocaleString()},
 ];
 
 function renderAllCompTable() {
+  const thStickyLabel = 'text-align:left;min-width:110px;position:sticky;left:0;z-index:3;background:var(--navy);';
+  const tdStickyLabel = 'text-align:left;position:sticky;left:0;z-index:1;background:var(--surface-2,#f5f7fb);font-weight:600;white-space:nowrap;';
   const headerCells = ALL_CO_ORDER.map(c=>{
     return c==='self'
       ? `<th class="comp-self-th">${PEER_DATA[c].name}</th>`
       : `<th>${PEER_DATA[c].name}</th>`;
   }).join('');
   document.getElementById('allCompHead').innerHTML =
-    `<tr><th style="text-align:left;min-width:110px;">지표</th>${headerCells}</tr>`;
+    `<tr><th style="${thStickyLabel}">지표</th>${headerCells}</tr>`;
   document.getElementById('allCompBody').innerHTML = ALL_COMP_METRICS.map(m=>{
     const cells = ALL_CO_ORDER.map(c=>{
       return c==='self'
         ? `<td class="comp-self-td">${m.get(PEER_DATA[c])}</td>`
         : `<td>${m.get(PEER_DATA[c])}</td>`;
     }).join('');
-    return `<tr><td style="text-align:left;">${m.label}</td>${cells}</tr>`;
+    return `<tr><td style="${tdStickyLabel}">${m.label}</td>${cells}<td></td></tr>`;
   }).join('');
 }
 
@@ -3195,15 +3155,17 @@ function renderDeepAllCompTable() {
       ? `<th class="comp-self-th">${PEER_DATA[c].name}</th>`
       : `<th>${PEER_DATA[c].name}</th>`;
   }).join('');
+  const thStickyLabel = 'text-align:left;min-width:110px;position:sticky;left:0;z-index:3;background:var(--navy);';
+  const tdStickyLabel = 'text-align:left;position:sticky;left:0;z-index:1;background:var(--surface-2,#f5f7fb);font-weight:600;white-space:nowrap;';
   document.getElementById('deepAllCompHead').innerHTML =
-    `<tr><th style="text-align:left;min-width:110px;">지표</th>${headerCells}</tr>`;
+    `<tr><th style="${thStickyLabel}">지표</th>${headerCells}</tr>`;
   document.getElementById('deepAllCompBody').innerHTML = ALL_COMP_METRICS.map(m=>{
     const cells = cols.map(c=>{
       return c==='self'
         ? `<td class="comp-self-td">${m.get(PEER_DATA[c])}</td>`
         : `<td>${m.get(PEER_DATA[c])}</td>`;
     }).join('');
-    return `<tr><td style="text-align:left;">${m.label}</td>${cells}</tr>`;
+    return `<tr><td style="${tdStickyLabel}">${m.label}</td>${cells}</tr>`;
   }).join('');
 }
 
@@ -3222,18 +3184,42 @@ function buildTrendLegend(legendId, cos, charts) {
   }).join('') + `</div>`;
 }
 
+function fitYAxis(chart, isRate = false) {
+  if (!chart) return;
+  const vals = chart.data.datasets
+    .filter((_, i) => chart.isDatasetVisible(i))
+    .flatMap(ds => ds.data.filter(v => v != null && v !== undefined));
+  if (!vals.length) return;
+  const maxVal = Math.max(...vals);
+  const minVal = Math.min(...vals);
+  if (isRate) {
+    // % 탭: 0%부터 시작, max는 100% 고정
+    chart.options.scales.y.max = 100;
+    chart.options.scales.y.min = 0;
+  } else {
+    // 억원 탭: 0부터 시작, max는 단위 올림
+    const step = maxVal > 5000 ? 1000 : maxVal > 1000 ? 500 : 100;
+    chart.options.scales.y.max = Math.ceil(maxVal / step) * step;
+    chart.options.scales.y.min = 0;
+  }
+  delete chart.options.scales.y.suggestedMax;
+  delete chart.options.scales.y.suggestedMin;
+  chart.update();
+}
+
 function toggleTrendLine(co, legendId) {
   const name = PEER_DATA[co]?.name;
   if (!name) return;
   const charts = legendId === 'allTrendLegend'
     ? [allSalesTrendChart]
     : [deepSalesChart, deepOpChart];
+  const isRate = _allTrendKey === 'trend_gp_rate' || _allTrendKey === 'trend_op_rate';
   charts.forEach(chart => {
     if (!chart) return;
     const idx = chart.data.datasets.findIndex(d => d.label === name);
     if (idx === -1) return;
     chart.setDatasetVisibility(idx, !chart.isDatasetVisible(idx));
-    chart.update();
+    fitYAxis(chart, legendId === 'allTrendLegend' ? isRate : false);
   });
   document.querySelectorAll(`.trend-legend-item[data-co="${co}"][data-legend="${legendId}"]`).forEach(el => {
     const isNowHidden = !charts[0]?.isDatasetVisible(
@@ -3243,7 +3229,7 @@ function toggleTrendLine(co, legendId) {
   });
 }
 
-const ALL_TREND_LABELS = ['매출액 추이 (억원)','매출총이익 추이 (억원)','영업이익 추이 (억원)','CAPEX 추이 (억원)','순차입금 추이 (억원)'];
+const ALL_TREND_LABELS = ['매출액 추이 (억원)','매출총이익 추이 (억원)','매출총이익률 추이 (%)','영업이익 추이 (억원)','영업이익률 추이 (%)','CAPEX 추이 (억원)','순차입금 추이 (억원)'];
 const ALL_TREND_KEYS  = ['trend_sales','trend_gp','trend_op','trend_capex','trend_debt'];
 
 function renderAllTrend() {
@@ -3252,8 +3238,8 @@ function renderAllTrend() {
     label: PEER_DATA[c].name,
     data: PEER_DATA[c][key] || [],
     borderColor: ALL_LINE_COLORS[c],
-    backgroundColor: c==='self' ? 'rgba(15,42,82,0.08)' : 'transparent',
-    fill: c==='self' ? 'origin' : false,
+    backgroundColor: 'transparent',
+    fill: false,
     borderWidth: c==='self' ? 2.5 : 1.5,
     pointRadius: c==='self' ? 4 : 2.5,
     pointHoverRadius: c==='self' ? 6 : 4,
@@ -3270,78 +3256,90 @@ function renderAllTrend() {
     },
     scales:{
       x:{ticks:{font:{size:10},maxRotation:45},grid:{display:false}},
-      y:{beginAtZero:false,ticks:{font:{size:10},callback:v=>v.toLocaleString()+'억'},grid:{color:'rgba(0,0,0,0.04)'}}
-    }
+      y:{type:'linear',beginAtZero:false,ticks:{font:{size:10},callback:v=>v.toLocaleString()+'억'},grid:{color:'rgba(0,0,0,0.04)'}}
+    },
   };
-  const _vline2008 = {
-    id:'vline2008',
+  const _vlines = {
+    id:'vlines',
     afterDraw(chart){
-      const xi = chart.data.labels.indexOf(2008);
-      if(xi===-1) return;
-      const x = chart.scales.x.getPixelForValue(xi);
-      const {top,bottom} = chart.chartArea;
+      const {top,bottom,canvas} = chart.chartArea;
       const ctx = chart.ctx;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x, top);
-      ctx.lineTo(x, bottom);
-      ctx.strokeStyle='#ef4444';
-      ctx.lineWidth=1.5;
-      ctx.stroke();
-      ctx.restore();
-      /* HTML overlay div — 차트 영역 밖 상단에 한 번만 생성 */
       const container = chart.canvas.parentElement;
-      if (container.querySelector('.vline-label-2008')) return;
-      const div = document.createElement('div');
-      div.className = 'vline-label-2008';
-      div.style.cssText = [
-        'position:absolute',
-        `left:${x}px`,
-        'top:4px',
-        'transform:translateX(-50%)',
-        'background:#fff1f1',
-        'border:1px solid #ef4444',
-        'border-radius:5px',
-        'padding:2px 7px',
-        'font-size:9px',
-        'font-weight:700',
-        'color:#ef4444',
-        'white-space:nowrap',
-        'pointer-events:none',
-        'box-shadow:0 1px 4px rgba(239,68,68,.15)',
-        'z-index:10',
-      ].join(';');
-      div.textContent = '대림바스 대주주 변경';
-      container.appendChild(div);
+      const LINES = [
+        {year:2008, label:'대림바스 대주주 변경'},
+        {year:2018, label:null},
+        {year:2022, label:null},
+      ];
+      LINES.forEach(({year, label}) => {
+        const xi = chart.data.labels.indexOf(year);
+        if(xi===-1) return;
+        const x = chart.scales.x.getPixelForValue(xi);
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4,3]);
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.strokeStyle='#ef4444';
+        ctx.lineWidth=1.5;
+        ctx.stroke();
+        ctx.restore();
+        if(!label) return;
+        const cls = `vline-label-${year}`;
+        if(container.querySelector('.'+cls)) return;
+        const div = document.createElement('div');
+        div.className = cls;
+        div.style.cssText = [
+          'position:absolute',
+          `left:${x}px`,
+          'top:4px',
+          'transform:translateX(-50%)',
+          'background:#fff1f1',
+          'border:1px solid #ef4444',
+          'border-radius:5px',
+          'padding:2px 7px',
+          'font-size:9px',
+          'font-weight:700',
+          'color:#ef4444',
+          'white-space:nowrap',
+          'pointer-events:none',
+          'box-shadow:0 1px 4px rgba(239,68,68,.15)',
+          'z-index:10',
+        ].join(';');
+        div.textContent = label;
+        container.appendChild(div);
+      });
     }
   };
   if(allSalesTrendChart) allSalesTrendChart.destroy();
   document.querySelectorAll('.vline-label-2008').forEach(el=>el.remove());
-  allSalesTrendChart = new Chart(document.getElementById('chartAllSalesTrend'),{
+  const _trendCanvas = document.getElementById('chartAllSalesTrend');
+  allSalesTrendChart = new Chart(_trendCanvas,{
     type:'line', data:{labels:TREND_YEARS, datasets:mk(_allTrendKey)}, options:opts,
-    plugins:[_vline2008]
+    plugins:[_vlines]
   });
+
+
+
   buildTrendLegend('allTrendLegend', cos, [allSalesTrendChart]);
 }
 
 function switchAllTrendKey(key, idx) {
   _allTrendKey = key;
-  // 탭 버튼 active
-  for(let i=0;i<5;i++){
+  for(let i=0;i<7;i++){
     const b = document.getElementById('allTrendBtn'+i);
     if(b) b.classList.toggle('active', i===idx);
   }
-  // 차트 제목
   const titleEl = document.getElementById('allTrendChartTitle');
   if(titleEl) titleEl.textContent = ALL_TREND_LABELS[idx];
-  // 데이터 교체 (visible 상태 유지)
   if(!allSalesTrendChart) return;
   const cos = ALL_CO_ORDER;
+  const isRate = key==='trend_gp_rate'||key==='trend_op_rate';
   allSalesTrendChart.data.datasets.forEach((ds,i)=>{
-    const co = cos[i];
-    ds.data = (PEER_DATA[co][key]||[]);
+    ds.data = (PEER_DATA[cos[i]][key]||[]);
   });
-  allSalesTrendChart.update();
+  allSalesTrendChart.options.scales.y.type = 'linear';
+  allSalesTrendChart.options.scales.y.ticks.callback = isRate ? v=>parseFloat(v.toFixed(1))+'%' : v=>v.toLocaleString()+'억';
+  fitYAxis(allSalesTrendChart, isRate);
 }
 
 /* ══ 기업별 상세 프로파일 ══ */
@@ -3437,23 +3435,87 @@ function initNewsCharts() {
 
 /* ── 시장 규모 연도 슬라이더 ── */
 let mktYear = 2025;
-let marketShareChart = null;
-let _mktLegendState = [true,true,true,true,true,true,true,true]; // 각 dataset 표시 여부 (연도 변경 시 유지)
+let marketShareCharts = [null, null, null];
+let _mktLegendState = [false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false];
+let _mktRawData = { sw: [], faucet: [], bidet: [] };
 
-function sparklineSVG(data, color) {
-  const W=82, H=30, pad=3;
-  const mn=Math.min(...data), mx=Math.max(...data), rng=mx-mn||1;
-  const pts = data.map((v,i) => {
-    const x = (pad + (i/(data.length-1))*(W-pad*2)).toFixed(1);
-    const y = (H - pad - ((v-mn)/rng)*(H-pad*2)).toFixed(1);
-    return `${x},${y}`;
-  }).join(' ');
-  const last = pts.split(' ').pop().split(',');
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="overflow:visible;display:block;">
-    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8"
-      stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${last[0]}" cy="${last[1]}" r="2.8" fill="${color}"/>
-  </svg>`;
+const MKT_LEGEND = [
+  {label:'대림바스',      color:'#1a4a8a'},
+  {label:'ASK',          color:'#f97316'},
+  {label:'대림통상',      color:'#64748B'},
+  {label:'계림요업',      color:'#be185d'},
+  {label:'화신',          color:'#a16207'},
+  {label:'보보코퍼레이션', color:'#0369a1'},
+  {label:'이누스',        color:'#E05570'},
+  {label:'로얄앤컴퍼니',  color:'#16A34A'},
+  {label:'세림산업',      color:'#15803d'},
+  {label:'다다',          color:'#6d28d9'},
+  {label:'대신건기산업',  color:'#0f766e'},
+  {label:'콜러노비타',    color:'#0891b2'},
+  {label:'아이젠',        color:'#9f1239'},
+  {label:'엘에스대원',    color:'#b45309'},
+  {label:'한샘',          color:'#2563EB'},
+  {label:'리바트',        color:'#06b6a2'},
+  {label:'에넥스',        color:'#d4a017'},
+  {label:'영림임업',      color:'#7c3aed'},
+];
+
+const _emptyDonutPlugin = {
+  id: 'emptyDonut',
+  afterDraw(chart) {
+    const total = chart.data.datasets[0].data.reduce((s, v) => s + (v || 0), 0);
+    if (total > 0) return;
+    const { ctx, chartArea: { left, top, right, bottom } } = chart;
+    const cx  = (left + right) / 2, cy = (top + bottom) / 2;
+    const r   = Math.min(right - left, bottom - top) / 2;
+    const cut = parseFloat(chart.options.cutout) / 100;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, r,       0, Math.PI * 2);
+    ctx.arc(cx, cy, r * cut, 0, Math.PI * 2, true);
+    ctx.fillStyle = '#e8edf5';
+    ctx.fill();
+    ctx.restore();
+  }
+};
+
+function _getDonutDatasets(rawData) {
+  const selected = _mktLegendState.map((v, i) => v ? i : -1).filter(i => i >= 0);
+  if (selected.length === 0) {
+    return { labels: [], data: [], colors: [] };
+  }
+  const selSum = selected.reduce((s, i) => s + (rawData[i] || 0), 0);
+  const other  = +Math.max(0, 100 - selSum).toFixed(1);
+  return {
+    labels: [...selected.map(i => MKT_LEGEND[i].label), '기타'],
+    data:   [...selected.map(i => rawData[i] || 0),      other],
+    colors: [...selected.map(i => MKT_LEGEND[i].color),  '#CBD5E1'],
+  };
+}
+
+function _buildDonut(canvasId, rawData) {
+  const { labels, data, colors } = _getDonutDatasets(rawData);
+  const ch = new Chart(document.getElementById(canvasId), {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderWidth: 1, borderColor: '#fff' }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '60%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
+          }
+        }
+      }
+    },
+    plugins: [_emptyDonutPlugin]
+  });
+  return ch;
 }
 
 function renderMarket(year) {
@@ -3461,48 +3523,42 @@ function renderMarket(year) {
   const yi = MKT_YEARS.indexOf(year);
   document.getElementById('mktYearBadge').textContent = `${year}년 기준`;
 
+  const swTotal     = MKT_SIZE.sw[yi];
+  const faucetTotal = MKT_SIZE.faucet[yi];
+  const bidetTotal  = MKT_SIZE.bidet[yi];
+  const totalAll    = swTotal + faucetTotal + bidetTotal;
+
+  // 종합 성장률 (가중평균)
+  const growSw = MKT_GROWTH.sw[yi], growF = MKT_GROWTH.faucet[yi], growB = MKT_GROWTH.bidet[yi];
+  const growAll = +((growSw*swTotal + growF*faucetTotal + growB*bidetTotal) / totalAll).toFixed(1);
+  const isUpAll = growAll >= 0;
+
+  const fmtAmt = v => v >= 10000
+    ? `${Math.floor(v/10000)}<span class="mkt-unit">조</span> ${(v%10000).toLocaleString()}<span class="mkt-unit">억</span>`
+    : `${v.toLocaleString()}<span class="mkt-unit">억</span>`;
+
   const cats = [
-    { key:'sw',     label:'SW (욕실가구)', color:'#1a4a8a',
-      fmt: v => v >= 10000
-        ? `${Math.floor(v/10000)}<span class="mkt-unit">조</span> ${(v%10000).toLocaleString()}<span class="mkt-unit">억</span>`
-        : `${v.toLocaleString()}<span class="mkt-unit">억</span>` },
-    { key:'faucet', label:'수전금구', color:'#06b6a2',
-      fmt: v => `${v.toLocaleString()}<span class="mkt-unit">억</span>` },
-    { key:'bidet',  label:'비데',    color:'#d4a017',
-      fmt: v => `${v.toLocaleString()}<span class="mkt-unit">억</span>` },
+    { key:'총합',   label:'종합',        color:'#374151', val:totalAll,    grow:growAll },
+    { key:'sw',     label:'SW (욕실가구)', color:'#1a4a8a', val:swTotal,     grow:growSw  },
+    { key:'faucet', label:'수전금구',     color:'#06b6a2', val:faucetTotal, grow:growF   },
+    { key:'bidet',  label:'비데',         color:'#d4a017', val:bidetTotal,  grow:growB   },
   ];
 
   document.getElementById('mktCards').innerHTML = cats.map(c => {
-    const val  = MKT_SIZE[c.key][yi];
-    const grow = MKT_GROWTH[c.key][yi];
-    const isUp = grow >= 0;
+    const isUp = c.grow >= 0;
     return `
       <div class="mkt-card">
         <div class="mkt-cat">${c.label}</div>
-        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:8px;">
-          <div>
-            <div class="mkt-val">${c.fmt(val)}</div>
-            <div class="mkt-chg ${isUp?'up':'dn'}">${isUp?'▲':'▼'} 시장성장률 ${grow>0?'+':''}${grow}%</div>
-          </div>
-          <div style="opacity:0.75;flex-shrink:0;">${sparklineSVG(MKT_SIZE[c.key].slice(0,yi+1), c.color)}</div>
+        <div>
+          <div class="mkt-val">${fmtAmt(c.val)}</div>
+          <div class="mkt-chg" style="${c.grow>=0?'color:#1e293b':'color:var(--red)'}">시장성장률 ${c.grow>=0?'+'+c.grow:'▲'+Math.abs(c.grow)}%</div>
         </div>
-        <div style="font-size:9px;color:var(--text-3);margin-top:6px;">2019 → ${year} 추이</div>
       </div>`;
   }).join('');
 
   renderMarketTable();
 
-  // 시장규모 커스텀 범례
-  const MKT_LEGEND = [
-    {label:'대림바스',     color:'#1a4a8a'},
-    {label:'ASK',         color:'#f97316'},
-    {label:'대림통상',     color:'#64748B'},
-    {label:'계림',        color:'#be185d'},
-    {label:'이누스',       color:'#E05570'},
-    {label:'로얄앤컴퍼니', color:'#16A34A'},
-    {label:'콜러노비타',   color:'#0891b2'},
-    {label:'기타',        color:'#CBD5E1'},
-  ];
+  // 범례
   const legEl = document.getElementById('mktShareLegend');
   if (legEl) {
     legEl.innerHTML = MKT_LEGEND.map((d,i) =>
@@ -3514,56 +3570,48 @@ function renderMarket(year) {
   }
 
   const s = MKT_SHARE[year];
-  if (marketShareChart) marketShareChart.destroy();
-  marketShareChart = new Chart(document.getElementById('chartMarketShare'), {
-    type: 'bar',
-    data: {
-      labels: ['SW (욕실가구)','수전금구','비데'],
-      datasets: [
-        {label:'대림바스',     data:[s.sw[0],s.faucet[0],s.bidet[0]], backgroundColor:'#1a4a8a', hidden:!_mktLegendState[0]},
-        {label:'ASK',         data:[s.sw[1],s.faucet[1],s.bidet[1]], backgroundColor:'#f97316', hidden:!_mktLegendState[1]},
-        {label:'대림통상',     data:[s.sw[2],s.faucet[2],s.bidet[2]], backgroundColor:'#64748B', hidden:!_mktLegendState[2]},
-        {label:'계림',        data:[s.sw[3],s.faucet[3],s.bidet[3]], backgroundColor:'#be185d', hidden:!_mktLegendState[3]},
-        {label:'이누스',       data:[s.sw[4],s.faucet[4],s.bidet[4]], backgroundColor:'#E05570', hidden:!_mktLegendState[4]},
-        {label:'로얄앤컴퍼니', data:[s.sw[5],s.faucet[5],s.bidet[5]], backgroundColor:'#16A34A', hidden:!_mktLegendState[5]},
-        {label:'콜러노비타',   data:[s.sw[6],s.faucet[6],s.bidet[6]], backgroundColor:'#0891b2', hidden:!_mktLegendState[6]},
-        {label:'기타',        data:[s.sw[7],s.faucet[7],s.bidet[7]], backgroundColor:'#CBD5E1', hidden:!_mktLegendState[7]},
-      ]
-    },
-    options: {
-      responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{ display:false } },
-      scales:{
-        x:{ stacked:true, ticks:{font:{size:10}}, grid:{display:false} },
-        y:{ stacked:true, max:100, ticks:{font:{size:10}, callback:v=>v+'%'}, grid:{color:'rgba(0,0,0,0.04)'} }
-      }
-    }
-  });
+  _mktRawData = { sw: s.sw, faucet: s.faucet, bidet: s.bidet };
+  marketShareCharts.forEach(ch => { if (ch) ch.destroy(); });
+  marketShareCharts = [
+    _buildDonut('chartMktSW',     s.sw),
+    _buildDonut('chartMktFaucet', s.faucet),
+    _buildDonut('chartMktBidet',  s.bidet),
+  ];
 }
 
 function renderMarketTable() {
   const years = MKT_YEARS;
-  const thS = 'padding:6px 10px;font-size:11px;font-weight:700;text-align:right;white-space:nowrap;background:var(--navy) !important;color:#fff !important;border-bottom:none;';
-  const th1S = 'padding:6px 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;background:var(--navy) !important;color:#fff !important;border-bottom:none;';
-  const tdS = 'padding:5px 10px;font-size:11px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--text-1);';
+  const SEP  = 'border-right:1px solid rgba(255,255,255,0.3);';
+  const SEPd = 'border-right:1px solid var(--border);';
+  const th1S = 'padding:0 10px;font-size:11px;font-weight:700;text-align:left;white-space:nowrap;background:var(--navy) !important;color:#fff !important;border:none;vertical-align:middle;';
+  const thYS = 'padding:4px 8px;font-size:11px;font-weight:700;text-align:center;white-space:nowrap;background:var(--navy) !important;color:#fff !important;border:none;border-bottom:1px solid rgba(255,255,255,0.15);';
+  const thSS = 'padding:4px 8px;font-size:10px;font-weight:500;text-align:center;white-space:nowrap;background:var(--navy) !important;color:rgba(255,255,255,0.75) !important;border:none;';
+  const tdS  = 'padding:5px 8px;font-size:11px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--text-1);';
+  const tdPS = 'padding:5px 8px;font-size:10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--text-3);';
   const td1S = 'padding:5px 10px;font-size:11px;font-weight:600;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);color:var(--navy);background:var(--surface-2,#f8fafc);';
 
-  const mkTbl = (elId, title, rows) => {
+  // 전체 시장규모 전용 헬퍼: 전 연도 금액+% (2019 포함)
+  const mkTblTotal = (elId, title, rows) => {
     const el = document.getElementById(elId);
     if (!el) return;
     el.innerHTML = `
-      <div class="card card-sm" style="margin-bottom:14px;">
+      <div class="card card-sm" style="margin-bottom:14px;overflow:hidden;">
         <div class="card-title" style="margin-bottom:10px;">${title} <span style="font-size:10px;font-weight:400;color:var(--text-3);">(단위: 억원)</span></div>
         <div style="overflow-x:auto;">
           <table style="border-collapse:collapse;width:100%;min-width:max-content;">
-            <thead><tr>
-              <th style="${th1S}">구분</th>
-              ${years.map(y=>`<th style="${thS}">${y}</th>`).join('')}
-            </tr></thead>
+            <thead>
+              <tr>
+                <th rowspan="2" style="${th1S}border-radius:0 !important;">구분</th>
+                ${years.map(y=>`<th colspan="2" style="${thYS}${SEP}">${y}</th>`).join('')}
+              </tr>
+              <tr>
+                ${years.map(()=>`<th style="${thSS}">금액</th><th style="${thSS}${SEP}">%</th>`).join('')}
+              </tr>
+            </thead>
             <tbody>
               ${rows.map(r=>`<tr>
                 <td style="${td1S}">${r.label}</td>
-                ${r.data.map(v=>`<td style="${tdS}">${v.toLocaleString()}</td>`).join('')}
+                ${r.cells.map(c=>`<td style="${tdS}">${c.val}</td><td style="${tdPS}${SEPd}">${c.pct}</td>`).join('')}
               </tr>`).join('')}
             </tbody>
           </table>
@@ -3571,34 +3619,76 @@ function renderMarketTable() {
       </div>`;
   };
 
-  // 전체 시장규모
-  mkTbl('mktTotalTable', '전체 시장규모 표', [
-    { label:'종합',       data: years.map((_,i)=>MKT_SIZE.sw[i]+MKT_SIZE.faucet[i]+MKT_SIZE.bidet[i]) },
-    { label:'위생도기(SW)', data: MKT_SIZE.sw },
-    { label:'수전',       data: MKT_SIZE.faucet },
-    { label:'비데',       data: MKT_SIZE.bidet },
+  // 일반 표 헬퍼 (대림바스 등): 모든 연도 금액+%, 연도마다 세로선
+  const mkTbl = (elId, title, rows) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = `
+      <div class="card card-sm" style="margin-bottom:14px;overflow:hidden;">
+        <div class="card-title" style="margin-bottom:10px;">${title} <span style="font-size:10px;font-weight:400;color:var(--text-3);">(단위: 억원)</span></div>
+        <div style="overflow-x:auto;">
+          <table style="border-collapse:collapse;width:100%;min-width:max-content;">
+            <thead>
+              <tr>
+                <th rowspan="2" style="${th1S}border-radius:0 !important;">구분</th>
+                ${years.map(y=>`<th colspan="2" style="${thYS}${SEP}">${y}</th>`).join('')}
+              </tr>
+              <tr>
+                ${years.map(()=>`<th style="${thSS}">금액</th><th style="${thSS}${SEP}">%</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r=>`<tr>
+                <td style="${td1S}">${r.label}</td>
+                ${r.cells.map(c=>`<td style="${tdS}">${c.val}</td><td style="${tdPS}${SEPd}">${c.pct}</td>`).join('')}
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  };
+
+  // 전체 시장규모 — pct = 구성비 (종합=100%, 나머지=항목/종합×100)
+  const totalArr = years.map((_,i) => MKT_SIZE.sw[i]+MKT_SIZE.faucet[i]+MKT_SIZE.bidet[i]);
+
+  mkTblTotal('mktTotalTable', '전체 시장규모 표', [
+    { label:'종합',         cells: years.map((_,i)=>({ val: totalArr[i].toLocaleString(),          pct: '100%' })) },
+    { label:'위생도기(SW)', cells: years.map((_,i)=>({ val: MKT_SIZE.sw[i].toLocaleString(),       pct: (MKT_SIZE.sw[i]/totalArr[i]*100).toFixed(1)+'%' })) },
+    { label:'수전',         cells: years.map((_,i)=>({ val: MKT_SIZE.faucet[i].toLocaleString(),   pct: (MKT_SIZE.faucet[i]/totalArr[i]*100).toFixed(1)+'%' })) },
+    { label:'비데',         cells: years.map((_,i)=>({ val: MKT_SIZE.bidet[i].toLocaleString(),    pct: (MKT_SIZE.bidet[i]/totalArr[i]*100).toFixed(1)+'%' })) },
   ]);
 
-  // 대림바스
+  // 대림바스 표 — pct = 시장점유율
+  const dalimSales = years.map((_,i) => {
+    const yr=years[i], s=MKT_SHARE[yr];
+    return Math.round(MKT_SIZE.sw[i]*s.sw[0]/100 + MKT_SIZE.faucet[i]*s.faucet[0]/100 + MKT_SIZE.bidet[i]*s.bidet[0]/100);
+  });
+  const dalimShare = years.map((_,i) => {
+    const s = MKT_SHARE[years[i]];
+    return (dalimSales[i] / totalArr[i] * 100).toFixed(1)+'%';
+  });
+
   mkTbl('mktDalimTable', '대림바스 표', [
-    { label:'종합', data: years.map((_,i)=>{
-        const yr=years[i], s=MKT_SHARE[yr];
-        return Math.round(MKT_SIZE.sw[i]*s.sw[0]/100 + MKT_SIZE.faucet[i]*s.faucet[0]/100 + MKT_SIZE.bidet[i]*s.bidet[0]/100);
-    })},
-    { label:'위생도기(SW)', data: years.map((_,i)=>Math.round(MKT_SIZE.sw[i]*MKT_SHARE[years[i]].sw[0]/100)) },
-    { label:'수전',         data: years.map((_,i)=>Math.round(MKT_SIZE.faucet[i]*MKT_SHARE[years[i]].faucet[0]/100)) },
-    { label:'비데',         data: years.map((_,i)=>Math.round(MKT_SIZE.bidet[i]*MKT_SHARE[years[i]].bidet[0]/100)) },
+    { label:'종합',         cells: years.map((_,i)=>({ val: dalimSales[i].toLocaleString(), pct: dalimShare[i] })) },
+    { label:'위생도기(SW)', cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.sw[i]*MKT_SHARE[years[i]].sw[0]/100).toLocaleString(),       pct: MKT_SHARE[years[i]].sw[0]+'%' })) },
+    { label:'수전',         cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.faucet[i]*MKT_SHARE[years[i]].faucet[0]/100).toLocaleString(), pct: MKT_SHARE[years[i]].faucet[0]+'%' })) },
+    { label:'비데',         cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.bidet[i]*MKT_SHARE[years[i]].bidet[0]/100).toLocaleString(),   pct: MKT_SHARE[years[i]].bidet[0]+'%' })) },
   ]);
 }
 
 function toggleMarketLegend(idx) {
-  if (!marketShareChart) return;
-  const visible = marketShareChart.isDatasetVisible(idx);
-  marketShareChart.setDatasetVisibility(idx, !visible);
-  marketShareChart.update();
-  _mktLegendState[idx] = !visible;
+  _mktLegendState[idx] = !_mktLegendState[idx];
+  const keys = ['sw', 'faucet', 'bidet'];
+  marketShareCharts.forEach((ch, ci) => {
+    if (!ch) return;
+    const { labels, data, colors } = _getDonutDatasets(_mktRawData[keys[ci]]);
+    ch.data.labels = labels;
+    ch.data.datasets[0].data = data;
+    ch.data.datasets[0].backgroundColor = colors;
+    ch.update();
+  });
   const el = document.querySelector(`.chk-leg-item[data-mkt-idx="${idx}"]`);
-  if (el) el.classList.toggle('off', visible);
+  if (el) el.classList.toggle('off', !_mktLegendState[idx]);
 }
 
 function switchMktYear(btn, year) {
