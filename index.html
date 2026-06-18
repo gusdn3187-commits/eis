@@ -92,9 +92,9 @@ body { font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','A
 .kpi-cell:last-child { border-right:none; }
 .kpi-cell::after { content:''; position:absolute; bottom:-14px; right:-14px; width:72px; height:72px; border-radius:50%; opacity:.07; background:currentColor; }
 .kpi-accent-bar { position:absolute; top:0; left:0; right:0; height:3px; }
-.kpi-name { font-size:var(--kpi-label); font-weight:700; color:var(--text-1); letter-spacing:0.04em; margin-bottom:8px; }
-.kpi-main-num { font-size:var(--kpi-num); font-weight:700; color:var(--text-1); letter-spacing:-0.03em; line-height:1; font-variant-numeric:tabular-nums; margin-bottom:12px; }
-.kpi-main-unit { font-size:14px; font-weight:500; color:var(--text-2); margin-left:2px; }
+.kpi-name { font-size:18px; font-weight:700; color:var(--text-1); letter-spacing:0.04em; margin-bottom:8px; }
+.kpi-main-num { font-size:clamp(32px,3.6vw,46px); font-weight:700; color:var(--text-1); letter-spacing:-0.03em; line-height:1; font-variant-numeric:tabular-nums; margin-bottom:12px; }
+.kpi-main-unit { font-size:16px; font-weight:500; color:var(--text-2); margin-left:2px; }
 
 /* gauge (기존 보존) */
 .kpi-gauge-wrap { margin-bottom:8px; }
@@ -103,7 +103,7 @@ body { font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','A
 .kpi-gauge-pct { font-size:11px; font-weight:700; }
 .kpi-gauge-track { height:5px; background:#FBE2E1; border-radius:3px; overflow:hidden; }
 .kpi-gauge-fill { height:100%; border-radius:3px; transition:width 0.4s; }
-.kpi-yoy { display:flex; align-items:center; gap:5px; margin-top:8px; font-size:12px; font-weight:600; }
+.kpi-yoy { display:flex; align-items:center; gap:5px; margin-top:8px; font-size:14px; font-weight:600; }
 .kpi-yoy span { white-space:nowrap; }
 .yoy-up { color:#1e293b; } .yoy-dn { color:#1e293b; } .yoy-flat { color:var(--text-3); }
 .kpi-yoy-arrow { font-size:10px; }
@@ -132,23 +132,26 @@ body { font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','A
   border-radius:4px; transition:width 0.4s;
 }
 .bullet-dot {
-  position:absolute; top:0; transform:translate(-50%, calc(-100% - 6px));
-  display:flex; flex-direction:column; align-items:center; gap:2px;
-  pointer-events:none; z-index:2; white-space:nowrap;
-  font-size:11px; font-weight:700; color:var(--navy);
+  position:absolute; top:0;
+  pointer-events:none; z-index:2;
+  font-size:13px; font-weight:700; color:var(--navy);
+}
+.bullet-dot-label {
+  position:absolute; left:0; bottom:14px; white-space:nowrap;
 }
 .bullet-dot::after {
   content:'';
+  position:absolute; left:0; bottom:4px; transform:translateX(-50%);
   width:0; height:0;
   border-left:4px solid transparent;
   border-right:4px solid transparent;
   border-top:6px solid #64748b;
 }
 .bullet-info {
-  display:flex; justify-content:space-between; align-items:center;
-  font-size:12px; color:var(--text-1); font-weight:600;
+  display:flex; justify-content:space-between; align-items:center; gap:6px;
+  font-size:14px; color:var(--text-1); font-weight:600;
 }
-.bullet-pct { font-size:14px; font-weight:400; color:#1e293b; }
+.bullet-pct { font-size:17px; font-weight:400; color:#1e293b; }
 
 /* ── SEGMENT MATRIX ── */
 .seg-matrix { background:var(--surface); border:none; border-radius:var(--r-lg); overflow:hidden; box-shadow:var(--shadow); }
@@ -1833,11 +1836,16 @@ function renderSegKpiCards(btn, segName, ctxKey){
     const yoyNum = parseFloat(displayYoy);
     const yoyIsUp = yoyNum >= 0;
     const yoyText = yoyIsUp
-      ? `<span style="color:#1e293b;font-weight:600;">전년실적 +${Math.abs(yoyNum).toFixed(1)}%</span>`
-      : `<span style="color:var(--red);font-weight:600;">전년실적 ▲${Math.abs(yoyNum).toFixed(1)}%</span>`;
+      ? `<span style="color:#1e293b;font-weight:600;">전년실적 대비 +${Math.abs(yoyNum).toFixed(1)}%</span>`
+      : `<span style="color:var(--red);font-weight:600;">전년실적 대비 ▲${Math.abs(yoyNum).toFixed(1)}%</span>`;
+
+    // 전년동월 마커 라벨이 카드를 벗어나지 않도록 위치별 정렬 보정
+    const labelTransform = prevPct > 70 ? 'translateX(calc(-100% + 8px))'
+                         : prevPct < 16 ? 'translateX(-8px)'
+                         : 'translateX(-50%)';
 
     const footer   = isExceed
-      ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
+      ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);">
            <div class="kpi-yoy" style="margin-top:0;">${yoyText}</div>
            <span style="font-size:10px;font-weight:700;background:var(--teal-lt);color:#0B7A57;border:1px solid var(--teal-pale);padding:3px 9px;border-radius:20px;white-space:nowrap;">목표 달성 ✓ +${exceedPct}%</span>
          </div>`
@@ -1850,7 +1858,7 @@ function renderSegKpiCards(btn, segName, ctxKey){
         <div class="bullet-track">
           <div class="bullet-fill" style="width:${fillW}%;background:${accent[k]};"></div>
           ${overBar}
-          <div class="bullet-dot" style="left:${prevPct}%;">${yoyLabel.prev} ${Math.round(py*100).toLocaleString()}백만</div>
+          <div class="bullet-dot" style="left:${prevPct}%;"><span class="bullet-dot-label" style="transform:${labelTransform};">${yoyLabel.prev} ${Math.round(py*100).toLocaleString()}백만</span></div>
         </div>
         <div class="bullet-info">
           <span class="bullet-pct" style="color:${achColor};font-weight:${isExceed?'700':'400'};">달성률 ${pct}%</span>
@@ -3658,21 +3666,17 @@ function renderMarketTable() {
     { label:'비데',         cells: years.map((_,i)=>({ val: MKT_SIZE.bidet[i].toLocaleString(),    pct: (MKT_SIZE.bidet[i]/totalArr[i]*100).toFixed(1)+'%' })) },
   ]);
 
-  // 대림바스 표 — pct = 시장점유율
-  const dalimSales = years.map((_,i) => {
-    const yr=years[i], s=MKT_SHARE[yr];
-    return Math.round(MKT_SIZE.sw[i]*s.sw[0]/100 + MKT_SIZE.faucet[i]*s.faucet[0]/100 + MKT_SIZE.bidet[i]*s.bidet[0]/100);
-  });
-  const dalimShare = years.map((_,i) => {
-    const s = MKT_SHARE[years[i]];
-    return (dalimSales[i] / totalArr[i] * 100).toFixed(1)+'%';
-  });
+  // 대림바스 표 — 전체 시장규모 표와 동일하게 종합=100% 기준 구성비(%) 표기
+  const dalimSw     = years.map((_,i) => Math.round(MKT_SIZE.sw[i]    *MKT_SHARE[years[i]].sw[0]    /100));
+  const dalimFaucet = years.map((_,i) => Math.round(MKT_SIZE.faucet[i]*MKT_SHARE[years[i]].faucet[0]/100));
+  const dalimBidet  = years.map((_,i) => Math.round(MKT_SIZE.bidet[i] *MKT_SHARE[years[i]].bidet[0] /100));
+  const dalimSales  = years.map((_,i) => dalimSw[i] + dalimFaucet[i] + dalimBidet[i]);
 
   mkTbl('mktDalimTable', '대림바스 표', [
-    { label:'종합',         cells: years.map((_,i)=>({ val: dalimSales[i].toLocaleString(), pct: dalimShare[i] })) },
-    { label:'위생도기(SW)', cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.sw[i]*MKT_SHARE[years[i]].sw[0]/100).toLocaleString(),       pct: MKT_SHARE[years[i]].sw[0]+'%' })) },
-    { label:'수전',         cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.faucet[i]*MKT_SHARE[years[i]].faucet[0]/100).toLocaleString(), pct: MKT_SHARE[years[i]].faucet[0]+'%' })) },
-    { label:'비데',         cells: years.map((_,i)=>({ val: Math.round(MKT_SIZE.bidet[i]*MKT_SHARE[years[i]].bidet[0]/100).toLocaleString(),   pct: MKT_SHARE[years[i]].bidet[0]+'%' })) },
+    { label:'종합',         cells: years.map((_,i)=>({ val: dalimSales[i].toLocaleString(),  pct: '100%' })) },
+    { label:'위생도기(SW)', cells: years.map((_,i)=>({ val: dalimSw[i].toLocaleString(),     pct: (dalimSw[i]    /dalimSales[i]*100).toFixed(1)+'%' })) },
+    { label:'수전',         cells: years.map((_,i)=>({ val: dalimFaucet[i].toLocaleString(), pct: (dalimFaucet[i]/dalimSales[i]*100).toFixed(1)+'%' })) },
+    { label:'비데',         cells: years.map((_,i)=>({ val: dalimBidet[i].toLocaleString(),  pct: (dalimBidet[i] /dalimSales[i]*100).toFixed(1)+'%' })) },
   ]);
 }
 
