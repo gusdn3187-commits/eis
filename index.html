@@ -593,7 +593,7 @@ tbody td:first-child { text-align:left; font-weight:600; font-size:11px; color:v
   <div id="kpi-cumul-pane" class="hidden">
     <div class="sec-head">
       <span class="sec-label">사업부 KPI</span>
-      <span class="badge badge-gray">1~6월 누계 · 억원</span>
+      <span class="badge badge-gray" id="badgeCumulPeriod">1~6월 누계 · 억원</span>
     </div>
     <div id="kpiScopeSegCumul" style="margin-bottom:20px;"></div>
 
@@ -2016,6 +2016,12 @@ buildSegKpiCards(SEG_CUMUL, 'kpiScopeSegCumul', '_SEG_KPI_CTX_CUMUL', 1208,
     op:     {val:214,  plan:230,  prev:196},
     orders: {val:1208, plan:1235, prev:1133}
   });
+
+/* 누계 배지: 당월 기준 동적 표기 (예: "6월 당월 누계") */
+(function setCumulPeriodBadge(){
+  const el = document.getElementById('badgeCumulPeriod');
+  if (el) el.textContent = `${MONTHS[CUR]} 당월 누계 · 억원`;
+})();
 
 function initPerfCharts() {
   buildHistCards();
