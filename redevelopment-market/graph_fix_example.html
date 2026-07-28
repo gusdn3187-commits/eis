@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>착공연도별 → 착공기간 구간 수정 예시</title>
+<style>
+:root{--navy:#082b4c;--blue:#1f6fb2;--sky:#48a2df;--bg:#f2f5f8;--card:#fff;--line:#d8e0e8;--text:#182431;--muted:#69798a;--green:#168a5b;--red:#d94a4a;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Malgun Gothic","Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text);padding:24px;line-height:1.5}
+h1{font-size:20px;margin-bottom:4px}.lead{color:var(--muted);font-size:13px;margin-bottom:20px}
+.wrap{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:1080px}
+@media(max-width:820px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 2px 10px rgba(11,39,65,.07)}
+.tag{display:inline-block;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+.bad{background:#fde9e9;color:var(--red)}.good{background:#e5f7ee;color:var(--green)}
+.chart{position:relative;height:210px;border-left:1.5px solid #9eabb6;border-bottom:1.5px solid #9eabb6;margin:14px 6px 8px;display:flex;align-items:flex-end;gap:10px;padding:0 6px}
+.bar{flex:1;background:linear-gradient(180deg,var(--sky),var(--navy));border-radius:4px 4px 0 0;position:relative;min-width:0}
+.bar b{position:absolute;top:-17px;left:0;right:0;text-align:center;font-size:10px;color:var(--navy)}
+.bar span{position:absolute;bottom:-34px;left:0;right:0;text-align:center;font-size:9.5px;color:#5c6d7b;white-space:nowrap}
+.bar.hi{outline:2px solid #d88a13;outline-offset:1px}
+.axis-pad{height:34px}
+.tip{background:rgba(16,38,58,.96);color:#fff;font-size:11.5px;border-radius:7px;padding:9px 11px;margin:6px 0}
+.tip .t{font-weight:800;margin-bottom:5px}
+.tip .r{display:flex;justify-content:space-between;gap:20px}
+.tip .tot{border-top:1px solid rgba(255,255,255,.3);margin-top:5px;padding-top:5px;font-weight:800}
+.drill{border:1px dashed #b7c4d2;border-radius:7px;padding:10px;margin-top:6px;font-size:12px;background:#f8fbfd}
+.drill .h{font-weight:800;margin-bottom:6px}
+.match{font-size:12.5px;font-weight:800;margin-top:10px;padding:8px 10px;border-radius:6px;text-align:center}
+.match.bad{background:#fde9e9;color:var(--red)}.match.good{background:#e5f7ee;color:var(--green)}
+.hilite{color:#d88a13;font-weight:800}
+.note{font-size:11.5px;color:var(--muted);margin-top:14px;max-width:1080px;line-height:1.7}
+.k{color:var(--navy);font-weight:700}
+</style></head>
+<body>
+<h1>수정 예시 · 착공연도별(÷연수) → 착공기간 구간(전액·1회)</h1>
+<div class="lead">경기 108건 실제 데이터 기준. 강조 막대는 <span class="hilite">관리처분인가(2030~2033, 4년)</span> — hover와 클릭(드릴다운)을 비교합니다.</div>
+
+<div class="wrap">
+  <!-- BEFORE -->
+  <div class="card">
+    <span class="tag bad">수정 전 — 1년 단위 막대(÷연수 분할)</span>
+    <div class="chart">
+      <div class="bar" style="height:43%"><b>420</b><span>2026</span></div>
+      <div class="bar" style="height:43%"><b>420</b><span>2027</span></div>
+      <div class="bar hi" style="height:25%"><b>246</b><span>2030</span></div>
+      <div class="bar hi" style="height:25%"><b>246</b><span>2031</span></div>
+      <div class="bar hi" style="height:25%"><b>246</b><span>2032</span></div>
+      <div class="bar hi" style="height:25%"><b>246</b><span>2033</span></div>
+      <div class="bar" style="height:14%"><b>135</b><span>2034</span></div>
+      <div class="bar" style="height:6%"><b>56</b><span>2037</span></div>
+    </div>
+    <div class="axis-pad"></div>
+    <div class="tip">
+      <div class="t">🖱️ 2030년 · 사업장 33개</div>
+      <div class="r"><span>세면기</span><span>…</span></div>
+      <div class="r tot"><span>총시장</span><span class="hilite">245.7억</span></div>
+    </div>
+    <div class="drill">
+      <div class="h">👆 클릭 → 2030년 착공 사업장 상세</div>
+      <div class="r" style="display:flex;justify-content:space-between"><span>33개</span><span class="hilite">총시장 982.7억</span></div>
+    </div>
+    <div class="match bad">✗ 개수 33=33이지만 금액 245.7억 ≠ 982.7억 (정확히 4배)</div>
+  </div>
+
+  <!-- AFTER -->
+  <div class="card">
+    <span class="tag good">수정 후 — 착공기간 구간 막대(전액·1회)</span>
+    <div class="chart">
+      <div class="bar" style="height:85%"><b>840</b><span>2026~27</span></div>
+      <div class="bar hi" style="height:100%"><b>983</b><span>2030~33</span></div>
+      <div class="bar" style="height:41%"><b>404</b><span>2034~36</span></div>
+      <div class="bar" style="height:28%"><b>279</b><span>2037~41</span></div>
+      <div class="bar" style="height:22%"><b>217</b><span>2042~43</span></div>
+      <div class="bar" style="height:51%"><b>500</b><span>2044~46</span></div>
+    </div>
+    <div class="axis-pad"></div>
+    <div class="tip">
+      <div class="t">🖱️ 2030~2033 착공 · 사업장 33개</div>
+      <div class="r"><span>세면기</span><span>…</span></div>
+      <div class="r tot"><span>총시장</span><span class="hilite">982.7억</span></div>
+    </div>
+    <div class="drill">
+      <div class="h">👆 클릭 → 2030~2033 착공 사업장 상세</div>
+      <div class="r" style="display:flex;justify-content:space-between"><span>33개</span><span class="hilite">총시장 982.7억</span></div>
+    </div>
+    <div class="match good">✓ 개수 33=33, 금액 982.7억=982.7억 — 완전 일치</div>
+  </div>
+</div>
+
+<div class="note">
+  <span class="k">무엇이 달라졌나:</span> 수정 전에는 한 사업(관리처분인가)을 2030·2031·2032·2033 <b>4개 막대에 ¼씩 나눠</b> 담고 개수는 매 연도 중복(+1)했습니다.
+  그래서 hover 금액(그 해 몫, 245.7억)과 클릭 상세 금액(사업 전액 합, 982.7억)이 4배 어긋났습니다.<br>
+  수정 후에는 사업을 자기 <b>착공기간 구간(2030~2033) 막대 하나에 통째로</b> 담습니다(전액·개수 1회). 막대에 집계된 사업 = 클릭 시 뜨는 사업이 같은 집합이라 <b>개수·금액이 항상 일치</b>합니다.<br>
+  <span class="k">검증(경기 108건):</span> 전 구간 개수차 0·금액차 0 · 막대 개수합 108 = 고유 사업수 108(중복 0) · 막대 총시장합 3,222.8억 = 전체 총시장(보존).
+</div>
+</body></html>
