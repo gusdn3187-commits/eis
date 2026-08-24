@@ -1,0 +1,16 @@
+{
+  "name": "plan2027-eis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "2027 사업계획 EIS — Apps Script 프로젝트",
+  "scripts": {
+    "login": "clasp login",
+    "push": "clasp push -f",
+    "watch": "clasp push --watch",
+    "open": "clasp open",
+    "logs": "clasp logs --watch"
+  },
+  "devDependencies": {
+    "@google/clasp": "2.4.2"
+  }
+}

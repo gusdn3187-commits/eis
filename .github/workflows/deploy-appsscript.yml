@@ -1,0 +1,89 @@
+# 2027 사업계획 EIS — 코드가 푸시되면 Apps Script 프로젝트에 자동 반영한다.
+#
+# 필요한 GitHub Secret (Settings → Secrets and variables → Actions)
+#   CLASPRC_JSON   : 로컬에서 `clasp login` 후 생긴 ~/.clasprc.json 파일 '내용 전체'
+#   SCRIPT_ID      : Apps Script 편집기 → 프로젝트 설정 → 스크립트 ID
+#   DEPLOYMENT_ID  : (선택) 웹앱 배포 ID. 넣으면 같은 URL을 유지한 채 갱신한다.
+#                    배포 → 배포 관리 → 해당 배포의 '배포 ID'
+#
+# 시크릿을 아직 안 넣었으면 실패시키지 않고 조용히 건너뛴다 —
+# 연동 설정 전까지 실패 알림이 쌓이는 것을 막기 위해서다.
+
+name: Apps Script 배포
+
+on:
+  push:
+    branches: [main, master, "claude/**"]
+    paths:
+      - "2027_사업계획_EIS/**"
+      - ".github/workflows/deploy-appsscript.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_DIR: 2027_사업계획_EIS
+      DEPLOYMENT_ID: ${{ secrets.DEPLOYMENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 연동 설정 여부 확인
+        id: check
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
+        run: |
+          if [ -n "$CLASPRC_JSON" ] && [ -n "$SCRIPT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::CLASPRC_JSON / SCRIPT_ID 시크릿이 아직 없어 배포를 건너뜁니다. README 2장 참고."
+            echo "### 배포 건너뜀" >> "$GITHUB_STEP_SUMMARY"
+            echo "\`CLASPRC_JSON\` / \`SCRIPT_ID\` 시크릿을 등록하면 이 워크플로가 Apps Script 로 자동 반영합니다." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'true'
+        with:
+          node-version: '20'
+
+      - name: clasp 설치
+        if: steps.check.outputs.ready == 'true'
+        run: npm install -g @google/clasp@2.4.2
+
+      - name: 인증 정보 · 대상 프로젝트 준비
+        if: steps.check.outputs.ready == 'true'
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          SCRIPT_ID: ${{ secrets.SCRIPT_ID }}
+        run: |
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+          # scriptId 는 시크릿으로만 다룬다 — 레포에 커밋하지 않는다
+          printf '{"scriptId":"%s","rootDir":"."}\n' "$SCRIPT_ID" > "$PROJECT_DIR/.clasp.json"
+
+      - name: 코드 업로드
+        if: steps.check.outputs.ready == 'true'
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: clasp push -f
+
+      - name: 웹앱 갱신 (배포 ID가 있을 때만)
+        if: steps.check.outputs.ready == 'true' && env.DEPLOYMENT_ID != ''
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: clasp deploy -i "$DEPLOYMENT_ID" -d "$(date '+%Y-%m-%d %H:%M') ${GITHUB_SHA::7}"
+
+      - name: 결과 안내
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          {
+            echo "### Apps Script 반영 완료"
+            echo "- 커밋: \`${GITHUB_SHA::7}\`"
+            if [ -n "$DEPLOYMENT_ID" ]; then
+              echo "- 웹앱: 기존 URL 그대로 갱신됨 (새로고침하면 반영)"
+            else
+              echo "- 웹앱: 코드만 반영. URL에 적용하려면 편집기에서 '배포 관리 → 새 버전'"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

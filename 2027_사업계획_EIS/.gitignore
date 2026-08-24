@@ -1,0 +1,4 @@
+# clasp 인증·프로젝트 식별자 — 절대 커밋하지 않는다
+.clasprc.json
+**/.clasp.json
+node_modules/
