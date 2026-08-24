@@ -539,7 +539,8 @@ function demoData() {
   var P=Math.round;
   return {
     META:{planYear:2027, baseYear:2026, title:'2027 사업계획', company:'대림바스',
-      dept:'경영지원부문 · 기획팀', updated:'로컬 미리보기', authOn:false, note:'표=백만원 · 그래프=억원'},
+      dept:'경영지원부문 · 기획팀', updated:'시트 연결 전', authOn:false, demo:true,
+      note:'표=백만원 · 그래프=억원'},
     BU:BU, BU_ORDER:order, CORP:CORP, TREND_YEARS:ys,
     TREND:{ sales:mk(pS,bS,[1,1,1,1,1]), gp:mk(pG,bG,[0.88,0.92,0.96,1.02,0.99]),
       op:mk(pO,bO,[0.55,0.70,0.86,1.08,0.95]), orders:mk(pS*1.06,bS*1.03,[1,1,1,1,1]),
@@ -1631,6 +1632,16 @@ function authSubmit() {
   document.getElementById('pageFooter').textContent = D.META.title + ' EIS · ' + D.META.company + ' ' + D.META.dept;
   document.title = D.META.title + ' EIS';
   document.getElementById('monBadge').textContent   = '전사 · ' + PY;
+
+  /* 데모 데이터로 돌고 있으면 화면 맨 위에 못 박아 둔다 */
+  if (D.META.demo) {
+    var bar = document.createElement('div');
+    bar.style.cssText = 'background:var(--amber-lt);border-bottom:1px solid #edd9a3;color:#8a6508;'
+      + 'font-size:13px;font-weight:600;padding:9px 40px;';
+    bar.innerHTML = '데모 데이터로 표시 중입니다 — 구글시트를 연결하면 실제 ' + PY + ' 사업계획 숫자로 바뀝니다. '
+      + '<span style="font-weight:400;">화면 구성·기능을 확인하는 용도이며 아래 숫자는 실제 계획이 아닙니다.</span>';
+    document.querySelector('.main-tab-bar').insertAdjacentElement('afterend', bar);
+  }
 
   /* 접근 게이트 (설정!AUTH_ON = Y) */
   var gate = document.getElementById('auth-gate');
