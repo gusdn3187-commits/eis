@@ -1,6 +1,0 @@
-# clasp 는 여기서 허용한 것만 Apps Script 로 올린다.
-# (README·package.json 같은 레포 전용 파일이 딸려 올라가 오류나는 것을 막는다)
-**/**
-!appsscript.json
-!**/*.gs
-!**/*.html

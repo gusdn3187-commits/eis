@@ -540,7 +540,7 @@ function demoData() {
   return {
     META:{planYear:2027, baseYear:2026, title:'2027 사업계획', company:'대림바스',
       dept:'경영지원부문 · 기획팀', updated:'시트 연결 전', authOn:false, demo:true,
-      note:'표=백만원 · 그래프=억원'},
+      note:'표=백만원 · 그래프=억원', version:'1.0.0', built:'2026-08-24'},
     BU:BU, BU_ORDER:order, CORP:CORP, TREND_YEARS:ys,
     TREND:{ sales:mk(pS,bS,[1,1,1,1,1]), gp:mk(pG,bG,[0.88,0.92,0.96,1.02,0.99]),
       op:mk(pO,bO,[0.55,0.70,0.86,1.08,0.95]), orders:mk(pS*1.06,bS*1.03,[1,1,1,1,1]),
@@ -1629,7 +1629,11 @@ function authSubmit() {
   document.getElementById('navBase').textContent    = BY + '년 추정 대비';
   document.getElementById('navUpdated').textContent = D.META.updated;
   document.getElementById('navUnit').textContent    = D.META.note;
-  document.getElementById('pageFooter').textContent = D.META.title + ' EIS · ' + D.META.company + ' ' + D.META.dept;
+  document.getElementById('pageFooter').innerHTML =
+      esc(D.META.title) + ' EIS · ' + esc(D.META.company) + ' ' + esc(D.META.dept)
+    + (D.META.version ? '<span style="margin-left:10px;color:var(--border-strong);">|</span>'
+        + '<span style="margin-left:10px;" title="붙여넣은 Code.gs 의 버전입니다">v' + esc(D.META.version)
+        + (D.META.built ? ' · ' + esc(D.META.built) : '') + '</span>' : '');
   document.title = D.META.title + ' EIS';
   document.getElementById('monBadge').textContent   = '전사 · ' + PY;
 

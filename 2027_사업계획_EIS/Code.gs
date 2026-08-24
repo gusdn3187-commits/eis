@@ -15,6 +15,9 @@
  *   5) 시트 값을 실제 사업계획 숫자로 교체 → 웹앱 새로고침
  ****************************************************************/
 
+var APP_VERSION = '1.0.0';        // 코드 버전 — 화면 오른쪽 아래에 표시된다
+var APP_BUILT   = '2026-08-24';   // 이 코드를 만든 날
+
 var PLAN_YEAR = 2027;     // 계획연도
 var BASE_YEAR = 2026;     // 비교 기준연도(전년 추정)
 var MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
@@ -47,6 +50,30 @@ function doGet(e) {
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
+/* 시트에서 바로 대시보드를 연다 — 웹앱 주소를 따로 적어두지 않아도 되게 */
+function openDashboard() {
+  var ui = SpreadsheetApp.getUi();
+  var url = '';
+  try { url = ScriptApp.getService().getUrl(); } catch (e) {}
+  if (!url) {
+    ui.alert('대시보드 열기',
+      '아직 웹앱으로 배포되지 않았습니다.\n\nApps Script 편집기 → 배포 → 새 배포 → 웹 앱 으로 한 번 배포한 뒤 다시 눌러 주세요.',
+      ui.ButtonSet.OK);
+    return;
+  }
+  var html = HtmlService.createHtmlOutput(
+      '<script>window.open(' + JSON.stringify(url) + ', "_blank"); google.script.host.close();</' + 'script>')
+    .setWidth(120).setHeight(60);
+  ui.showModalDialog(html, '대시보드 여는 중…');
+}
+
+/* 붙여넣은 코드가 최신인지 확인용 */
+function showVersion() {
+  SpreadsheetApp.getUi().alert('코드 버전',
+    'v' + APP_VERSION + '  (' + APP_BUILT + ')\n\n대시보드 화면 오른쪽 아래에도 같은 버전이 표시됩니다.',
+    SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
 /* 사내망에서 CDN이 막히면 Chart.js 를 프로젝트 안에 넣고 이 함수로 끼워 넣는다.
    (Index.html 의 <script src="...chart.umd.js"> 를 <?!= include('chartjs') ?> 로 교체) */
 function include(filename) {
@@ -57,10 +84,13 @@ function include(filename) {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('2027 사업계획')
+    .addItem('대시보드 열기', 'openDashboard')
+    .addSeparator()
     .addItem('시트 초기화 (틀 + 데모데이터)', 'setupSheets')
     .addItem('데모데이터만 다시 채우기', 'seedDemoData')
     .addSeparator()
     .addItem('입력값 점검 (합계·부호 검증)', 'validatePlan')
+    .addItem('코드 버전 확인', 'showVersion')
     .addToUi();
 }
 
@@ -127,7 +157,9 @@ function buildData() {
     dept:     s_(cfg.DEPT)    || '경영지원부문 · 기획팀',
     updated:  asText(cfg.UPDATED) || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy.MM.dd'),
     authOn:   String(cfg.AUTH_ON || 'N').toUpperCase() === 'Y',
-    note:     s_(cfg.NOTE) || '표=백만원 · 그래프=억원'
+    note:     s_(cfg.NOTE) || '표=백만원 · 그래프=억원',
+    version:  APP_VERSION,
+    built:    APP_BUILT
   };
 
   /* 2) 사업부_월별 : 사업부 | 구분(계획/전년) | 지표 | 1~12월 */
