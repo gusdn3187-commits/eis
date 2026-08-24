@@ -12,105 +12,146 @@
 
 ---
 
-## 1. 설치 — 최초 1회 (약 10분)
+## 1. 먼저 알아둘 것
 
-> ⚠️ 이 단계는 **계정 로그인이 필요해 대신 해드릴 수 없습니다.** 아래대로 붙여넣기만 하면 됩니다.
-> 여기만 넘기면 그 뒤 수정은 **2장의 자동 연동**으로 손 댈 일이 없습니다.
+**지금 어떤 구글 계정에도 만들어진 것이 없습니다.** 이 폴더의 파일은 아직 코드일 뿐이고,
+`asdblackwall@gmail.com` 의 구글시트·Apps Script 는 **아래 설치를 하셔야 생깁니다.**
 
-1. `asdblackwall@gmail.com` 으로 로그인 → [sheets.new](https://sheets.new) 로 **새 스프레드시트** 생성
-   - 이름 예: `2027 사업계획 데이터`
-2. 상단 메뉴 **확장 프로그램 → Apps Script**
-3. 왼쪽 파일 목록에서 아래 3개를 만든다
-   | Apps Script 파일 | 이 폴더의 파일 | 만드는 법 |
-   |---|---|---|
-   | `Code.gs` | `Code.gs` | 기본 생성된 `코드.gs` 내용을 지우고 붙여넣기 |
-   | `Index.html` | `Index.html` | `＋ → HTML`, 이름을 **`Index`** 로 (대문자 I) |
-   | `appsscript.json` | `appsscript.json` | 왼쪽 ⚙️ **프로젝트 설정 → "appsscript.json 매니페스트 파일 표시"** 체크 후 붙여넣기 |
-4. 저장(Ctrl+S) → 함수 선택창에서 **`setupSheets`** 고르고 **실행**
-   - 최초 1회 권한 승인 창이 뜬다 → 계정 선택 → *고급* → *(안전하지 않은 페이지)로 이동* → 허용
-   - 시트 12개가 만들어지고 **데모 데이터**가 채워진다
-5. **배포 → 새 배포 → 유형 ⚙️ 웹 앱**
-   - 다음 사용자로 실행: **나**
-   - 액세스 권한: **나만** (기본값). 나중에 임원께 링크로 보여줄 때만 넓히면 된다 → *아래 공유 범위* 참고
-   - **배포** → 나오는 **웹 앱 URL** 이 대시보드 주소다
-6. 시트의 데모 숫자를 **실제 2027 계획 숫자로 덮어쓰고** 웹앱을 새로고침하면 끝
+그리고 구글 로그인은 **사람이 브라우저에서 승인해야만** 됩니다. 대신 눌러드릴 수 없습니다.
+어떤 방식을 고르든 **최초 승인 1회는 직접** 하셔야 하고, 그 뒤로는 손 뗄 수 있습니다.
 
-### 붙여넣기 없이 한 번에 만들기 (clasp)
-터미널이 편하시면 위 1~3번을 명령 네 줄로 대신할 수 있습니다. **스프레드시트와 스크립트가 함께 생성**됩니다.
+### 두 가지 연동 방식 비교
 
-```bash
-npm i -g @google/clasp@2.4.2
-clasp login                                            # asdblackwall@gmail.com 으로 승인
-cd 2027_사업계획_EIS
-clasp create --type sheets --title "2027 사업계획 EIS"   # 시트 + 스크립트 동시 생성
-clasp push -f                                          # Code.gs / Index.html / appsscript.json 업로드
-clasp open                                             # 편집기 열기 → setupSheets 실행 → 배포
-```
-- 미리 [script.google.com/home/usersettings](https://script.google.com/home/usersettings) 에서 **Apps Script API 를 '사용'** 으로 켜 두세요.
-- 이때 생기는 `.clasp.json` 안의 `scriptId` 가 아래 2장에서 쓸 **`SCRIPT_ID`** 입니다.
-- `.clasp.json` 은 `.gitignore` 에 걸려 있어 커밋되지 않습니다.
+| | ① 깃허브 자동 배포 **(권장)** | ② 이 대화에서 직접 인증 |
+|---|---|---|
+| **직접 하는 일** | 설치 스크립트 1회 실행<br>+ 깃허브 시크릿 3개 붙여넣기 | 브라우저 승인 후<br>인증 코드 1줄 붙여넣기 |
+| **걸리는 시간** | 약 10분 (한 번만) | 약 3분 (그때마다) |
+| **인증 정보 보관** | 깃허브 시크릿<br>(암호화·로그에서 자동 마스킹) | 대화 기록 + 임시 작업환경 |
+| **대화 기록에 토큰이 남나** | 안 남음 | **남음** |
+| **얼마나 유지되나** | 계속 | 작업환경이 회수되면 끊김<br>→ 매번 재인증 |
+| **이후 코드 반영** | 푸시하면 30초 뒤 자동 | 인증이 살아 있는 동안만 수동 |
+| **내가 자리에 없을 때** | 그대로 동작 | 동작 안 함 |
+| **되돌리는 법** | 시크릿 삭제 | `clasp logout` |
+| **맞는 경우** | 계속 고쳐 쓸 계획 | 오늘 한 번 보고 말 것 |
 
-### 공유 범위 — 사업계획은 대외비다
-매니페스트 기본값은 `"access": "MYSELF"`(나만)입니다. 링크를 받은 사람이 전부 열 수 있게 하려면
-
-- `appsscript.json` 의 `access` 를 `"ANYONE_ANONYMOUS"` 로 바꾸고 다시 배포하거나, 배포 대화상자에서 *링크가 있는 모든 사용자* 선택
-- 이때는 `설정` 시트의 **`AUTH_ON` 을 `Y`** 로 두어 사번·이름 게이트를 함께 켜는 것을 권합니다(`직원` 시트로 대조)
+**②는 편해 보이지만 계속 쓰기엔 맞지 않습니다.** 이 작업 환경은 일정 시간 뒤 회수되어
+그때마다 다시 승인해야 하고, 인증 정보가 대화 기록에 남습니다.
+아래 ①로 진행하시길 권합니다 — 한 번만 하면 끝입니다.
 
 ---
 
-## 2. 코드 자동 연동 — 이후 수정은 붙여넣기 없이
+## 2. 설치 — 직접 하셔야 하는 부분 (약 10분)
 
-한 번만 연결해 두면 **깃허브에 푸시된 코드가 Apps Script 에 자동 반영**됩니다.
-(레포에서 수정 → `git push` → 30초 뒤 웹앱에 반영)
+### 2-A. 스크립트 한 번 실행 (권장)
 
-### 2-A. 깃허브 자동 배포 (권장)
+준비물: **Node.js** ([nodejs.org](https://nodejs.org) 에서 LTS 설치) 와 **Git**
 
-**① 내 PC에서 clasp 로그인 (한 번만)**
 ```bash
-npm i -g @google/clasp@2.4.2
-clasp login                       # 브라우저가 열리면 asdblackwall@gmail.com 으로 승인
+git clone https://github.com/gusdn3187-commits/eis.git
+cd eis
+git checkout claude/brave-volta-9zpj65
+cd 2027_사업계획_EIS
 ```
-그리고 [script.google.com/home/usersettings](https://script.google.com/home/usersettings) 에서
-**Google Apps Script API 를 '사용'으로** 켭니다. (안 켜면 clasp 가 401 을 냅니다)
 
-**② 값 3개를 깃허브 시크릿에 등록**
+그리고 운영체제에 맞게 한 줄 실행합니다.
+
+| OS | 명령 |
+|---|---|
+| Windows | `powershell -ExecutionPolicy Bypass -File .\setup-windows.ps1` |
+| macOS / Linux | `bash setup-mac.sh` |
+
+**스크립트가 진행하면서 3번 멈춰 섭니다. 그때만 손을 대시면 됩니다.**
+
+| # | 화면에 뜨는 것 | 하실 일 |
+|---|---|---|
+| 1 | 브라우저에 *Apps Script API* 설정 페이지 | 스위치를 **사용**으로 켜고 터미널로 돌아와 **Enter** |
+| 2 | 브라우저에 구글 로그인 창 | **asdblackwall@gmail.com** 선택 → *고급* → *(안전하지 않음)으로 이동* → **허용** |
+| 3 | 깃허브 시크릿 등록 페이지 | 터미널에 출력된 **값 3개**를 등록 (아래 3장) |
+
+스크립트가 끝나면 이만큼이 이미 되어 있습니다.
+- `asdblackwall@gmail.com` 안에 **구글시트 + Apps Script 프로젝트 생성**
+- `Code.gs` / `Index.html` / `appsscript.json` **업로드**
+- **웹앱 배포 완료**, 터미널에 대시보드 주소 출력
+- 깃허브에 넣을 **시크릿 3개** 출력 (`CLASPRC_JSON` 은 클립보드에 자동 복사)
+
+**마지막 한 가지** — 스크립트가 열어준 Apps Script 편집기에서
+함수 선택창에서 **`setupSheets`** 를 고르고 **실행**하세요.
+시트 12개와 데모 데이터가 이때 만들어집니다. (권한 승인 창이 한 번 더 뜹니다)
+
+### 2-B. 스크립트 없이 직접 (대안)
+
+터미널이 부담스러우면 손으로 해도 됩니다.
+
+1. `asdblackwall@gmail.com` 로그인 → [sheets.new](https://sheets.new) 로 새 스프레드시트 생성
+2. **확장 프로그램 → Apps Script**
+3. 파일 3개를 만든다
+   | Apps Script 파일 | 이 폴더의 파일 | 만드는 법 |
+   |---|---|---|
+   | `Code.gs` | `Code.gs` | 기본 `코드.gs` 내용을 지우고 붙여넣기 |
+   | `Index.html` | `Index.html` | `＋ → HTML`, 이름을 **`Index`** 로 (대문자 I) |
+   | `appsscript.json` | `appsscript.json` | ⚙️ **프로젝트 설정 → "appsscript.json 매니페스트 파일 표시"** 체크 후 붙여넣기 |
+4. 저장 → 함수 **`setupSheets`** 실행 (권한 승인 필요)
+5. **배포 → 새 배포 → 웹 앱** → 실행: *나*, 액세스: *나만* → 배포 → **URL 확보**
+
+이 경우에도 3장의 시크릿만 등록하면 이후 자동 연동은 똑같이 됩니다.
+(`SCRIPT_ID` 는 **프로젝트 설정**, `DEPLOYMENT_ID` 는 **배포 → 배포 관리**에서 복사)
+
+### 2-C. 공유 범위 — 사업계획은 대외비다
+
+매니페스트 기본값은 `"access": "MYSELF"`(나만)입니다. 링크 받은 사람이 모두 열게 하려면
+
+- `appsscript.json` 의 `access` 를 `"ANYONE_ANONYMOUS"` 로 바꿔 다시 배포하거나,
+  배포 대화상자에서 *링크가 있는 모든 사용자* 선택
+- 이때는 `설정` 시트의 **`AUTH_ON` 을 `Y`** 로 두어 사번·이름 게이트를 함께 켜시길 권합니다
+  (`직원` 시트에 등록된 사람만 열립니다)
+
+---
+
+## 3. 자동 연동 — 시크릿 3개 등록
+
 레포 → **Settings → Secrets and variables → Actions → New repository secret**
+([바로가기](https://github.com/gusdn3187-commits/eis/settings/secrets/actions/new))
 
 | 시크릿 이름 | 넣을 값 | 어디서 |
 |---|---|---|
-| `CLASPRC_JSON` | `~/.clasprc.json` **파일 내용 전체** | 위 `clasp login` 이 만든 파일<br>`cat ~/.clasprc.json` (Windows: `type %USERPROFILE%\.clasprc.json`) |
-| `SCRIPT_ID` | 스크립트 ID | Apps Script 편집기 → **프로젝트 설정 → 스크립트 ID** |
-| `DEPLOYMENT_ID` | 배포 ID *(선택)* | **배포 → 배포 관리 →** 해당 배포의 **배포 ID** |
+| `CLASPRC_JSON` | `~/.clasprc.json` **파일 내용 전체** | 설치 스크립트가 클립보드에 복사해 둠<br>수동: `cat ~/.clasprc.json` · Windows `type %USERPROFILE%\.clasprc.json` |
+| `SCRIPT_ID` | 스크립트 ID | 스크립트 출력 · Apps Script **프로젝트 설정** |
+| `DEPLOYMENT_ID` | 배포 ID *(선택이지만 권장)* | 스크립트 출력 · **배포 → 배포 관리** |
 
-`DEPLOYMENT_ID` 까지 넣으면 **웹앱 URL 이 바뀌지 않은 채** 새 버전이 올라갑니다.
-비워두면 코드만 반영되고, 웹앱에 적용하려면 편집기에서 *배포 관리 → 새 버전*을 눌러야 합니다.
+등록이 끝나면 이렇게 돕니다.
 
-**③ 끝.** 이후 `2027_사업계획_EIS/` 안의 파일이 바뀌어 푸시되면
-`.github/workflows/deploy-appsscript.yml` 이 알아서 `clasp push` + `clasp deploy` 를 돌립니다.
-진행 상황은 레포 **Actions** 탭에서 봅니다. 수동 실행도 같은 탭의 *Run workflow* 로 됩니다.
-
-> `CLASPRC_JSON` 은 구글 계정 접근 토큰입니다. 깃허브 시크릿(암호화 저장) 외의 곳,
-> 특히 코드·채팅·문서에 붙여넣지 마세요. 유출됐다면 `clasp logout` 후 다시 로그인하면 무효화됩니다.
-
-### 2-B. 내 PC에서 한 줄로 올리기
-
-자동 배포를 안 쓰고 싶으면 이 폴더에서 직접 올려도 됩니다.
-```bash
-cd 2027_사업계획_EIS
-cp .clasp.json.example .clasp.json    # 파일을 열어 scriptId 를 채운다
-npm run push                          # 코드 업로드
-npm run watch                         # (선택) 저장할 때마다 자동 업로드
+```
+여기서 코드 수정  →  git push  →  GitHub Actions  →  clasp push + deploy
+                                                      → 웹앱에 30초 내 반영 (URL 그대로)
 ```
 
-### 2-C. 이 대화에서 바로 올리기
+- 진행 상황은 레포 **Actions** 탭에서 봅니다. 수동 실행은 같은 탭 *Run workflow*.
+- `DEPLOYMENT_ID` 를 비워두면 코드만 반영되고, 웹앱에 적용하려면
+  편집기에서 *배포 관리 → 새 버전*을 눌러야 합니다.
+- 시크릿을 등록하기 전까지 워크플로는 **실패하지 않고 건너뜁니다.**
 
-원하시면 이 세션에서 `clasp login --no-localhost` 로 인증해 제가 직접 올릴 수도 있습니다.
-다만 **인증 코드가 대화 기록에 남고**, 이 작업 환경은 일정 시간 뒤 회수되어 재인증이 필요합니다.
-상시로 쓰실 거라면 **2-A 를 권합니다.**
+> `CLASPRC_JSON` 은 구글 계정 접근 토큰입니다. 깃허브 시크릿 외의 곳
+> — 코드·채팅·문서 — 에 붙여넣지 마세요. 유출 시 `clasp logout` 후 재로그인하면 무효화됩니다.
+
+### 코드와 숫자는 경로가 다릅니다
+
+| 무엇을 바꾸나 | 어디서 | 반영 |
+|---|---|---|
+| 화면 구성·기능 (`Code.gs`, `Index.html`) | 레포 → 푸시 | Actions 가 자동 반영 |
+| **계획 숫자** | **구글시트에서 직접 입력** | 웹앱 **새로고침이면 즉시** (배포 불필요) |
+
+### 내 PC에서 직접 올리고 싶을 때
+
+```bash
+cd 2027_사업계획_EIS
+npm run push     # 코드 업로드
+npm run watch    # 저장할 때마다 자동 업로드
+npm run open     # 편집기 열기
+```
 
 ---
 
-## 3. 시트 구조 — 숫자를 어디에 넣나
+## 4. 시트 구조 — 숫자를 어디에 넣나
 
 **단위 규칙: 시트 입력은 전부 `백만원`(정수).** 화면에서 표는 백만원, 그래프·KPI 카드는 억원으로 자동 환산합니다.
 비율(%)·인원(명)은 그대로 씁니다.
@@ -144,7 +185,7 @@ npm run watch                         # (선택) 저장할 때마다 자동 업�
 
 ---
 
-## 4. 화면 구성
+## 5. 화면 구성
 
 | 탭 | 내용 |
 |---|---|
@@ -160,7 +201,7 @@ npm run watch                         # (선택) 저장할 때마다 자동 업�
 
 ---
 
-## 5. 자주 겪는 문제
+## 6. 자주 겪는 문제
 
 | 증상 | 원인 / 해결 |
 |---|---|
@@ -175,7 +216,7 @@ npm run watch                         # (선택) 저장할 때마다 자동 업�
 
 ---
 
-## 6. 파일
+## 7. 파일
 
 ```
 2027_사업계획_EIS/
@@ -183,6 +224,8 @@ npm run watch                         # (선택) 저장할 때마다 자동 업�
 ├─ Index.html          화면 — 5개 탭, 13개 차트, 표·시뮬레이션 전부 포함(단일 파일)
 ├─ appsscript.json     매니페스트(시간대·웹앱 설정)  ← Apps Script 로 올라가는 건 여기까지 3개
 ├─ .claspignore        위 3개만 올리도록 제한
+├─ setup-windows.ps1   Windows 최초 설치 — 로그인·생성·업로드·배포를 한 번에
+├─ setup-mac.sh        macOS / Linux 최초 설치 (같은 역할)
 ├─ .clasp.json.example scriptId 를 채워 .clasp.json 으로 복사해 쓴다(커밋 안 됨)
 ├─ package.json        npm run push / watch
 └─ README.md           이 문서
