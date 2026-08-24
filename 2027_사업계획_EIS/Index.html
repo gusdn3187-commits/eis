@@ -1321,8 +1321,12 @@ function renderMkt(){
         return '<tr class="lv2"><td class="sticky">'+esc(r.item)+'</td>'
           +'<td style="text-align:center;color:var(--text-3)">'+esc(r.unit)+'</td>'
           +'<td>'+f(r.prev)+'</td><td class="plan">'+f(r.plan)+'</td>'
-          +'<td>'+(d==null?'–':(d<0?'<span class="neg">−'+n1(Math.abs(d))+(isPct?'%p':'')+'</span>'
-              :(d===0?'–':'+'+n1(d)+(isPct?'%p':''))))+'</td>'
+          +'<td>'+(function(){
+              if(d==null||d===0) return '–';
+              /* 비율은 소수 한 자리 %p, 금액은 천 단위 구분 */
+              var t=isPct? n1(Math.abs(d))+'%p' : nf.format(Math.round(Math.abs(d)));
+              return d<0 ? '<span class="neg">△'+t+'</span>' : '+'+t;
+            })()+'</td>'
           +'<td style="text-align:left;color:var(--text-3);white-space:normal;min-width:220px">'+esc(r.note||'')+'</td></tr>';
       }).join('');
   }).join('');
