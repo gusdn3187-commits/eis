@@ -15,7 +15,7 @@
  *   5) 시트 값을 실제 사업계획 숫자로 교체 → 웹앱 새로고침
  ****************************************************************/
 
-var APP_VERSION = '1.0.0';        // 코드 버전 — 화면 오른쪽 아래에 표시된다
+var APP_VERSION = '1.0.1';        // 코드 버전 — 화면 오른쪽 아래에 표시된다
 var APP_BUILT   = '2026-08-24';   // 이 코드를 만든 날
 
 var PLAN_YEAR = 2027;     // 계획연도
@@ -86,8 +86,8 @@ function onOpen() {
     .createMenu('2027 사업계획')
     .addItem('대시보드 열기', 'openDashboard')
     .addSeparator()
-    .addItem('시트 초기화 (틀 + 데모데이터)', 'setupSheets')
-    .addItem('데모데이터만 다시 채우기', 'seedDemoData')
+    .addItem('시트 점검·보강 (비어 있는 것만 채움)', 'setupSheets')
+    .addItem('데모데이터로 되돌리기 (입력값 삭제)', 'resetDemoData')
     .addSeparator()
     .addItem('입력값 점검 (합계·부호 검증)', 'validatePlan')
     .addItem('코드 버전 확인', 'showVersion')
@@ -388,7 +388,8 @@ function setupSheets() {
   sheetOf_(SH.memo, ['키', '항목', '작성자', '내용', '작성일시']);
   sheetOf_(SH.emp,  ['부서', '사번', '이름', '사용여부']);
 
-  seedDemoData();
+  /* 이미 값이 들어 있는 시트는 손대지 않는다 — 이 함수를 몇 번 눌러도 입력값이 지워지지 않게 */
+  var r = seedDemoData(true);
 
   /* 기본 시트('시트1') 정리 */
   var first = ss.getSheets()[0];
@@ -396,18 +397,35 @@ function setupSheets() {
     if (first.getLastRow() === 0) ss.deleteSheet(first);
   }
   ss.setActiveSheet(ss.getSheetByName(SH.cfg));
-  Logger.log('시트 12종 준비 완료 — 데모 데이터가 채워졌습니다. 실제 숫자로 덮어쓰세요.');
+
+  var msg = '시트 12종 준비 완료\n\n'
+    + '· 새로 채운 시트 : ' + r.filled + '개\n'
+    + '· 그대로 둔 시트 : ' + r.kept + '개 (이미 값이 있어 건드리지 않았습니다)';
+  try { SpreadsheetApp.getUi().alert('시트 점검·보강', msg, SpreadsheetApp.getUi().ButtonSet.OK); } catch (e) {}
+  Logger.log(msg);
+  return r;
 }
 
 /* ── 데모 데이터 ──
    실제 계획 수립 전 화면이 비어 보이지 않도록 채워두는 값이다.
    숫자는 전부 시트에서 덮어쓰면 되고, 이 함수를 다시 돌리면 원래 값으로 되돌아간다. */
-function seedDemoData() {
+function seedDemoData(onlyIfEmpty) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var filled = 0, kept = 0;
+
+  /* 건너뛸 시트 자리에 끼워 넣는 대역(代役).
+     아래 채우기 코드를 그대로 두고도 '아무 일도 일어나지 않게' 하려고 둔다. */
+  var noop = { setValues: function () { return this; }, setValue: function () { return this; },
+               setFontWeight: function () { return this; }, setBackground: function () { return this; },
+               setFontColor: function () { return this; } };
+  var SKIP = { getRange: function () { return noop; }, setFrozenRows: function () {} };
+
   var clear = function (name, keepHeader) {
-    var sh = ss.getSheetByName(name); if (!sh) return null;
+    var sh = ss.getSheetByName(name); if (!sh) return SKIP;
     var last = sh.getLastRow();
+    if (onlyIfEmpty && last > (keepHeader ? 1 : 0)) { kept++; return SKIP; }   /* 값이 있으면 보존 */
     if (last > (keepHeader ? 1 : 0)) sh.getRange(keepHeader ? 2 : 1, 1, last - (keepHeader ? 1 : 0), sh.getLastColumn()).clearContent();
+    filled++;
     return sh;
   };
 
@@ -603,5 +621,17 @@ function seedDemoData() {
     ['기획팀', '1003', '이영희', 'Y']
   ]);
 
-  Logger.log('데모 데이터 채움 완료');
+  Logger.log('데모 데이터 — 채운 시트 ' + filled + '개 / 보존한 시트 ' + kept + '개');
+  return { filled: filled, kept: kept };
+}
+
+/* 데모값으로 되돌리기 — 입력한 숫자가 사라지므로 반드시 확인을 받는다 */
+function resetDemoData() {
+  var ui = SpreadsheetApp.getUi();
+  var ans = ui.alert('데모데이터로 되돌리기',
+    '지금까지 입력한 계획 숫자가 모두 지워지고 데모값으로 바뀝니다.\n\n되돌릴 수 없습니다. 계속할까요?',
+    ui.ButtonSet.YES_NO);
+  if (ans !== ui.Button.YES) { ui.alert('취소했습니다. 입력값은 그대로입니다.'); return; }
+  var r = seedDemoData(false);
+  ui.alert('완료', r.filled + '개 시트를 데모값으로 되돌렸습니다.', ui.ButtonSet.OK);
 }
