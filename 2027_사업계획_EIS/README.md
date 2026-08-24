@@ -115,16 +115,72 @@
 
 ## 3. 코드를 새로 받았을 때
 
-기능을 고쳐 새 `Code.gs` / `Index.html` 을 받으시면:
+기능을 고친 새 코드를 받으시면 반영하는 방법이 두 가지입니다.
+
+### 3-A. 붙여넣기 (준비물 없음)
 
 1. Apps Script 편집기에서 해당 파일 열기
-2. **전체 선택(Ctrl+A) → 삭제 → 새 내용 붙여넣기 → 저장**
-3. **배포 → 배포 관리 → ✏️(연필) → 버전: `새 버전` → 배포**
-   (이 단계를 빼먹으면 웹앱 URL은 예전 코드 그대로입니다)
-4. 대시보드 오른쪽 아래 **버전 표기**로 반영됐는지 확인
+2. **Ctrl+A → 삭제 → 새 내용 붙여넣기 → 저장**
+3. **배포 → 배포 관리 → ✏️ → 버전 `새 버전` → 배포**
+4. 대시보드 오른쪽 아래 **버전 표기**가 바뀌었는지 확인
 
-> 바뀐 파일만 붙여넣으면 됩니다. `Code.gs` 만 바뀌었으면 `Index.html` 은 그대로 두세요.
-> 지금 버전은 **v1.0.0 (2026-08-24)** 이고, 시트 메뉴 *코드 버전 확인*으로도 볼 수 있습니다.
+바뀐 파일만 붙여넣으면 됩니다. `Code.gs` 만 바뀌었으면 `Index.html` 은 그대로 두세요.
+
+### 3-B. 스크립트로 자동 반영 (설정 10분, 이후 클릭 한 번)
+
+**무슨 원리인가**
+
+```
+   깃허브 창고            내 PC              구글 Apps Script
+  (코드 보관소)   ──▶  (작업 폴더)   ──▶     (실제 도는 곳)
+                git pull            clasp push
+              최신 코드 받기        올려보내기
+```
+
+- **`git pull`** = 인터넷 창고(깃허브)에 올라온 **최신 파일을 내 PC로 내려받기**
+- **`clasp push`** = 내 PC의 파일을 **구글 Apps Script로 올려보내기**
+- 두 개를 이어 붙이면 *새 코드 → 내 PC → 내 계정 Apps Script* 가 한 번에 끝납니다.
+
+**최초 1회 설정**
+
+준비물: [Node.js](https://nodejs.org) (LTS) 와 [Git](https://git-scm.com/download/win)
+
+```bash
+git clone https://github.com/gusdn3187-commits/eis.git
+cd eis
+git checkout claude/brave-volta-9zpj65
+cd 2027_사업계획_EIS
+```
+
+| OS | 실행 |
+|---|---|
+| Windows | `powershell -ExecutionPolicy Bypass -File .\최초설정_windows.ps1` |
+| macOS | `bash 최초설정_mac.sh` |
+
+스크립트가 **세 번 멈춰 섭니다.**
+
+| # | 물어보는 것 | 하실 일 |
+|---|---|---|
+| 1 | *Apps Script API* 설정 페이지 | 스위치를 **사용**으로 켜고 **Enter** |
+| 2 | 구글 로그인 창 | **asdblackwall@gmail.com** 선택 → 허용 |
+| 3 | **스크립트 ID** / **배포 ID** | Apps Script 편집기에서 복사해 붙여넣기 (아래 위치 참고) |
+
+- **스크립트 ID** : 편집기 왼쪽 **⚙️ 프로젝트 설정 → 스크립트 ID**
+- **배포 ID** *(선택)* : **배포 → 배포 관리 →** 해당 배포의 **배포 ID**
+  넣어두면 웹앱까지 자동 갱신됩니다. 안 넣으면 코드만 올라가고 재배포는 수동입니다.
+
+**이후 평소 사용 — 이 파일만 실행**
+
+| OS | 실행 |
+|---|---|
+| Windows | `powershell -ExecutionPolicy Bypass -File .\업데이트_windows.ps1` |
+| macOS | `bash 업데이트_mac.sh` |
+
+`git pull` → `clasp push` → 웹앱 갱신까지 알아서 하고 끝나면 결과를 알려줍니다.
+**구글 계정 정보는 내 PC 밖으로 나가지 않습니다.**
+
+> 처음 한 번은 `clasp pull` 로 구글에 있는 설정 파일(`appsscript.json`)을 내려받습니다.
+> 이 파일과 `.clasp.json`(스크립트 ID), `.deployid`(배포 ID)는 **내 PC에만** 남고 공유되지 않습니다.
 
 ---
 
@@ -162,11 +218,18 @@
 
 ```
 2027_사업계획_EIS/
-├─ Code.gs      서버 — 시트 읽기(buildData), 시트 초기화(setupSheets),
-│               검토의견, 입력값 점검, 시트 메뉴
-├─ Index.html   화면 — 5개 탭, 13개 차트, 표·시뮬레이션 전부 포함(단일 파일)
-└─ README.md    이 문서
+├─ Code.gs                  서버 — 시트 읽기(buildData), 시트 초기화(setupSheets),
+│                           검토의견, 입력값 점검, 시트 메뉴
+├─ Index.html               화면 — 5개 탭, 13개 차트, 표·시뮬레이션 (단일 파일)
+├─ README.md                이 문서
+│
+├─ 최초설정_windows.ps1     자동 반영을 쓸 때만 — 1회 설정
+├─ 업데이트_windows.ps1     자동 반영을 쓸 때만 — 평소 실행
+├─ 최초설정_mac.sh          (macOS 용)
+└─ 업데이트_mac.sh          (macOS 용)
 ```
+
+붙여넣기 방식(3-A)으로 쓰신다면 **`Code.gs` 와 `Index.html` 두 개만** 있으면 됩니다.
 
 `Index.html` 은 **파일만 열어도** 데모 데이터로 화면이 보이도록 폴백을 갖고 있어,
 설치 전에 구성만 먼저 확인할 수 있습니다.
