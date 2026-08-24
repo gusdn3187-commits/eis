@@ -395,7 +395,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">수익성 추이</span><span class="ch-unit">%</span></div>
-      <div style="position:relative;height:290px"><canvas id="chRate"></canvas></div>
+      <div style="position:relative;height:330px"><canvas id="chRate"></canvas></div>
     </div>
   </div>
 
@@ -817,7 +817,7 @@ function dataLabels(opt){
   opt=opt||{};
   const fmt=opt.fmt||(v=>nf.format(Math.round(v)));
   const off=opt.off==null?7:opt.off;
-  const font=opt.font||'600 11px "Noto Sans KR",sans-serif';
+  const font=opt.font||'600 10.5px "Noto Sans KR",sans-serif';
   return {id:'dl_'+(opt.key||Math.round(off*997)), afterDatasetsDraw(ch){
     const ctx=ch.ctx, area=ch.chartArea, placed=[];
     ctx.save(); ctx.font=font; ctx.textBaseline='middle';
@@ -893,7 +893,9 @@ function dataLabels(opt){
           ta='center'; x=el.x;
           const base=(el.base!=null&&!isNaN(el.base))?el.base:el.y;
           const inside=(typeof opt.inside==='function')?opt.inside(v,i,di):opt.inside;
-          const outY=(v>=0? Math.min(el.y,base) : Math.max(el.y,base)) + (v>=0?-off2:off2);
+          const dn=(typeof opt.below==='function')?opt.below(v,i,di):opt.below;
+          const outY=dn ? Math.max(el.y,base)+off2 
+                        : (v>=0? Math.min(el.y,base) : Math.max(el.y,base)) + (v>=0?-off2:off2);
           let ok=false;
           if(inside){
             const bh=Math.abs(base-el.y);
@@ -1121,7 +1123,10 @@ function renderOverview(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:14}},
       tooltip:{callbacks:{label:c=>c.dataset.label+': '+n1(c.parsed.y)+'%'}}},
       scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,.05)'}}}}),
-    plugins:[dataLabels({key:'rate',off:9,fmt:function(v){return n1(v)+'%';},color:function(v,i,di){return [P.매출총이익률,P.영업이익률,P.당기순이익][di]||'#5A6B85';}})]});
+    plugins:[dataLabels({key:'rate',off:8,minGap:2,fmt:function(v){return n1(v);},
+      font:'700 10.5px "Noto Sans KR",sans-serif',
+      below:function(v,i,di){ return di===2; },   /* 당기순이익률은 아래로 — 영업이익률과 붙어 있다 */
+      color:function(v,i,di){return [P.매출총이익률,P.영업이익률,P.당기순이익][di]||'#5A6B85';}})]});
 }
 
 /* ══════════════ 02 손익추이 ══════════════ */
@@ -1158,7 +1163,7 @@ function renderDivTrend(){
       scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11.5}}},
         y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>nf.format(v)}},
         y1:{position:'right',grid:{display:false},min:-6,max:32,ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'div',lastOnly:true,off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'div',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
 
   /* 표 */
   document.getElementById('divHead').innerHTML='<tr><th class="sticky" style="min-width:110px">구분</th>'
@@ -1295,7 +1300,7 @@ function drawItemTrend(){
       scales:{x:{grid:{display:false}},
         y:{grid:{color:'rgba(0,0,0,.05)'},
            ticks:{callback:function(v){return isPct?v+'%':nf.format(v)+'억';}}}}}),
-    plugins:[dataLabels({key:'itm',lastOnly:true,off:8,
+    plugins:[dataLabels({key:'itm',off:8,
       fmt:function(v){ return isPct?n1(v)+'%':nf.format(Math.round(v)); },
       font:'700 10.5px "Noto Sans KR",sans-serif'})]});
 }
@@ -1360,7 +1365,9 @@ function renderPlan(){
           callbacks:{label:function(c){return c.dataset.label+': '+n1(c.parsed.y)+'%';}}}},
       scales:{x:{grid:{display:false}},
         y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return v+'%';}}}}}),
-    plugins:[dataLabels({key:'mrate',off:9,fmt:function(v){return n1(v);},
+    plugins:[dataLabels({key:'mrate',off:8,minGap:2,fmt:function(v){return n1(v);},
+      below:function(v,i,di){ return di===1; },
+      font:'700 10.5px "Noto Sans KR",sans-serif',
       color:function(v,i,di){ return di===0?'#1F3864':'#6F55C8'; }})]});
 }
 let segOn=null;
@@ -1381,8 +1388,10 @@ function drawMonthOne(metric){
       scales:{x:{grid:{display:false}},
         y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v2=>nf.format(v2)+'억'}},
         y1:{position:'right',grid:{display:false},ticks:{callback:v2=>nf.format(v2)+'억',font:{size:11}}}}}),
-    plugins:[dataLabels({key:'m'+metric,off:6,fmt:x=>n1(x),
-      font:'600 10.5px "Noto Sans KR",sans-serif',color:'#16233B'})]});
+    plugins:[dataLabels({key:'m'+metric,off:5,minGap:2,
+      inside:function(v,i,di){ return di===0; }, insideColor:'#fff',
+      fmt:function(x){ return n1(x); },
+      font:'700 10.5px "Noto Sans KR",sans-serif',color:'#16233B'})]});
   const mx=v.indexOf(Math.max.apply(null,v)), mn=v.indexOf(Math.min.apply(null,v));
   const el=document.getElementById('note_'+metric);
   if(el) el.innerHTML='연간 <b>'+n1(cum[11])+'억</b> · 월평균 <b>'+n1(cum[11]/12)+'억</b>. '
@@ -1622,9 +1631,10 @@ function renderSens(){
           label:function(c){return '영업이익 '+n1(c.parsed.y)+'억 · 매출 '+nf.format(curS[c.dataIndex])+'억';}}}},
       scales:{x:{grid:{display:false},title:{display:true,text:'매출 달성률',font:{size:11.5}}},
         y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return nf.format(v)+'억';}}}}}),
-    plugins:[dataLabels({key:'cur',off:10,
-      fmt:function(v,i){ return (i%2===0||i===hereIdx)?n0(v):''; },
-      color:function(v,i){ return i===hereIdx?'#16233B':'#8A97AB'; }})]});
+    plugins:[dataLabels({key:'cur',off:10,minGap:2,
+      fmt:function(v){ return n0(v); },
+      color:function(v,i){ return i===hereIdx?'#16233B':'#8A97AB'; },
+      font:'700 10.5px "Noto Sans KR",sans-serif'})]});
   document.getElementById('curveNote').innerHTML=
     '현재 <b>'+n1(sensLv.sales)+'%</b> 달성 시 영업이익 <b>'+n1(now.O)+'억</b>. '
     +'달성률이 <b>1%p</b> 움직이면 영업이익은 <b>'
@@ -1699,7 +1709,7 @@ function renderMkt(){
       tooltip:{callbacks:{label:c=>c.dataset.label+': '+n1(c.parsed.y)+'만'}}},
       scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+'만'}},
         y1:{position:'right',grid:{display:false},ticks:{callback:v=>v+'만',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'house',lastOnly:true,off:8,fmt:function(v){return n1(v);}})]});
+    plugins:[dataLabels({key:'house',off:8,fmt:function(v){return n1(v);}})]});
 
   draw('chFx',{type:'bar',
     data:{labels:Y,datasets:[
@@ -1709,7 +1719,7 @@ function renderMkt(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{grid:{display:false}},y:{min:900,ticks:{callback:v=>nf.format(v)}},
         y1:{position:'right',grid:{display:false},min:0,max:5,ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'fx',lastOnly:true,off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'fx',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
 
   draw('chRaw',{type:'line',
     data:{labels:Y,datasets:[
@@ -1718,7 +1728,7 @@ function renderMkt(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>nf.format(v)}},
         y1:{position:'right',grid:{display:false},ticks:{callback:v=>nf.format(v),font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'raw',lastOnly:true,off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'raw',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
 
   document.getElementById('mktHead').innerHTML='<tr><th class="sticky" style="min-width:150px">항목</th><th>단위</th>'
     +Y.map(y=>'<th'+(String(y).indexOf('(P)')>=0?' class="plan-h"':'')+'>'+esc(y)+'</th>').join('')+'</tr>';
@@ -1758,7 +1768,7 @@ function drawPeer(){
         layout:{padding:{top:20,right:34}},
         scales:{x:{grid:{display:false},ticks:{font:{size:11}}},
           y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>isPct?v+'%':nf.format(v),font:{size:11}}}}}),
-      plugins:[dataLabels({key:id,lastOnly:true,off:7,
+      plugins:[dataLabels({key:id,off:7,
         fmt:function(v){ return isPct?n1(v)+'%':nf.format(Math.round(v)); },
         font:'700 10.5px "Noto Sans KR",sans-serif'})]});
   };
@@ -1778,7 +1788,7 @@ function renderAsset(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>nf.format(v/1000)+'천'}},
         y1:{position:'right',grid:{display:false},min:0,max:1,ticks:{font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'ar',lastOnly:true,off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'ar',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
   draw('chINV',{type:'bar',
     data:{labels:Y,datasets:[
       {label:'제품',data:g('재고자산','제품'),backgroundColor:P.바스,stack:'i',...BAR},
@@ -1789,7 +1799,7 @@ function renderAsset(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>nf.format(v/1000)+'천'}},
         y1:{position:'right',grid:{display:false},min:0,max:1,ticks:{font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'inv',lastOnly:true,off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'inv',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
 
   document.getElementById('arHead').innerHTML='<tr><th class="sticky" style="min-width:160px">항목</th>'
     +Y.map(y=>'<th'+(String(y).indexOf('(P)')>=0?' class="plan-h"':'')+'>'+esc(y)+'</th>').join('')+'</tr>';
@@ -2028,7 +2038,7 @@ function detDraw(){
         y:{display:anyAmt,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return nf.format(v);}}},
         y1:{display:anyPct,position:anyAmt?'right':'left',grid:{display:!anyAmt,color:'rgba(0,0,0,.05)'},
             ticks:{callback:function(v){return v+'%';},font:{size:11}}}}}),
-    plugins:[dataLabels({key:'dy',off:8,lastOnly:!single,
+    plugins:[dataLabels({key:'dy',off:8,
       fmt:function(v,i,di){ const nm=single?rows[0].name:rows[di].name;
         return isPct(nm)?n1(v)+'%':nf.format(Math.round(v)); },
       color:function(v,i,di){ return single?'#5A6B85':colOf(rows[di].name); },
@@ -2062,7 +2072,7 @@ function detDraw(){
         y:{display:anyAmt||single,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return nf.format(v);}}},
         y1:{display:anyPct&&!single,position:'right',grid:{display:false},
             ticks:{callback:function(v){return v+'%';},font:{size:11}}}}}),
-    plugins:[dataLabels({key:'dm',off:6,lastOnly:!single,
+    plugins:[dataLabels({key:'dm',off:6,
       fmt:function(v,i,di){ const nm=single?rows[0].name:rows[di].name;
         return isPct(nm)?n1(v)+'%':nf.format(Math.round(v)); },
       color:function(v,i,di){ return single?'#5A6B85':colOf(rows[di].name); },
