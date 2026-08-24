@@ -1,4 +1,0 @@
-# 아래는 각자 PC에만 있는 파일이라 공유하지 않는다
-.clasp.json      # 내 Apps Script 프로젝트 ID
-.deployid        # 내 웹앱 배포 ID
-appsscript.json  # clasp pull 로 구글에서 내려받은 매니페스트

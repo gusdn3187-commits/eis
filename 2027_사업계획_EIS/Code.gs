@@ -1,637 +1,412 @@
 /***** 2027 사업계획 EIS — 구글시트 연동 Apps Script *****
- * 기존 '경영지원부문 KPI(EIS)'와 완전히 별개인 독립 프로젝트다.
- * 그쪽 시트/스크립트는 건드리지 않는다 — 코드 작성 방식만 참고했다.
+ * 2026년 사업계획서(PPT)와 '2026사업계획 양식정비v2' 엑셀의 구성을 그대로 옮긴 대시보드다.
+ * 기존 '경영지원부문 KPI(EIS)' 시트·스크립트는 건드리지 않는다.
  *
- * ── 단위 규칙 (헷갈리면 여기부터 볼 것) ──
- *   시트 입력 = 백만원 (정수).  서버는 변환하지 않고 백만원 그대로 넘긴다.
- *   화면에서 표는 백만원, 그래프·KPI 카드는 억원(÷100)으로 표시한다.
- *   비율(%)·인원(명)·건수는 단위 변환 없이 그대로 쓴다.
+ * ── 단위 규칙 ──
+ *   02_월별손익 = 백만원,  그 외 금액 시트 = 억원 (원문 서식과 동일)
+ *   화면 표는 시트 단위 그대로, 그래프는 억원으로 환산해 그린다.
  *
- * ── 최초 설치 순서 ──
- *   1) 새 구글시트 생성 → 확장 프로그램 > Apps Script
- *   2) Code.gs / Index.html 붙여넣기 (appsscript.json 매니페스트도 표시해서 교체)
- *   3) 편집기에서 setupSheets() 1회 실행 (시트 12개 생성 + 데모 데이터)
- *   4) 배포 > 새 배포 > 웹 앱 (실행: 나, 액세스: 조직 또는 링크가 있는 모든 사용자)
- *   5) 시트 값을 실제 사업계획 숫자로 교체 → 웹앱 새로고침
+ * ── 최초 설치 ──
+ *   1) 새 구글시트 > 확장 프로그램 > Apps Script
+ *   2) Code.gs / Index.html 붙여넣기
+ *   3) setupSheets() 1회 실행 → 시트 12개 + 2026 사업계획 실데이터 + 2027 계획(가정) 생성
+ *   4) 배포 > 새 배포 > 웹 앱
  ****************************************************************/
 
-var APP_VERSION = '1.0.1';        // 코드 버전 — 화면 오른쪽 아래에 표시된다
-var APP_BUILT   = '2026-08-24';   // 이 코드를 만든 날
+var APP_VERSION = '2.0.0';
+var APP_BUILT   = '2026-08-24';
 
-var PLAN_YEAR = 2027;     // 계획연도
-var BASE_YEAR = 2026;     // 비교 기준연도(전년 추정)
+var PLAN_YEAR = 2027;   // 계획연도
+var BASE_YEAR = 2026;   // 직전연도(예상)
 var MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 
-/* 시트 이름 — 이름을 바꾸려면 여기만 고치면 된다 */
 var SH = {
-  cfg:    '설정',
-  bu:     '사업부_월별',
-  corp:   '전사_월별',
-  trend:  '연도추이',
-  pl:     '손익구조',
-  assum:  '전제조건',
-  task:   '추진과제',
-  capex:  '투자계획',
-  hc:     '인원계획',
-  scen:   '시나리오',
-  memo:   '검토의견',
-  emp:    '직원'
+  cfg:'설정', sum:'01_손익요약', pl:'02_월별손익', div:'03_부문별추이', item:'04_품목별추이',
+  ar:'05_채권재고', mkt:'06_시장동향', peer:'07_동종사', capex:'08_투자계획',
+  sens:'09_민감도가정', memo:'10_검토의견', emp:'직원'
 };
 
-/* ══════════════════════════════════════════
-   웹앱 진입
-══════════════════════════════════════════ */
+/* 원문(2026 사업계획서) 색상 — 화면 전체가 이 팔레트를 따른다 */
+var PALETTE = {
+  바스:'#9DC3E6', BK:'#F4B183', CARE:'#FFD966',
+  매출총이익률:'#2E5FA3', 영업이익률:'#7030A0', 당기순이익:'#FF0000',
+  계획:'#FFD966', 실적:'#9DC3E6', 예상:'#BFBFBF'
+};
+
+/* ══════════════ 웹앱 ══════════════ */
 function doGet(e) {
   var t = HtmlService.createTemplateFromFile('Index');
   t.DATA_JSON = JSON.stringify(buildData());
-  return t.evaluate()
-    .setTitle(PLAN_YEAR + ' 사업계획 EIS')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0')
+  return t.evaluate().setTitle(PLAN_YEAR + ' 사업계획 EIS')
+    .addMetaTag('viewport','width=device-width, initial-scale=1.0')
     .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
-/* 시트에서 바로 대시보드를 연다 — 웹앱 주소를 따로 적어두지 않아도 되게 */
-function openDashboard() {
-  var ui = SpreadsheetApp.getUi();
-  var url = '';
-  try { url = ScriptApp.getService().getUrl(); } catch (e) {}
-  if (!url) {
-    ui.alert('대시보드 열기',
-      '아직 웹앱으로 배포되지 않았습니다.\n\nApps Script 편집기 → 배포 → 새 배포 → 웹 앱 으로 한 번 배포한 뒤 다시 눌러 주세요.',
-      ui.ButtonSet.OK);
-    return;
-  }
-  var html = HtmlService.createHtmlOutput(
-      '<script>window.open(' + JSON.stringify(url) + ', "_blank"); google.script.host.close();</' + 'script>')
-    .setWidth(120).setHeight(60);
-  ui.showModalDialog(html, '대시보드 여는 중…');
-}
-
-/* 붙여넣은 코드가 최신인지 확인용 */
-function showVersion() {
-  SpreadsheetApp.getUi().alert('코드 버전',
-    'v' + APP_VERSION + '  (' + APP_BUILT + ')\n\n대시보드 화면 오른쪽 아래에도 같은 버전이 표시됩니다.',
-    SpreadsheetApp.getUi().ButtonSet.OK);
-}
-
-/* 사내망에서 CDN이 막히면 Chart.js 를 프로젝트 안에 넣고 이 함수로 끼워 넣는다.
-   (Index.html 의 <script src="...chart.umd.js"> 를 <?!= include('chartjs') ?> 로 교체) */
-function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
-}
-
-/* 스프레드시트 상단 커스텀 메뉴 — 운영자가 편집기에 들어가지 않아도 되게 */
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('2027 사업계획')
-    .addItem('대시보드 열기', 'openDashboard')
+  SpreadsheetApp.getUi().createMenu(PLAN_YEAR + ' 사업계획')
+    .addItem('대시보드 열기','openDashboard')
     .addSeparator()
-    .addItem('시트 점검·보강 (비어 있는 것만 채움)', 'setupSheets')
-    .addItem('데모데이터로 되돌리기 (입력값 삭제)', 'resetDemoData')
+    .addItem('시트 점검·보강 (비어 있는 것만 채움)','setupSheets')
+    .addItem('원본 데이터로 되돌리기 (입력값 삭제)','resetSeedData')
     .addSeparator()
-    .addItem('입력값 점검 (합계·부호 검증)', 'validatePlan')
-    .addItem('코드 버전 확인', 'showVersion')
+    .addItem('입력값 점검 (합계·부호 검증)','validatePlan')
+    .addItem('코드 버전 확인','showVersion')
     .addToUi();
 }
+function openDashboard() {
+  var ui = SpreadsheetApp.getUi(), url='';
+  try { url = ScriptApp.getService().getUrl(); } catch(e){}
+  if (!url) { ui.alert('대시보드 열기','아직 웹앱으로 배포되지 않았습니다.\n\n배포 > 새 배포 > 웹 앱 으로 한 번 배포한 뒤 다시 눌러 주세요.',ui.ButtonSet.OK); return; }
+  ui.showModalDialog(HtmlService.createHtmlOutput(
+    '<script>window.open('+JSON.stringify(url)+',"_blank");google.script.host.close();</'+'script>')
+    .setWidth(120).setHeight(60), '대시보드 여는 중…');
+}
+function showVersion() {
+  var ui=SpreadsheetApp.getUi();
+  ui.alert('코드 버전','v'+APP_VERSION+'  ('+APP_BUILT+')\n\n대시보드 오른쪽 아래에도 같은 버전이 표시됩니다.',ui.ButtonSet.OK);
+}
 
-/* ══════════════════════════════════════════
-   공용 헬퍼 (기존 EIS와 같은 방식)
-══════════════════════════════════════════ */
-function readRows(name) {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
-  if (!sh) return [];
-  if (sh.getLastRow() < 1) return [];
+/* ══════════════ 공용 헬퍼 ══════════════ */
+function readRows(name){
+  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(name);
+  if(!sh || sh.getLastRow()<1) return [];
   return sh.getDataRange().getValues();
 }
-/* 문자열/삼각(△)/콤마 섞인 셀을 숫자로. 빈칸은 null */
-function pv(v) {
-  if (v === '' || v === null || v === undefined) return null;
-  if (typeof v === 'number') return v;
-  var s = String(v).trim().replace(/,/g, '').replace(/%/g, '');
-  if (s === '') return null;
-  var neg = false;
-  if (s.charAt(0) === '△' || s.charAt(0) === '▲' || s.charAt(0) === '-') { neg = true; s = s.substring(1).trim(); }
-  var n = Number(s);
-  return isNaN(n) ? null : (neg ? -n : n);
+function pv(v){
+  if(v===''||v===null||v===undefined) return null;
+  if(typeof v==='number') return v;
+  var s=String(v).trim().replace(/,/g,'').replace(/%/g,'');
+  if(s==='') return null;
+  var neg=false, c=s.charAt(0);
+  if(c==='△'||c==='▲'||c==='-'){ neg=true; s=s.substring(1).trim(); }
+  var n=Number(s);
+  return isNaN(n)?null:(neg?-n:n);
 }
-function s_(v) { return (v === null || v === undefined) ? '' : String(v).trim(); }
-function asText(v) {
-  if (v instanceof Date) return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy.MM.dd');
+function s_(v){ return (v===null||v===undefined)?'':String(v).trim(); }
+function asText(v){
+  if(v instanceof Date) return Utilities.formatDate(v,Session.getScriptTimeZone(),'yyyy.MM.dd');
   return s_(v);
 }
-function sum_(arr) {
-  var t = 0, has = false;
-  for (var i = 0; i < (arr || []).length; i++) { if (arr[i] != null) { t += arr[i]; has = true; } }
-  return has ? t : null;
-}
-function sheetOf_(name, headers) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sh = ss.getSheetByName(name);
-  if (!sh) sh = ss.insertSheet(name);
-  if (headers && headers.length) {
-    sh.getRange(1, 1, 1, headers.length).setValues([headers])
-      .setFontWeight('bold').setBackground('#1a4a8a').setFontColor('#ffffff');
+function sheetOf_(name, headers){
+  var ss=SpreadsheetApp.getActiveSpreadsheet(), sh=ss.getSheetByName(name);
+  if(!sh) sh=ss.insertSheet(name);
+  if(headers && headers.length){
+    sh.getRange(1,1,1,headers.length).setValues([headers])
+      .setFontWeight('bold').setBackground('#7F7F7F').setFontColor('#FFFFFF');
     sh.setFrozenRows(1);
   }
   return sh;
 }
-
-/* ══════════════════════════════════════════
-   buildData — 시트 → 화면 데이터 한 덩어리
-══════════════════════════════════════════ */
-function buildData() {
-  var out = {};
-
-  /* 1) 설정 */
-  var cfg = {};
-  var cr = readRows(SH.cfg);
-  for (var r = 1; r < cr.length; r++) {
-    var k = s_(cr[r][0]); if (!k) continue;
-    cfg[k] = (cr[r][1] instanceof Date) ? asText(cr[r][1]) : cr[r][1];
+/* 연도 헤더가 붙는 시트 → [라벨...] 로 만들어 준다 */
+function yearHeads_(from,to,markPlan){
+  var a=[];
+  for(var y=from;y<=to;y++){
+    a.push(y===PLAN_YEAR ? (y+'(P)') : (y===BASE_YEAR ? (y+'(E)') : String(y)));
   }
-  out.META = {
-    planYear: Number(cfg.PLAN_YEAR || PLAN_YEAR),
-    baseYear: Number(cfg.BASE_YEAR || BASE_YEAR),
-    title:    s_(cfg.TITLE)   || (PLAN_YEAR + ' 사업계획'),
-    company:  s_(cfg.COMPANY) || '대림바스',
-    dept:     s_(cfg.DEPT)    || '경영지원부문 · 기획팀',
-    updated:  asText(cfg.UPDATED) || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy.MM.dd'),
-    authOn:   String(cfg.AUTH_ON || 'N').toUpperCase() === 'Y',
-    note:     s_(cfg.NOTE) || '표=백만원 · 그래프=억원',
-    version:  APP_VERSION,
-    built:    APP_BUILT
+  return a;
+}
+
+/* ══════════════ buildData ══════════════ */
+function buildData(){
+  var out={};
+
+  /* 설정 */
+  var cfg={}, cr=readRows(SH.cfg);
+  for(var r=1;r<cr.length;r++){ var k=s_(cr[r][0]); if(k) cfg[k]=(cr[r][1] instanceof Date)?asText(cr[r][1]):cr[r][1]; }
+  out.META={
+    planYear:Number(cfg.PLAN_YEAR||PLAN_YEAR), baseYear:Number(cfg.BASE_YEAR||BASE_YEAR),
+    title:s_(cfg.TITLE)||(PLAN_YEAR+'년 사업계획'), company:s_(cfg.COMPANY)||'대림바스',
+    dept:s_(cfg.DEPT)||'경영지원부문 · 기획팀',
+    updated:asText(cfg.UPDATED)||Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy.MM.dd'),
+    authOn:String(cfg.AUTH_ON||'N').toUpperCase()==='Y',
+    version:APP_VERSION, built:APP_BUILT, palette:PALETTE
   };
 
-  /* 2) 사업부_월별 : 사업부 | 구분(계획/전년) | 지표 | 1~12월 */
-  var BU = {}, buOrder = [];
-  var br = readRows(SH.bu);
-  for (var r2 = 1; r2 < br.length; r2++) {
-    var bu = s_(br[r2][0]), gubun = s_(br[r2][1]), metric = s_(br[r2][2]);
-    if (!bu || !metric) continue;
-    if (!BU[bu]) { BU[bu] = {}; buOrder.push(bu); }
-    var arr = [];
-    for (var m = 0; m < 12; m++) arr.push(pv(br[r2][3 + m]));
-    var key = (gubun === '전년') ? (metric + '_prev') : metric;
-    BU[bu][key] = arr;
-  }
-  out.BU = BU;
-  out.BU_ORDER = buOrder;
+  /* 01 손익요약 : 레벨 | 항목 | 2024 | 2025 | 2026(E) | 2027(P)  [억원] */
+  out.SUMMARY=_objs_(SH.sum,['level','item','y1','y2','y3','y4'],{num:['level','y1','y2','y3','y4']});
 
-  /* 3) 전사_월별 : 구분 | 지표 | 1~12월  (수주·판관비 등 전사 직접 입력분) */
-  var CORP = {};
-  var qr = readRows(SH.corp);
-  for (var r3 = 1; r3 < qr.length; r3++) {
-    var g3 = s_(qr[r3][0]), m3 = s_(qr[r3][1]);
-    if (!m3) continue;
-    var a3 = [];
-    for (var mm = 0; mm < 12; mm++) a3.push(pv(qr[r3][2 + mm]));
-    CORP[(g3 === '전년') ? (m3 + '_prev') : m3] = a3;
+  /* 02 월별손익 : 대|중|소 | 4개연도 | 1~12월  [백만원] */
+  var pr=readRows(SH.pl), PL=[];
+  for(var r2=1;r2<pr.length;r2++){
+    var l1=s_(pr[r2][0]), l2=s_(pr[r2][1]), l3=s_(pr[r2][2]);
+    if(!l1 && !l2 && !l3) continue;
+    var m=[]; for(var i=0;i<12;i++) m.push(pv(pr[r2][7+i]));
+    PL.push({l1:l1,l2:l2,l3:l3,name:(l3||l2||l1),
+      y1:pv(pr[r2][3]),y2:pv(pr[r2][4]),y3:pv(pr[r2][5]),y4:pv(pr[r2][6]),m:m});
   }
-  /* 손익 4종은 사업부 합계를 정본으로 쓴다 — 전사 시트와 어긋나 두 숫자가 도는 일을 막는다 */
-  ['sales','cogs','gp','sgna','op'].forEach(function (k) {
-    CORP[k]           = _sumBU_(BU, buOrder, k);
-    CORP[k + '_prev'] = _sumBU_(BU, buOrder, k + '_prev');
-  });
-  out.CORP = CORP;
+  out.PL=PL;
 
-  /* 4) 연도추이 : 지표 | 연도별 값 (1행 = 연도 헤더) */
-  var tyears = [], TREND = {};
-  var tr = readRows(SH.trend);
-  if (tr.length) {
-    for (var c4 = 1; c4 < tr[0].length; c4++) { var y4 = pv(tr[0][c4]); if (y4 != null) tyears.push(y4); }
-    for (var r4 = 1; r4 < tr.length; r4++) {
-      var k4 = s_(tr[r4][0]); if (!k4) continue;
-      var a4 = [];
-      for (var i4 = 0; i4 < tyears.length; i4++) a4.push(pv(tr[r4][1 + i4]));
-      TREND[k4] = a4;
+  /* 03 부문별추이 : 지표 | 2010~2027  [억원] */
+  var dv=readRows(SH.div), DIV={}, DY=[];
+  if(dv.length){
+    for(var c=1;c<dv[0].length;c++){ var h=s_(dv[0][c]); if(h) DY.push(h); }
+    for(var r3=1;r3<dv.length;r3++){
+      var k3=s_(dv[r3][0]); if(!k3) continue;
+      var a3=[]; for(var i3=0;i3<DY.length;i3++) a3.push(pv(dv[r3][1+i3]));
+      DIV[k3]=a3;
     }
   }
-  out.TREND_YEARS = tyears;
-  out.TREND = TREND;
+  out.DIV_YEARS=DY; out.DIV=DIV;
 
-  /* 5) 손익구조 : 레벨 | 항목 | 전년 | 계획 | 비고 */
-  out.PL = _rowsToObjs_(SH.pl, ['level', 'item', 'prev', 'plan', 'note'], { num: ['level', 'prev', 'plan'] });
+  /* 04 품목별추이 : 품목 | 지표 | 연도... [억원] */
+  var it=readRows(SH.item), ITEM={}, IY=[], IORDER=[];
+  if(it.length){
+    for(var c4=2;c4<it[0].length;c4++){ var h4=s_(it[0][c4]); if(h4) IY.push(h4); }
+    for(var r4=1;r4<it.length;r4++){
+      var nm=s_(it[r4][0]), mk=s_(it[r4][1]); if(!nm||!mk) continue;
+      if(!ITEM[nm]){ ITEM[nm]={}; IORDER.push(nm); }
+      var a4=[]; for(var i4=0;i4<IY.length;i4++) a4.push(pv(it[r4][2+i4]));
+      ITEM[nm][mk]=a4;
+    }
+  }
+  out.ITEM_YEARS=IY; out.ITEM=ITEM; out.ITEM_ORDER=IORDER;
 
-  /* 6) 전제조건 : 구분 | 항목 | 단위 | 전년 | 계획 | 비고 */
-  out.ASSUM = _rowsToObjs_(SH.assum, ['cat', 'item', 'unit', 'prev', 'plan', 'note'], { num: ['prev', 'plan'] });
+  /* 05 채권재고 : 구분 | 항목 | 연도... */
+  out.AR=_grouped_(SH.ar);
+  /* 06 시장동향 : 구분 | 항목 | 단위 | 연도... */
+  var mk2=readRows(SH.mkt), MKT={}, MORDER=[], MY=[];
+  if(mk2.length){
+    for(var c6=3;c6<mk2[0].length;c6++){ var h6=s_(mk2[0][c6]); if(h6) MY.push(h6); }
+    for(var r6=1;r6<mk2.length;r6++){
+      var g6=s_(mk2[r6][0]), i6=s_(mk2[r6][1]); if(!i6) continue;
+      if(!MKT[g6]){ MKT[g6]=[]; MORDER.push(g6); }
+      var a6=[]; for(var k6=0;k6<MY.length;k6++) a6.push(pv(mk2[r6][3+k6]));
+      MKT[g6].push({item:i6, unit:s_(mk2[r6][2]), v:a6});
+    }
+  }
+  out.MKT_YEARS=MY; out.MKT=MKT; out.MKT_ORDER=MORDER;
 
-  /* 7) 추진과제 : 부문 | 과제 | KPI | 목표 | 담당 | 일정 | 기대효과 | 비고 */
-  out.TASKS = _rowsToObjs_(SH.task, ['div', 'name', 'kpi', 'goal', 'owner', 'when', 'effect', 'note'], { num: ['effect'] });
+  /* 07 동종사 : 그룹 | 회사 | 지표 | 연도... */
+  var pe=readRows(SH.peer), PEER={}, PORDER=[], PY=[];
+  if(pe.length){
+    for(var c7=3;c7<pe[0].length;c7++){ var h7=s_(pe[0][c7]); if(h7) PY.push(h7); }
+    for(var r7=1;r7<pe.length;r7++){
+      var g7=s_(pe[r7][0]), co=s_(pe[r7][1]), mt=s_(pe[r7][2]);
+      if(!g7||!co||!mt) continue;
+      if(!PEER[g7]){ PEER[g7]={_order:[]}; PORDER.push(g7); }
+      if(!PEER[g7][co]){ PEER[g7][co]={}; PEER[g7]._order.push(co); }
+      var a7=[]; for(var k7=0;k7<PY.length;k7++) a7.push(pv(pe[r7][3+k7]));
+      PEER[g7][co][mt]=a7;
+    }
+  }
+  out.PEER_YEARS=PY; out.PEER=PEER; out.PEER_ORDER=PORDER;
 
-  /* 8) 투자계획 : 구분 | 투자명 | 금액 | 시기 | 목적 | 비고 */
-  out.CAPEX = _rowsToObjs_(SH.capex, ['cat', 'name', 'amt', 'when', 'purpose', 'note'], { num: ['amt'] });
+  /* 08 투자계획 */
+  out.CAPEX=_objs_(SH.capex,
+    ['div','name','grade','life','m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12','total','carry','year','next'],
+    {num:['life','m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12','total','carry','year','next']});
 
-  /* 9) 인원계획 : 부문 | 전년말 | 계획 | 비고 */
-  out.HC = _rowsToObjs_(SH.hc, ['div', 'prev', 'plan', 'note'], { num: ['prev', 'plan'] });
+  /* 09 민감도가정 */
+  out.SENS=_objs_(SH.sens,['key','label','delta','unit','base','note'],{num:['delta','base']});
 
-  /* 10) 시나리오 : 시나리오 | 매출 | 매출총이익 | 영업이익 | 확률 | 전제 */
-  out.SCEN = _rowsToObjs_(SH.scen, ['name', 'sales', 'gp', 'op', 'prob', 'note'], { num: ['sales', 'gp', 'op', 'prob'] });
-
-  /* 11) 검토의견 */
-  out.MEMO = getComments();
-
+  /* 10 검토의견 */
+  out.MEMO=getComments();
   return out;
 }
 
-/* 사업부 전체를 월별로 합산 — 값이 하나도 없는 월은 null 유지 */
-function _sumBU_(BU, order, key) {
-  var out = [];
-  for (var m = 0; m < 12; m++) {
-    var t = 0, has = false;
-    for (var i = 0; i < order.length; i++) {
-      var a = BU[order[i]][key];
-      if (a && a[m] != null) { t += a[m]; has = true; }
-    }
-    out.push(has ? Math.round(t * 10) / 10 : null);
+/* 구분 | 항목 | 연도... 형태 → {구분:[{item,v[]}]} + 연도 헤더 */
+function _grouped_(name){
+  var rows=readRows(name), out={_years:[],_order:[]};
+  if(!rows.length) return out;
+  for(var c=2;c<rows[0].length;c++){ var h=s_(rows[0][c]); if(h) out._years.push(h); }
+  for(var r=1;r<rows.length;r++){
+    var g=s_(rows[r][0]), i=s_(rows[r][1]); if(!i) continue;
+    if(!out[g]){ out[g]=[]; out._order.push(g); }
+    var a=[]; for(var k=0;k<out._years.length;k++) a.push(pv(rows[r][2+k]));
+    out[g].push({item:i,v:a});
   }
   return out;
 }
-
-/* 표 형태 시트 → 객체 배열. opt.num 에 적은 열만 숫자로 바꾼다 */
-function _rowsToObjs_(name, keys, opt) {
-  opt = opt || {};
-  var numSet = {};
-  (opt.num || []).forEach(function (k) { numSet[k] = true; });
-  var rows = readRows(name), out = [];
-  for (var r = 1; r < rows.length; r++) {
-    var blank = true;
-    for (var c = 0; c < keys.length; c++) { if (s_(rows[r][c]) !== '') { blank = false; break; } }
-    if (blank) continue;
-    var o = {};
-    for (var k = 0; k < keys.length; k++) {
-      o[keys[k]] = numSet[keys[k]] ? pv(rows[r][k]) : asText(rows[r][k]);
-    }
-    o._row = r + 1;
-    out.push(o);
+function _objs_(name,keys,opt){
+  opt=opt||{}; var numSet={}; (opt.num||[]).forEach(function(k){numSet[k]=true;});
+  var rows=readRows(name), out=[];
+  for(var r=1;r<rows.length;r++){
+    var blank=true;
+    for(var c=0;c<keys.length;c++){ if(s_(rows[r][c])!==''){ blank=false; break; } }
+    if(blank) continue;
+    var o={};
+    for(var k=0;k<keys.length;k++) o[keys[k]] = numSet[keys[k]] ? pv(rows[r][k]) : asText(rows[r][k]);
+    o._row=r+1; out.push(o);
   }
   return out;
 }
+function getPlanData(){ return buildData(); }
 
-/* 화면에서 데이터만 다시 받아갈 때 */
-function getPlanData() { return buildData(); }
-
-/* ══════════════════════════════════════════
-   검토의견 (카드/과제 단위 코멘트)
-══════════════════════════════════════════ */
-function getComments() {
-  var rows = readRows(SH.memo), map = {};
-  for (var r = 1; r < rows.length; r++) {
-    var key = s_(rows[r][0]), text = s_(rows[r][3]);
-    if (!key || !text) continue;
-    if (!map[key]) map[key] = [];
-    map[key].push({ id: r + 1, label: s_(rows[r][1]), author: s_(rows[r][2]), text: text, ts: asText(rows[r][4]) });
+/* ══════════════ 검토의견 ══════════════ */
+function getComments(){
+  var rows=readRows(SH.memo), map={};
+  for(var r=1;r<rows.length;r++){
+    var key=s_(rows[r][0]), text=s_(rows[r][3]);
+    if(!key||!text) continue;
+    if(!map[key]) map[key]=[];
+    map[key].push({id:r+1,label:s_(rows[r][1]),author:s_(rows[r][2]),text:text,ts:asText(rows[r][4])});
   }
   return map;
 }
-function addComment(key, label, text) {
-  key = s_(key); text = s_(text);
-  if (!key || !text) throw new Error('빈 입력');
-  var sh = sheetOf_(SH.memo, ['키', '항목', '작성자', '내용', '작성일시']);
-  var email = ''; try { email = Session.getActiveUser().getEmail(); } catch (e) {}
-  var author = email ? email.split('@')[0] : '익명';
-  var now = new Date();
-  sh.appendRow([key, s_(label), author, text, now]);
-  return { id: sh.getLastRow(), label: s_(label), author: author, text: text,
-           ts: Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyy.MM.dd') };
+function addComment(key,label,text){
+  key=s_(key); text=s_(text);
+  if(!key||!text) throw new Error('빈 입력');
+  var sh=sheetOf_(SH.memo,['키','항목','작성자','내용','작성일시']);
+  var email=''; try{ email=Session.getActiveUser().getEmail(); }catch(e){}
+  var author=email?email.split('@')[0]:'익명', now=new Date();
+  sh.appendRow([key,s_(label),author,text,now]);
+  return {id:sh.getLastRow(),label:s_(label),author:author,text:text,
+          ts:Utilities.formatDate(now,Session.getScriptTimeZone(),'yyyy.MM.dd')};
 }
-function updateComment(id, text) {
-  text = s_(text);
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SH.memo);
-  var row = parseInt(id, 10);
-  if (!sh || isNaN(row) || row < 2 || row > sh.getLastRow() || !text) return false;
-  sh.getRange(row, 4).setValue(text);
-  return true;
+function updateComment(id,text){
+  text=s_(text);
+  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SH.memo), row=parseInt(id,10);
+  if(!sh||isNaN(row)||row<2||row>sh.getLastRow()||!text) return false;
+  sh.getRange(row,4).setValue(text); return true;
 }
-function deleteComment(id) {
-  var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SH.memo);
-  var row = parseInt(id, 10);
-  if (!sh || isNaN(row) || row < 2 || row > sh.getLastRow()) return false;
-  sh.deleteRow(row);
-  return true;
+function deleteComment(id){
+  var sh=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SH.memo), row=parseInt(id,10);
+  if(!sh||isNaN(row)||row<2||row>sh.getLastRow()) return false;
+  sh.deleteRow(row); return true;
 }
 
-/* ══════════════════════════════════════════
-   접근 게이트 (설정!AUTH_ON = Y 일 때만 화면에 뜬다)
-══════════════════════════════════════════ */
-function verifyEmp(dept, emp, name) {
-  dept = s_(dept); emp = s_(emp); name = s_(name);
-  if (!emp || !name) return false;
-  var rows = readRows(SH.emp), ok = false;
-  for (var r = 1; r < rows.length; r++) {
-    var d = s_(rows[r][0]), e = s_(rows[r][1]), n = s_(rows[r][2]);
-    var use = s_(rows[r][3]) === '' ? 'Y' : s_(rows[r][3]);
-    if (e === emp && n === name && (dept === '' || d === dept) && use.toUpperCase() !== 'N') { ok = true; break; }
+/* ══════════════ 접근 게이트 ══════════════ */
+function verifyEmp(dept,emp,name){
+  dept=s_(dept); emp=s_(emp); name=s_(name);
+  if(!emp||!name) return false;
+  var rows=readRows(SH.emp);
+  for(var r=1;r<rows.length;r++){
+    var d=s_(rows[r][0]), e=s_(rows[r][1]), n=s_(rows[r][2]);
+    var use=s_(rows[r][3])===''?'Y':s_(rows[r][3]);
+    if(e===emp&&n===name&&(dept===''||d===dept)&&use.toUpperCase()!=='N') return true;
   }
-  return ok;
+  return false;
 }
 
-/* ══════════════════════════════════════════
-   입력값 점검 — 사람 눈으로 놓치기 쉬운 것만 짚어준다
-══════════════════════════════════════════ */
-function validatePlan() {
-  var d = buildData(), msg = [];
-  var round = function (v) { return Math.round(v || 0); };
+/* ══════════════ 입력값 점검 ══════════════ */
+function validatePlan(){
+  var d=buildData(), msg=[], R=function(v){return Math.round(v||0);};
+  var by={}; d.PL.forEach(function(r){ if(r.l1) by[r.l1]=r; });
+  var S=by['매출액'], C=by['매출원가'], G=by['매출총이익'], A=by['판매비와관리비'], O=by['영업이익'];
 
-  /* ① 사업부 손익 항등식: 매출 − 매출원가 = 매출총이익, 매출총이익 − 판관비 = 영업이익 */
-  d.BU_ORDER.forEach(function (bu) {
-    var b = d.BU[bu];
-    for (var m = 0; m < 12; m++) {
-      var s = (b.sales || [])[m], c = (b.cogs || [])[m], g = (b.gp || [])[m],
-          a = (b.sgna || [])[m], o = (b.op || [])[m];
-      if (s != null && c != null && g != null && Math.abs((s - c) - g) > 1)
-        msg.push('[' + bu + ' ' + (m + 1) + '월] 매출−매출원가(' + round(s - c) + ') ≠ 매출총이익(' + round(g) + ')');
-      if (g != null && a != null && o != null && Math.abs((g - a) - o) > 1)
-        msg.push('[' + bu + ' ' + (m + 1) + '월] 매출총이익−판관비(' + round(g - a) + ') ≠ 영업이익(' + round(o) + ')');
-    }
+  /* ① 손익 항등식 (연간·월별) */
+  if(S&&C&&G&&Math.abs((S.y4-C.y4)-G.y4)>1) msg.push('[연간] 매출−매출원가('+R(S.y4-C.y4)+') ≠ 매출총이익('+R(G.y4)+')');
+  if(G&&A&&O&&Math.abs((G.y4-A.y4)-O.y4)>1) msg.push('[연간] 매출총이익−판관비('+R(G.y4-A.y4)+') ≠ 영업이익('+R(O.y4)+')');
+  for(var m=0;m<12;m++){
+    if(S&&C&&G&&S.m[m]!=null&&C.m[m]!=null&&G.m[m]!=null&&Math.abs((S.m[m]-C.m[m])-G.m[m])>1)
+      msg.push('['+(m+1)+'월] 매출−매출원가 ≠ 매출총이익');
+    if(G&&A&&O&&G.m[m]!=null&&A.m[m]!=null&&O.m[m]!=null&&Math.abs((G.m[m]-A.m[m])-O.m[m])>1)
+      msg.push('['+(m+1)+'월] 매출총이익−판관비 ≠ 영업이익');
+  }
+  /* ② 월 합계 = 연간 */
+  d.PL.forEach(function(r){
+    var s=0,has=false;
+    r.m.forEach(function(v){ if(v!=null){ s+=v; has=true; } });
+    if(has && r.y4!=null && Math.abs(s-r.y4)>2) msg.push('['+r.name+'] 월 합계 '+R(s)+' ≠ 연간 '+R(r.y4));
   });
-
-  /* ② 연도추이 마지막 해(계획연도)와 월별 합계가 맞는지 */
-  var yi = d.TREND_YEARS.indexOf(d.META.planYear);
-  if (yi >= 0) {
-    [['sales', '매출액'], ['gp', '매출총이익'], ['op', '영업이익']].forEach(function (p) {
-      var t = d.TREND[p[0]] ? d.TREND[p[0]][yi] : null;
-      var s = sum_(d.CORP[p[0]]);
-      if (t != null && s != null && Math.abs(t - s) > 5)
-        msg.push('[연도추이] ' + p[1] + ' ' + d.META.planYear + '년 ' + round(t) + ' ≠ 월별 합계 ' + round(s));
-    });
+  /* ③ 매출 = 부문 합 — '매출원가' 행 앞에 오는 중분류만 매출 부문이다.
+        (인건비·경비·금융수익도 중분류라서 위치로 끊지 않으면 같이 더해진다) */
+  var grpSum=0;
+  for(var i=0;i<d.PL.length;i++){
+    var r=d.PL[i];
+    if(r.l1==='매출원가') break;
+    if(!r.l1 && r.l2 && !r.l3 && r.y4!=null) grpSum+=r.y4;
   }
-
-  /* ③ 시나리오 확률 합 */
-  var pTot = 0, pCnt = 0;
-  d.SCEN.forEach(function (x) { if (x.prob != null) { pTot += x.prob; pCnt++; } });
-  if (pCnt && Math.abs(pTot - 100) > 0.5) msg.push('[시나리오] 확률 합계가 ' + pTot + '% (100%가 아님)');
+  if(S && Math.abs(grpSum-S.y4)>2) msg.push('[매출] 부문 합계 '+R(grpSum)+' ≠ 매출액 '+R(S.y4));
 
   var body = msg.length
-    ? '점검 결과 ' + msg.length + '건\n\n' + msg.slice(0, 40).join('\n') + (msg.length > 40 ? '\n\n… 외 ' + (msg.length - 40) + '건' : '')
-    : '이상 없음 — 손익 항등식·연간 합계·시나리오 확률 모두 일치합니다.';
-  try { SpreadsheetApp.getUi().alert('입력값 점검', body, SpreadsheetApp.getUi().ButtonSet.OK); } catch (e) {}
-  Logger.log(body);
-  return body;
+    ? '점검 결과 '+msg.length+'건\n\n'+msg.slice(0,30).join('\n')+(msg.length>30?'\n\n… 외 '+(msg.length-30)+'건':'')
+    : '이상 없음 — 손익 항등식·월 합계·부문 합계가 모두 일치합니다.';
+  try{ SpreadsheetApp.getUi().alert('입력값 점검',body,SpreadsheetApp.getUi().ButtonSet.OK); }catch(e){}
+  Logger.log(body); return body;
 }
 
-/* ══════════════════════════════════════════
-   시트 초기화 — 최초 1회 실행
-══════════════════════════════════════════ */
-function setupSheets() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+/* ══════════════ 원본 데이터 (2026 사업계획서·양식정비 엑셀 기준, 2027은 계획 가정) ══════════════ */
+var SEED = {
+ SUMMARY:[[1, "매출액", 2516, 2579, 2441, 2553], [1, "매출원가", 1994, 1960, 1790, 1858], [1, "매출총이익", 522, 619, 650, 694], [2, "(%)", 20.8, 24.0, 26.6, 27.2], [1, "판매관리비", 418, 431, 440, 450], [2, "(%)", 16.6, 16.7, 18.0, 17.6], [2, "인건비", 191, 201, 186, 192], [2, "경비", 226, 229, 254, 258], [1, "영업이익", 105, 189, 210, 245], [2, "(%)", 4.2, 7.3, 8.6, 9.6], [1, "영업외수익", 91, 25, 20, 20], [2, "금융수익", 11, 8, 8, 8], [2, "기타", 79, 17, 12, 12], [1, "영업외비용", 96, 34, 31, 31], [2, "금융비용", 36, 23, 20, 20], [2, "기타", 59, 10, 10, 10], [1, "세전이익", 100, 180, 200, 234], [2, "(%)", 4.0, 7.0, 8.2, 9.2], [1, "법인세비용", 7, 37, 43, 51], [1, "당기순이익", 92, 144, 157, 183], [2, "(%)", 3.7, 5.6, 6.4, 7.2]],
+ DIV_YEARS:["2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026(E)", "2027(P)"], DIV:[["매출액", 816.42, 885.22, 1001.01, 1153.86, 1418.68, 1716.01, 1964.43, 2188.56, 2382.16, 2347.12, 2302.92, 2595.16, 2523.31, 2431.7, 2516.05, 2579.42, 2440.54, 2552.8], ["바스", 816.42, 877.06, 973.66, 1084.03, 1255.57, 1468.55, 1720.07, 1828.05, 1939.76, 1816.57, 1763.95, 1971.65, 2032.09, 1954.06, 1935.72, 1920.11, 1726.15, 1782.58], ["BK", null, 8.17, 17.39, 45.13, 103.92, 159.13, 244.36, 231.39, 402.39, 397.81, 385.5, 458.72, 252.98, 216.58, 289.62, 345.7, 380.08, 411.57], ["CARE", null, null, 9.96, 24.7, 59.2, 88.32, 123.07, 129.16, 124.26, 132.75, 153.47, 164.79, 237.8, 261.06, 290.71, 313.6, 334.31, 358.65], ["매출총이익", 171.89, 175.38, 194.56, 210.8, 310.5, 394.93, 447.04, 455.01, 481.68, 480.16, 452.5, 493.12, 414.61, 451.7, 522.25, 619.35, 650.16, 694.36], ["영업이익", 14.1, 8.74, -29.06, 55.54, 134.18, 171.12, 168.08, 158.23, 106.46, 52.33, 14.07, 32.62, 15.86, 58.75, 104.67, 188.68, 210.4, 244.84], ["당기순이익", 6.76, 11.92, -38.72, 16.45, 19.54, 82.19, 88.42, 70.38, 47.04, 31.79, -20.12, 12.62, -7.14, -52.28, 92.32, 143.77, 156.94, 182.53]],
+ PL:[["매출액", "", "", 251604.71, 257941.72, 244054.35, 255279.53, 22385.44, 21298.98, 21637.67, 21115.08, 19907.7, 20786.06, 23273.48, 19013.75, 22355.77, 20479.83, 21160.28, 21865.49], ["", "SW", "", 113346.74, 110971.19, 99861.5, 104013.5, 9764.49, 9995.47, 8599.59, 8963.31, 7329.41, 8118.35, 8532.46, 7019.73, 9666.23, 8526.47, 8233.67, 9264.32], ["", "", "SW제품", 40842.86, 40438.87, 33150.66, 33813.66, 3890.09, 3947.59, 2831.01, 3013.1, 1808.79, 2165.45, 2686.06, 2047.66, 3691.27, 2766.77, 2538.87, 2427.0], ["", "", "SW OEM", 46503.63, 46367.84, 49589.92, 52565.32, 4321.42, 3984.75, 4381.22, 4501.52, 4330.21, 4621.38, 4460.62, 3838.73, 4270.08, 4383.41, 4360.21, 5111.77], ["", "", "SW상품", 26000.24, 24164.48, 17120.92, 17634.52, 1552.98, 2063.13, 1387.36, 1448.69, 1190.41, 1331.52, 1385.78, 1133.34, 1704.88, 1376.29, 1334.59, 1725.55], ["", "수전", "", 56442.75, 54794.36, 45765.35, 47459.82, 4763.98, 3330.18, 4465.92, 3614.24, 3904.92, 3618.32, 4326.57, 3467.54, 4618.91, 3507.57, 4062.82, 3778.85], ["", "", "수전제품", 17827.21, 17895.4, 13619.59, 14028.19, 1579.09, 1071.04, 1483.01, 876.96, 1212.89, 826.74, 1215.86, 991.05, 1670.28, 1007.58, 1153.5, 940.19], ["", "", "수전상품", 34673.08, 36898.95, 32145.77, 33431.63, 3184.89, 2259.14, 2982.91, 2737.28, 2692.03, 2791.58, 3110.71, 2476.49, 2948.63, 2499.99, 2909.32, 2838.66], ["", "비데", "", 16897.16, 18329.82, 17045.78, 17898.09, 1021.91, 1311.08, 1318.95, 1604.88, 1538.57, 1700.72, 3120.61, 1416.67, 827.0, 985.66, 1421.41, 1630.63], ["", "타일", "", 5586.67, 6599.91, 8500.0, 9180.0, 810.0, 702.0, 702.0, 756.0, 756.0, 810.0, 756.0, 756.0, 756.0, 810.0, 810.0, 756.0], ["", "BK", "", 28962.13, 34569.8, 38008.18, 40656.56, 3221.75, 3019.29, 3308.55, 3249.28, 3425.38, 3369.65, 3298.8, 3355.7, 3431.95, 3734.83, 3680.25, 3561.13], ["", "", "욕실", 24822.52, 29661.04, 32618.6, 34901.9, 2803.11, 2604.09, 2878.64, 2774.12, 2875.67, 2860.31, 2811.6, 2883.18, 2954.12, 3202.26, 3157.56, 3097.24], ["", "", "주방 등", 1367.92, 1767.3, 2084.43, 2251.19, 142.77, 140.68, 161.98, 184.69, 240.31, 203.39, 184.14, 154.21, 195.31, 235.3, 232.51, 175.9], ["", "", "필터샤워헤드류", 2585.8, 3141.45, 3305.15, 3503.47, 275.87, 274.52, 267.93, 290.47, 309.4, 305.95, 303.06, 318.31, 282.52, 297.27, 290.18, 287.99], ["", "", "임대수익", 185.89, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], ["", "케어", "", 29071.0, 31360.49, 33431.06, 34600.24, 2680.96, 2818.73, 3120.43, 2805.14, 2831.19, 3046.79, 3116.58, 2875.65, 2933.22, 2792.84, 2829.67, 2749.04], ["", "", "렌탈,멤버십", 7911.67, 7629.05, 6516.03, 6190.23, 533.64, 527.32, 534.86, 573.68, 574.14, 565.95, 517.65, 482.27, 483.49, 489.28, 458.21, 449.74], ["", "", "일시불", 20613.58, 22914.92, 23930.48, 25127.0, 1871.92, 2060.37, 2302.39, 1927.44, 1990.38, 2209.69, 2292.92, 2176.62, 2176.56, 2035.64, 2085.38, 1997.69], ["", "", "CS팀(AS매출)", 545.75, 816.52, 2984.56, 3283.01, 275.4, 231.04, 283.18, 304.02, 266.67, 271.15, 306.01, 216.76, 273.17, 267.92, 286.08, 301.61], ["", "임대", "", 1298.26, 1316.15, 1442.47, 1471.32, 122.35, 122.23, 122.23, 122.23, 122.23, 122.23, 122.46, 122.46, 122.46, 122.46, 122.46, 125.52], ["매출원가", "", "", 199379.81, 196006.67, 179037.98, 185843.5, 16296.6, 15505.66, 15752.22, 15371.78, 14492.81, 15132.25, 16943.09, 13842.01, 16275.0, 14909.32, 15404.68, 15918.08], ["매출총이익", "", "", 52224.89, 61935.05, 65016.37, 69436.03, 6088.84, 5793.32, 5885.45, 5743.3, 5414.89, 5653.81, 6330.39, 5171.74, 6080.77, 5570.51, 5755.6, 5947.41], ["판매비와관리비", "", "", 41757.49, 43066.57, 43976.86, 44952.06, 3637.4, 3867.23, 3724.65, 3861.42, 3785.09, 3490.16, 3880.22, 3956.2, 3721.36, 3832.82, 3611.58, 3583.93], ["", "인건비", "", 19121.08, 20141.33, 18560.56, 19154.54, 1547.94, 1710.73, 1547.94, 1554.97, 1554.97, 1554.97, 1554.97, 1735.4, 1614.02, 1554.97, 1554.97, 1668.69], ["", "경비", "", 22636.41, 22925.24, 25416.29, 25797.52, 2089.46, 2156.5, 2176.71, 2306.45, 2230.12, 1935.19, 2325.25, 2220.8, 2107.34, 2277.85, 2056.61, 1915.24], ["영업이익", "", "", 10467.4, 18868.48, 21039.52, 24483.97, 2451.44, 1926.09, 2160.8, 1881.88, 1629.8, 2163.65, 2450.17, 1215.54, 2359.41, 1737.69, 2144.02, 2363.48], ["영업외수익", "", "", 9058.87, 2541.26, 1993.68, 1993.68, 78.94, 74.48, 338.93, 198.62, 78.94, 271.91, 78.94, 194.63, 268.12, 75.03, 69.73, 265.41], ["", "금융수익", "", 1112.23, 793.5, 822.42, 822.42, 46.15, 41.68, 111.7, 165.83, 46.15, 44.68, 46.15, 161.84, 40.89, 42.23, 36.94, 38.18], ["", "기타영업외수익", "", 7946.64, 1747.76, 1171.26, 1171.24, 32.79, 32.79, 227.23, 32.79, 32.79, 227.23, 32.79, 32.79, 227.23, 32.79, 32.79, 227.23], ["영업외비용", "", "", 9550.98, 3368.0, 3075.88, 3075.88, 200.02, 183.71, 355.02, 208.89, 214.61, 366.0, 212.49, 209.63, 358.35, 204.43, 201.03, 361.7], ["", "금융비용", "", 3627.43, 2336.63, 2039.32, 2039.3, 179.71, 160.4, 177.59, 171.66, 177.38, 171.66, 175.27, 167.41, 162.01, 167.2, 161.81, 167.2], ["", "기타영업외비용", "", 5923.54, 1031.38, 1036.57, 1036.54, 20.31, 23.31, 177.43, 37.22, 37.22, 194.34, 37.22, 42.22, 196.34, 37.22, 39.22, 194.49], ["세전이익", "", "", 9975.3, 18041.73, 19957.31, 23401.77, 2330.36, 1816.86, 2144.71, 1871.61, 1494.13, 2069.56, 2316.62, 1200.54, 2269.18, 1608.29, 2012.72, 2267.19], ["법인세", "", "", 743.0, 3664.77, 4263.68, 5148.39, 512.68, 399.71, 471.84, 411.75, 328.71, 455.3, 509.66, 264.12, 499.22, 353.82, 442.8, 498.78], ["당기순이익", "", "", 9232.3, 14376.96, 15693.63, 18253.38, 1817.68, 1417.15, 1672.87, 1459.86, 1165.42, 1614.26, 1806.96, 936.42, 1769.96, 1254.47, 1569.92, 1768.41]],
+ ITEM_YEARS:["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026(E)", "2027(P)"], ITEM:[["위생도기", "매출액", 1217.68, 1263.13, 1166.22, 1107.13, 1193.27, 1178.67, 1133.2, 1202.59, 1201.83, 1119.2, 1163.97], ["위생도기", "매출총이익", 293.43, 287.37, 268.21, 221.08, 235.75, 197.16, 194.21, 278.04, 301.6, 328.61, 341.75], ["창원SW", "매출액", 355.51, 344.92, 299.79, 283.4, 285.99, 214.77, 237.4, 224.9, 175.16, 119.73, 122.12], ["창원SW", "매출총이익", 78.08, 61.95, 52.8, 34.22, 19.01, -0.34, 3.54, 10.9, -10.13, -3.87, -3.95], ["제천SW", "매출액", 261.6, 281.19, 258.74, 224.32, 231.86, 236.16, 209.12, 202.12, 243.26, 225.44, 232.2], ["제천SW", "매출총이익", 58.48, 45.48, 46.57, 19.89, 20.85, 10.47, -11.82, 0.16, 13.94, 16.04, 16.52], ["SW OEM", "매출액", 405.95, 425.03, 423.08, 415.1, 465.42, 526.36, 472.21, 515.57, 530.37, 572.78, 607.15], ["SW OEM", "매출총이익", 115.71, 126.53, 118.91, 121.58, 147.2, 142.31, 149.67, 201.63, 224.29, 259.25, 274.81], ["상품SW", "매출액", 194.61, 211.99, 184.61, 184.31, 210.0, 201.38, 214.47, 260.0, 253.03, 201.26, 207.3], ["상품SW", "매출총이익", 41.16, 53.41, 49.92, 45.39, 48.69, 44.72, 52.82, 65.35, 73.48, 57.19, 58.91], ["수전금구", "매출액", 487.49, 561.51, 579.79, 614.17, 723.85, 814.22, 743.79, 783.41, 787.61, 718.81, 740.37], ["수전금구", "매출총이익", 79.82, 89.38, 107.64, 122.14, 134.76, 127.56, 142.42, 163.91, 167.39, 163.41, 168.31], ["수전제품", "매출액", null, 89.57, 250.0, 213.11, 244.83, 231.32, 201.85, 205.32, 194.02, 151.27, 155.81], ["수전제품", "매출총이익", null, 12.38, 34.82, 24.91, 21.91, 10.73, 12.42, 17.72, 21.74, 12.29, 12.66], ["수전상품", "매출액", 487.49, 471.94, 329.79, 401.06, 479.02, 582.9, 541.94, 415.88, 422.94, 394.1, 409.86], ["수전상품", "매출총이익", 79.82, 77.0, 72.81, 97.23, 112.85, 116.83, 130.01, 86.05, 93.04, 101.11, 105.15], ["필터샤워헤드", "매출액", null, 0.1, 28.84, 94.89, 122.84, 186.93, 209.45, 162.2, 170.64, 173.44, 183.85], ["필터샤워헤드", "매출총이익", null, 0.04, 10.46, 36.46, 42.43, 64.27, 72.11, 60.14, 52.6, 50.01, 53.01], ["비데", "매출액", 183.54, 213.25, 185.79, 195.24, 245.46, 213.87, 304.94, 311.56, 361.76, 358.68, 376.61], ["비데", "매출총이익", 48.57, 52.03, 42.67, 53.37, 54.93, 46.37, 72.82, 82.13, 99.23, 105.38, 110.65], ["일체형비데", "매출액", 127.4, 128.59, 97.52, 113.31, 146.28, 105.09, 175.6, 82.59, 148.27, 128.5, 133.64], ["일체형비데", "매출총이익", 36.07, 32.21, 23.19, 32.75, 31.75, 20.57, 40.22, 32.86, 41.19, 40.71, 42.34], ["분리형비데", "매출액", 56.14, 84.66, 88.27, 81.93, 99.19, 108.78, 129.34, 228.97, 213.49, 230.18, 243.99], ["분리형비데", "매출총이익", 12.49, 19.57, 18.62, 19.24, 21.74, 28.37, 43.33, 49.27, 58.05, 64.68, 68.56], ["비데제품", "매출액", 152.11, 188.37, 156.04, 168.43, 175.95, 151.33, 224.56, 147.98, 141.64, 139.1, 144.66], ["비데제품", "매출총이익", 29.28, 45.18, 34.41, 44.44, 35.29, 29.72, 52.37, 35.76, 39.17, 43.7, 45.45], ["비데상품", "매출액", 31.42, 24.87, 29.75, 26.81, 69.51, 62.54, 80.38, 163.58, 220.12, 219.57, 230.55], ["비데상품", "매출총이익", 19.28, 7.32, 8.35, 10.04, 20.41, 19.22, 31.17, 46.37, 60.47, 61.68, 64.76], ["타일", "매출액", 104.03, 95.49, 97.14, 89.93, 104.71, 107.56, 88.29, 55.87, 66.0, 85.0, 91.8], ["타일", "매출총이익", 9.09, 12.45, 7.43, 6.04, 9.62, 8.0, 8.77, 7.72, 9.9, 13.96, 15.08]],
+ AR_YEARS:["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026(E)", "2027(P)"], AR:[["매출채권", "순 매출채권", 53995.28, 51948.15, 51334.07, 45054.9, 45444.15, 45295.27, 46694.06, 43635.39, 43280.66, 40870.73, 41684.25], ["매출채권", "총 매출채권", 64901.02, 56363.84, 55976.47, 51305.67, 49982.11, 49935.25, 51448.4, 48303.7, 47931.2, 45270.88, 46194.74], ["매출채권", "대손충당금", -2325.22, -4415.69, -4642.4, -6250.77, -4537.96, -4639.97, -4754.34, -4668.31, -4650.54, -4400.15, -4510.49], ["매출채권", "외상매출금", 27109.76, 25555.62, 28125.81, 30405.15, 28750.49, 28468.2, 28971.97, 32936.94, 32220.89, 30486.07, 31250.6], ["매출채권", "받을어음", 33503.91, 27963.66, 25118.82, 18401.65, 18886.6, 19582.01, 20682.7, 13611.23, 13985.2, 13232.21, 13564.05], ["매출채권", "부실채권", 4287.35, 2844.57, 2731.84, 2498.87, 2345.02, 1885.03, 1793.73, 1755.53, 1725.11, 1552.6, 1380.09], ["매출채권", "매출채권 회전율(회)", 0.34, 0.38, 0.38, 0.43, 0.48, 0.46, 0.43, 0.48, 0.51, 0.51, 0.52], ["재고자산", "순 재고자산", 31796.83, 40629.14, 48617.64, 39096.18, 51869.93, 56434.12, 42288.55, 45977.35, 43962.82, 41675.71, 42284.92], ["재고자산", "총 재고자산", 33491.25, 42804.5, 50806.33, 42661.94, 55751.42, 60685.39, 46572.09, 49831.2, 46895.85, 44370.91, 45019.52], ["재고자산", "재고평가충당금", -1694.42, -2127.31, -2121.92, -3491.4, -3825.92, -4166.26, -4195.76, -3767.19, -2848.57, -2695.2, -2734.6], ["재고자산", "제품", 8347.81, 11275.12, 16862.99, 16505.89, 15869.16, 19522.12, 16554.0, 16532.71, 13782.07, 13040.02, 13230.64], ["재고자산", "상품", 19286.53, 23076.31, 25697.93, 19626.85, 29378.9, 30016.03, 20277.0, 24728.21, 24729.85, 23398.36, 23740.4], ["재고자산", "재공품·미착품", 5856.91, 8453.06, 8245.41, 6529.2, 10503.36, 11147.24, 9741.1, 8570.29, 8383.93, 7932.53, 8048.48], ["재고자산", "재고자산 회전율(회)", 0.57, 0.49, 0.4, 0.49, 0.42, 0.37, 0.48, 0.46, 0.5, 0.5, 0.51], ["장기재고", "장기 재고자산", 3393.73, 2188.0, 3494.21, 4013.14, 4205.16, 4799.55, 6304.61, 4397.38, 3260.4, 2771.34, 2282.28], ["장기재고", "제품", 648.91, 488.0, 846.55, 1197.81, 1669.77, 1773.87, 2585.03, 2163.85, 1690.6, 1437.01, 1183.42], ["장기재고", "상품", 2744.82, 1700.0, 2647.67, 2815.33, 2535.39, 3025.67, 3719.57, 2233.53, 1569.8, 1334.33, 1098.86]],
+ MKT_YEARS:["2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026(E)", "2027(P)"], MKT:[["주택건설경기", "주택 인허가실적", "만 가구", 65.34, 55.41, 48.8, 45.75, 54.54, 52.18, 42.87, 42.82, 44.0, 47.0, 49.0], ["주택건설경기", "주택 착공실적", "만 가구", 54.43, 47.07, 47.89, 52.63, 58.37, 38.34, 24.2, 30.53, 33.2, 35.3, 37.0], ["주택건설경기", "주택 분양물량", "만 가구", 31.19, 28.3, 31.43, 34.9, 33.65, 28.76, 19.24, 23.1, 21.0, 25.0, 27.0], ["주택건설경기", "주택 미분양물량", "만 가구", 5.73, 5.88, 4.78, 1.9, 1.77, 6.81, 6.25, 7.02, 6.75, null, 6.2], ["주택건설경기", "주택 매매거래량", "만 가구", 175.97, 85.62, 80.53, 127.93, 101.52, 50.88, 55.5, 64.26, 72.22, null, 75.0], ["주택건설경기", "주택 준공실적", "만 가구", 56.92, 62.69, 51.81, 47.11, 43.14, 41.38, 43.6, 44.98, 39.8, 29.3, 31.0], ["시장동향", "기준금리", "%", 1.5, 1.75, 1.25, 0.5, 1.0, 3.25, 3.5, 3.0, 2.5, 2.25, 2.25], ["시장동향", "최저임금", "원", 6470.0, 7530.0, 8350.0, 8590.0, 8720.0, 9160.0, 9620.0, 9860.0, 10030.0, null, 10320], ["시장동향", "GDP 성장률", "%", 3.0, 3.0, 2.0, -1.0, 5.0, 3.0, 2.0, 2.0, 1.0, null, 1.8], ["시장동향", "환율", "원", 1071.4, 1118.1, 1157.8, 1088.0, 1185.5, 1267.3, 1289.4, 1470.0, 1447.2, 1400.0, 1380], ["시장동향", "구리", "$/톤", 6162.31, 6524.8, 6004.61, 6168.59, 9314.73, 8814.82, 8483.4, 9144.09, 9667.0, null, 9800], ["시장동향", "아연", "$/톤", 2893.97, 2925.07, 2549.24, 2264.55, 3004.96, 3485.1, 2649.04, 2777.34, 2806.0, null, 2850]],
+ PEER_YEARS:["2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"], PEER:[["1. 위생도기 (대림·ASK·대림통상·계림)", "대림", "매출액", 1418.68, 1716.01, 1964.43, 2188.56, 2382.16, 2347.12, 2302.92, 2595.16, 2522.86, 2431.7, 2516.05], ["1. 위생도기 (대림·ASK·대림통상·계림)", "대림", "매출총이익률", 21.9, 23.0, 22.8, 20.8, 20.2, 20.5, 19.7, 19.0, 16.4, 18.6, 20.8], ["1. 위생도기 (대림·ASK·대림통상·계림)", "대림", "영업이익률", 9.5, 10.0, 8.6, 7.2, 4.7, 2.2, 0.6, 1.3, 0.6, 2.4, 4.2], ["1. 위생도기 (대림·ASK·대림통상·계림)", "ASK", "매출액", 598.04, 778.96, 796.66, 900.76, 939.46, 772.85, 951.22, 1216.06, 1210.12, 1204.32, 1516.75], ["1. 위생도기 (대림·ASK·대림통상·계림)", "ASK", "매출총이익률", 22.9, 23.2, 22.3, 22.2, 22.2, 19.9, 22.5, 25.5, 21.9, 22.0, 21.4], ["1. 위생도기 (대림·ASK·대림통상·계림)", "ASK", "영업이익률", 5.2, 7.0, 4.9, 6.0, 6.8, 0.5, 8.5, 11.9, 7.8, 8.0, 8.0], ["1. 위생도기 (대림·ASK·대림통상·계림)", "대림통상", "매출액", 1516.73, 1513.53, 1581.97, 1833.31, 1841.86, 1619.28, 1324.63, 1223.88, 1290.34, 1134.22, 1164.89], ["1. 위생도기 (대림·ASK·대림통상·계림)", "대림통상", "매출총이익률", 14.2, 13.6, 16.3, 15.0, 12.4, 12.6, 13.0, 15.8, 17.0, 12.4, 16.7], ["1. 위생도기 (대림·ASK·대림통상·계림)", "대림통상", "영업이익률", 2.6, -1.1, 3.9, 1.2, 0.0, -2.5, -9.3, 0.3, 3.1, -7.5, -2.0], ["1. 위생도기 (대림·ASK·대림통상·계림)", "계림", "매출액", 1190.34, 1232.09, 1231.72, 1265.18, 1262.56, 1073.5, 1016.98, 1013.89, 1034.29, 1162.03, 1095.24], ["1. 위생도기 (대림·ASK·대림통상·계림)", "계림", "매출총이익률", 18.4, 17.4, 17.0, 16.4, 12.7, 11.5, 11.3, 12.4, 9.6, 9.1, 12.0], ["1. 위생도기 (대림·ASK·대림통상·계림)", "계림", "영업이익률", 10.3, 9.0, 7.2, 6.2, 1.5, 0.1, 0.9, 2.7, -0.3, 0.3, 1.6], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대림(수전)", "매출액", 200.81, 279.48, 345.97, 426.4, 492.26, 486.74, 475.78, 569.72, 657.36, 563.29, 564.43], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대림(수전)", "매출총이익률", 19.8, 19.3, 17.9, 14.9, 14.7, 16.2, 15.7, 14.9, 11.4, 14.4, 15.7], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대림(수전)", "영업이익률", 10.3, 9.7, 7.3, 5.2, 6.9, 6.0, 3.8, 3.2, 2.4, 3.6, 4.2], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "로얄", "매출액", 516.64, 461.53, 523.73, 617.3, 679.79, 535.61, 539.12, 460.68, 423.92, 384.61, 397.46], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "로얄", "매출총이익률", 11.1, 10.1, 8.6, 10.6, 9.6, 10.8, 12.7, 9.8, 7.2, 6.2, 6.5], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "로얄", "영업이익률", -6.4, -9.8, -10.2, -3.8, -4.6, -8.1, -5.4, -11.5, -15.6, -18.0, -14.4], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "다다", "매출액", 244.7, 250.71, 231.9, 230.2, 247.89, 188.93, 183.98, 132.28, 144.27, 149.85, 211.45], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "다다", "매출총이익률", 12.8, 17.2, 20.3, 14.5, 15.3, 9.3, 7.2, -0.4, -5.9, -3.7, 2.3], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "다다", "영업이익률", -0.3, 3.8, 5.7, -0.1, 2.5, -7.2, -9.6, -22.6, -28.8, -22.7, -12.0], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "유진", "매출액", 240.64, 240.68, 214.49, 306.0, 357.53, 344.19, 324.6, 270.42, 260.9, 255.18, 197.72], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "유진", "매출총이익률", 16.0, 16.1, 18.1, 14.1, 12.3, 13.0, 13.8, 13.7, 12.7, 15.2, 15.0], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "유진", "영업이익률", 2.9, 1.4, 1.3, 1.5, 1.6, 1.8, 1.1, 2.0, -4.4, 3.9, 3.1], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대신", "매출액", 291.74, 253.75, 253.99, 330.68, 384.45, 308.42, 258.86, 230.99, 226.92, 315.77, 371.84], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대신", "매출총이익률", 20.8, 27.3, 28.3, 26.5, 24.3, 23.1, 22.4, 15.9, 15.5, 16.4, 14.3], ["2. 수전 (대림수전·로얄·다다·유진·대신)", "대신", "영업이익률", 6.7, 13.0, 8.8, 9.7, 9.1, 6.2, 2.2, -5.1, -4.8, 1.5, 1.9], ["3. 기타 (콜러·아이젠·대원·보보)", "콜러", "매출액", 706.85, 744.58, 750.62, 772.92, 780.33, 835.97, 865.32, 402.89, 790.62, 681.57, 736.55], ["3. 기타 (콜러·아이젠·대원·보보)", "콜러", "매출총이익률", 22.8, 19.5, 27.8, 25.0, 24.8, 25.2, 24.5, 20.3, 16.7, 15.5, 17.4], ["3. 기타 (콜러·아이젠·대원·보보)", "콜러", "영업이익률", -2.6, -7.0, 5.9, 4.5, 4.2, 6.4, 7.0, -3.0, -5.5, -11.5, -5.2], ["3. 기타 (콜러·아이젠·대원·보보)", "아이젠", "매출액", 246.59, 225.93, 269.62, 264.96, 271.72, 300.23, 384.35, 392.61, 406.44, 385.28, 512.39], ["3. 기타 (콜러·아이젠·대원·보보)", "아이젠", "매출총이익률", 15.7, 17.3, 18.4, 18.4, 18.9, 18.1, 20.7, 19.1, 19.7, 16.2, 18.3], ["3. 기타 (콜러·아이젠·대원·보보)", "아이젠", "영업이익률", 2.5, 2.3, 4.3, 3.8, 4.2, 4.5, 6.8, 5.7, 8.5, 5.4, 9.0], ["3. 기타 (콜러·아이젠·대원·보보)", "대원", "매출액", 116.97, 154.99, 109.41, 139.51, 134.78, 150.79, 250.95, 183.56, 204.24, 130.99, 232.8], ["3. 기타 (콜러·아이젠·대원·보보)", "대원", "매출총이익률", 20.9, 22.4, 24.1, 23.3, 17.5, 20.4, 16.3, 15.4, 13.6, 21.7, 16.3], ["3. 기타 (콜러·아이젠·대원·보보)", "대원", "영업이익률", 8.1, 12.4, 10.0, 10.4, 6.1, 9.4, 7.8, 2.5, -3.2, 0.2, 2.2], ["3. 기타 (콜러·아이젠·대원·보보)", "보보", "매출액", 212.33, 266.02, 253.91, 234.0, 373.68, 266.27, 400.1, 280.52, 339.71, 268.78, 299.83], ["3. 기타 (콜러·아이젠·대원·보보)", "보보", "매출총이익률", 11.0, 8.2, 13.2, 11.4, 19.4, 16.4, 23.0, 12.1, 26.7, 24.1, 26.1], ["3. 기타 (콜러·아이젠·대원·보보)", "보보", "영업이익률", 5.1, 0.1, 4.0, 0.9, 8.9, 2.1, 9.3, -10.8, 6.3, 1.7, 3.5], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "한샘", "매출액", 12655.09, 16310.47, 18550.03, 19738.69, 18479.89, 16055.51, 17239.27, 17734.11, 15398.2, 14877.2, 14346.38], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "한샘", "매출총이익률", 31.3, 31.4, 31.6, 30.1, 27.2, 27.8, 29.0, 29.3, 26.4, 26.6, 28.3], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "한샘", "영업이익률", 8.1, 8.5, 8.5, 8.2, 4.5, 4.3, 5.8, 3.6, -1.7, -0.4, 1.2], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "리바트", "매출액", 6311.53, 6957.32, 7314.41, 8845.89, 13210.83, 12170.36, 13626.09, 13860.38, 14632.33, 15521.28, 18214.59], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "리바트", "매출총이익률", 21.1, 22.4, 22.8, 21.8, 16.8, 17.1, 17.9, 18.2, 14.0, 13.7, 14.8], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "리바트", "영업이익률", 5.4, 5.9, 5.9, 5.6, 3.5, 1.9, 2.5, 1.4, -1.9, -1.3, 1.3], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "에넥스", "매출액", 2583.41, 3029.74, 3901.27, 4279.56, 4420.45, 3614.91, 2312.75, 2003.17, 2029.07, 2276.04, 2617.76], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "에넥스", "매출총이익률", 19.5, 20.4, 17.3, 15.9, 9.1, 8.5, 7.9, 6.9, 0.4, 5.9, 9.9], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "에넥스", "영업이익률", 2.4, 2.6, 0.5, 0.7, 0.4, -0.5, -3.6, -5.9, -11.5, -3.0, 2.3], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "영림", "매출액", 1195.69, 1406.0, 1469.59, 1387.78, 1278.41, 1204.94, 1303.81, 930.88, 840.19, 685.77, 669.31], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "영림", "매출총이익률", 36.4, 36.7, 36.4, 34.3, 32.9, 30.7, 33.7, 37.4, 33.5, 35.6, 36.1], ["4. 인테리어 (한샘·리바트·에넥스·영림)", "영림", "영업이익률", 17.2, 19.2, 19.0, 13.8, 11.6, 9.5, 14.7, 18.9, 11.2, 6.0, 2.2]],
+ CAPEX:[["창원공장", "SK3 소성로 버너 개조", "A", 15, 0, 0, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 0, 120, 0], ["창원공장", "성형라인 자동화 설비", "A", 12, 0, 0, 0, 180, 0, 0, 0, 0, 0, 0, 0, 0, 180, 0, 180, 0], ["창원공장", "집진설비 보강", "B", 10, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 60, 0, 60, 0], ["제천공장", "SK3 천정 코디어라이트 교체", "A", 20, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 63, 10, 63, 0], ["제천공장", "CC4000 생산설비 및 프로그램 개조", "A", 20, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 40, 0, 40, 0], ["제천공장", "백관→PE 배관 교체", "A", 12, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0], ["제천공장", "정수장 여과재 교체공사", "B", 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 22, 20, 22, 0], ["수전", "수전 가공라인 증설", "A", 12, 0, 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 150, 0, 150, 0], ["비데", "비데 신제품 금형", "A", 5, 0, 60, 0, 0, 60, 0, 0, 0, 60, 0, 0, 0, 180, 0, 180, 0], ["BK", "전시장 리뉴얼", "B", 5, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 70, 0, 70, 0], ["케어", "렌탈 계정 설비", "B", 5, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 240, 0, 240, 0], ["전사", "ERP 고도화 / MES 연계", "A", 5, 0, 0, 0, 0, 90, 0, 0, 0, 90, 0, 0, 0, 180, 0, 180, 60], ["전사", "물류센터 설비", "B", 5, 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 80, 0, 80, 0], ["전사", "안전·환경 설비 보강", "A", 10, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 55, 0, 55, 0]],
+ SENS:[["sales", "매출목표 미달", -1, "%", 2553, "매출 1% 감소 시 한계이익(1−변동원가율)만큼 영업이익 감소"], ["yield", "수율 개선", 1, "%", 1022, "자사 제조원가. 수율 1%p 개선 시 그만큼 제조원가 절감"], ["fx", "환율 하락", -10, "원", 650, "수입 매입액(원화). 환율 하락 시 매입원가 감소"], ["wage", "임금인상률 증가", 1, "%", 415, "판관 인건비 + 제조 노무비"], ["expense", "경비 절감", -1, "%", 258, "판관비 중 경비"], ["_var_rate", "변동원가율", null, "%", 62, "매출원가 중 변동비 비중 85% 가정"], ["_fx_base", "기준환율", null, "원", 1380, "2027 계획 전제 환율"], ["_export", "수출액", null, "억원", 60, "환율 하락 시 매출 감소분 계산용"]]
+};
 
-  sheetOf_(SH.cfg,  ['키', '값', '설명']);
-  sheetOf_(SH.bu,   ['사업부', '구분', '지표'].concat(MONTHS_KO));
-  sheetOf_(SH.corp, ['구분', '지표'].concat(MONTHS_KO));
-  sheetOf_(SH.trend,['지표']);
-  sheetOf_(SH.pl,   ['레벨', '항목', BASE_YEAR + ' 추정', PLAN_YEAR + ' 계획', '비고']);
-  sheetOf_(SH.assum,['구분', '항목', '단위', BASE_YEAR + ' 추정', PLAN_YEAR + ' 계획', '비고']);
-  sheetOf_(SH.task, ['부문', '과제명', 'KPI', '목표', '담당', '일정', '기대효과(백만)', '비고']);
-  sheetOf_(SH.capex,['구분', '투자명', '금액(백만)', '시기', '목적', '비고']);
-  sheetOf_(SH.hc,   ['부문', BASE_YEAR + '말', PLAN_YEAR + ' 계획', '비고']);
-  sheetOf_(SH.scen, ['시나리오', '매출액', '매출총이익', '영업이익', '확률(%)', '전제']);
-  sheetOf_(SH.memo, ['키', '항목', '작성자', '내용', '작성일시']);
-  sheetOf_(SH.emp,  ['부서', '사번', '이름', '사용여부']);
+/* ══════════════ 시트 생성 ══════════════ */
+function setupSheets(){
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var YM=[]; for(var i=0;i<12;i++) YM.push(MONTHS_KO[i]);
 
-  /* 이미 값이 들어 있는 시트는 손대지 않는다 — 이 함수를 몇 번 눌러도 입력값이 지워지지 않게 */
-  var r = seedDemoData(true);
+  sheetOf_(SH.cfg,  ['키','값','설명']);
+  sheetOf_(SH.sum,  ['레벨','항목','2024','2025','2026(E)','2027(P)']);
+  sheetOf_(SH.pl,   ['대분류','중분류','소분류','2024','2025','2026(E)','2027(P)'].concat(YM));
+  sheetOf_(SH.div,  ['지표'].concat(SEED.DIV_YEARS));
+  sheetOf_(SH.item, ['품목','지표'].concat(SEED.ITEM_YEARS));
+  sheetOf_(SH.ar,   ['구분','항목'].concat(SEED.AR_YEARS));
+  sheetOf_(SH.mkt,  ['구분','항목','단위'].concat(SEED.MKT_YEARS));
+  sheetOf_(SH.peer, ['그룹','회사','지표'].concat(SEED.PEER_YEARS));
+  sheetOf_(SH.capex,['부문','투자명','중요도','내용연수'].concat(YM).concat(['총예산','전년이월','당해계','익년이월']));
+  sheetOf_(SH.sens, ['키','변수','기본변동','단위','노출금액(억원)','설명']);
+  sheetOf_(SH.memo, ['키','항목','작성자','내용','작성일시']);
+  sheetOf_(SH.emp,  ['부서','사번','이름','사용여부']);
 
-  /* 기본 시트('시트1') 정리 */
-  var first = ss.getSheets()[0];
-  if (first.getName() === '시트1' || first.getName() === 'Sheet1') {
-    if (first.getLastRow() === 0) ss.deleteSheet(first);
-  }
+  var r=seedData_(true);
+
+  var first=ss.getSheets()[0];
+  if((first.getName()==='시트1'||first.getName()==='Sheet1') && first.getLastRow()===0) ss.deleteSheet(first);
   ss.setActiveSheet(ss.getSheetByName(SH.cfg));
 
-  var msg = '시트 12종 준비 완료\n\n'
-    + '· 새로 채운 시트 : ' + r.filled + '개\n'
-    + '· 그대로 둔 시트 : ' + r.kept + '개 (이미 값이 있어 건드리지 않았습니다)';
-  try { SpreadsheetApp.getUi().alert('시트 점검·보강', msg, SpreadsheetApp.getUi().ButtonSet.OK); } catch (e) {}
-  Logger.log(msg);
-  return r;
+  var msg='시트 12종 준비 완료\n\n· 새로 채운 시트 : '+r.filled+'개\n· 그대로 둔 시트 : '+r.kept+'개 (이미 값이 있어 건드리지 않았습니다)';
+  try{ SpreadsheetApp.getUi().alert('시트 점검·보강',msg,SpreadsheetApp.getUi().ButtonSet.OK); }catch(e){}
+  Logger.log(msg); return r;
 }
 
-/* ── 데모 데이터 ──
-   실제 계획 수립 전 화면이 비어 보이지 않도록 채워두는 값이다.
-   숫자는 전부 시트에서 덮어쓰면 되고, 이 함수를 다시 돌리면 원래 값으로 되돌아간다. */
-function seedDemoData(onlyIfEmpty) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var filled = 0, kept = 0;
+/* onlyIfEmpty=true 면 값이 있는 시트는 건너뛴다 — 여러 번 눌러도 입력값이 지워지지 않게 */
+function seedData_(onlyIfEmpty){
+  var ss=SpreadsheetApp.getActiveSpreadsheet(), filled=0, kept=0;
+  function prep(name){
+    var sh=ss.getSheetByName(name); if(!sh) return null;
+    var last=sh.getLastRow();
+    if(onlyIfEmpty && last>1){ kept++; return null; }
+    if(last>1) sh.getRange(2,1,last-1,sh.getLastColumn()).clearContent();
+    filled++; return sh;
+  }
+  function put(name, rows){
+    var sh=prep(name); if(!sh||!rows.length) return;
+    var w=0; rows.forEach(function(r){ if(r.length>w) w=r.length; });
+    var norm=rows.map(function(r){ var a=r.slice(); while(a.length<w) a.push(''); 
+      return a.map(function(v){ return (v===null||v===undefined)?'':v; }); });
+    sh.getRange(2,1,norm.length,w).setValues(norm);
+  }
 
-  /* 건너뛸 시트 자리에 끼워 넣는 대역(代役).
-     아래 채우기 코드를 그대로 두고도 '아무 일도 일어나지 않게' 하려고 둔다. */
-  var noop = { setValues: function () { return this; }, setValue: function () { return this; },
-               setFontWeight: function () { return this; }, setBackground: function () { return this; },
-               setFontColor: function () { return this; } };
-  var SKIP = { getRange: function () { return noop; }, setFrozenRows: function () {} };
-
-  var clear = function (name, keepHeader) {
-    var sh = ss.getSheetByName(name); if (!sh) return SKIP;
-    var last = sh.getLastRow();
-    if (onlyIfEmpty && last > (keepHeader ? 1 : 0)) { kept++; return SKIP; }   /* 값이 있으면 보존 */
-    if (last > (keepHeader ? 1 : 0)) sh.getRange(keepHeader ? 2 : 1, 1, last - (keepHeader ? 1 : 0), sh.getLastColumn()).clearContent();
-    filled++;
-    return sh;
-  };
-
-  /* ① 설정 */
-  var shCfg = clear(SH.cfg, true);
-  shCfg.getRange(2, 1, 8, 3).setValues([
-    ['PLAN_YEAR', PLAN_YEAR, '계획연도'],
-    ['BASE_YEAR', BASE_YEAR, '비교 기준연도(전년 추정)'],
-    ['TITLE',     PLAN_YEAR + ' 사업계획', '대시보드 제목'],
-    ['COMPANY',   '대림바스', '회사명'],
-    ['DEPT',      '경영지원부문 · 기획팀', '작성 부서'],
-    ['UPDATED',   Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy.MM.dd'), '최종 갱신일'],
-    ['AUTH_ON',   'N', '접근 게이트 사용(Y/N). Y면 사번·이름 입력 화면이 뜬다'],
-    ['NOTE',      '표=백만원 · 그래프=억원', '단위 안내 문구']
+  put(SH.cfg,[
+    ['PLAN_YEAR',PLAN_YEAR,'계획연도'],
+    ['BASE_YEAR',BASE_YEAR,'직전연도(예상)'],
+    ['TITLE',PLAN_YEAR+'년 사업계획','대시보드 제목'],
+    ['COMPANY','대림바스','회사명'],
+    ['DEPT','경영지원부문 · 기획팀','작성 부서'],
+    ['UPDATED',Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy.MM.dd'),'최종 갱신일'],
+    ['AUTH_ON','N','접근 게이트 사용(Y/N)']
   ]);
+  put(SH.sum,   SEED.SUMMARY);
+  put(SH.pl,    SEED.PL);
+  put(SH.div,   SEED.DIV);
+  put(SH.item,  SEED.ITEM);
+  put(SH.ar,    SEED.AR);
+  put(SH.mkt,   SEED.MKT);
+  put(SH.peer,  SEED.PEER);
+  put(SH.capex, SEED.CAPEX);
+  put(SH.sens,  SEED.SENS);
+  put(SH.emp,[['기획팀','1001','홍길동','Y'],['기획팀','1002','김철수','Y'],['기획팀','1003','이영희','Y']]);
 
-  /* ② 사업부 월별 — 아래 기준값에서 계절가중치로 12개월을 만든다 */
-  var SEASON = [0.85, 0.88, 1.05, 1.08, 1.10, 0.95, 0.92, 0.88, 1.06, 1.08, 1.10, 1.05];  // 합 = 12
-  var BU_SEED = [
-    /* 사업부,      전년매출(백만), 전년GP율, 전년OP율, 매출성장률, GP율개선(%p), OP율개선(%p) */
-    ['창원SW',      12000, 0.020, -0.120, 0.04,  0.030, 0.045],
-    ['제천SW',      21000, 0.115, -0.030, 0.05,  0.015, 0.025],
-    ['상품SW',      22500, 0.300,  0.180, 0.07,  0.005, 0.008],
-    ['SW OEM',      45000, 0.450,  0.250, 0.06,  0.005, 0.010],
-    ['수전',        52000, 0.160,  0.048, 0.05,  0.012, 0.015],
-    ['비데',        17000, 0.270,  0.078, 0.08,  0.008, 0.014],
-    ['타일',         6500, 0.150,  0.018, 0.06,  0.010, 0.012],
-    ['BK',          38000, 0.330,  0.048, 0.07,  0.006, 0.012],
-    ['Care',        31000, 0.220,  0.030, 0.06,  0.010, 0.016],
-    ['임대',         1300, 0.880,  0.880, 0.02,  0.000, 0.000]
-  ];
-  var shBU = clear(SH.bu, true), buRows = [];
-  BU_SEED.forEach(function (b) {
-    var name = b[0], base = b[1], gpr = b[2], opr = b[3], grw = b[4], dG = b[5], dO = b[6];
-    [['계획', base * (1 + grw), gpr + dG, opr + dO], ['전년', base, gpr, opr]].forEach(function (g) {
-      var gubun = g[0], annual = g[1], gRate = g[2], oRate = g[3];
-      var sales = [], cogs = [], gp = [], sgna = [], op = [];
-      for (var m = 0; m < 12; m++) {
-        var s = Math.round(annual * SEASON[m] / 12);
-        var gv = Math.round(s * gRate);
-        var ov = Math.round(s * oRate);
-        sales.push(s); gp.push(gv); cogs.push(s - gv); op.push(ov); sgna.push(gv - ov);
-      }
-      buRows.push([name, gubun, 'sales'].concat(sales));
-      buRows.push([name, gubun, 'cogs'].concat(cogs));
-      buRows.push([name, gubun, 'gp'].concat(gp));
-      buRows.push([name, gubun, 'sgna'].concat(sgna));
-      buRows.push([name, gubun, 'op'].concat(op));
-    });
-  });
-  shBU.getRange(2, 1, buRows.length, 15).setValues(buRows);
-
-  /* ③ 전사 월별 — 수주액·CAPEX 등 사업부로 안 쪼개는 항목 */
-  var totalSales = 0;
-  BU_SEED.forEach(function (b) { totalSales += b[1] * (1 + b[4]); });
-  var prevSales = 0;
-  BU_SEED.forEach(function (b) { prevSales += b[1]; });
-  var shCorp = clear(SH.corp, true), corpRows = [];
-  [['계획', totalSales * 1.06, totalSales * 0.045], ['전년', prevSales * 1.03, prevSales * 0.040]].forEach(function (g) {
-    var ord = [], cap = [];
-    for (var m = 0; m < 12; m++) {
-      ord.push(Math.round(g[1] * SEASON[m] / 12));
-      cap.push(Math.round(g[2] / 12));
-    }
-    corpRows.push([g[0], 'orders'].concat(ord));
-    corpRows.push([g[0], 'capex'].concat(cap));
-  });
-  shCorp.getRange(2, 1, corpRows.length, 14).setValues(corpRows);
-
-  /* ④ 연도추이 (2021~계획연도) */
-  var shTrend = clear(SH.trend, true);
-  var tYears = [];
-  for (var y = PLAN_YEAR - 6; y <= PLAN_YEAR; y++) tYears.push(y);
-  shTrend.getRange(1, 1, 1, tYears.length + 1)
-    .setValues([['지표'].concat(tYears)])
-    .setFontWeight('bold').setBackground('#1a4a8a').setFontColor('#ffffff');
-  var planTot = { sales: 0, gp: 0, op: 0 }, prevTot = { sales: 0, gp: 0, op: 0 };
-  BU_SEED.forEach(function (b) {
-    var ps = b[1] * (1 + b[4]);
-    planTot.sales += ps; planTot.gp += ps * (b[2] + b[5]); planTot.op += ps * (b[3] + b[6]);
-    prevTot.sales += b[1]; prevTot.gp += b[1] * b[2]; prevTot.op += b[1] * b[3];
-  });
-  var back = [0.82, 0.86, 0.90, 0.94, 0.97];   // 2021~2025 를 전년 대비 비율로 역산
-  var mk = function (planV, prevV, wobble) {
-    var a = [];
-    for (var i = 0; i < back.length; i++) a.push(Math.round(prevV * back[i] * wobble[i]));
-    a.push(Math.round(prevV)); a.push(Math.round(planV));
-    return a;
-  };
-  shTrend.getRange(2, 1, 5, tYears.length + 1).setValues([
-    ['sales'].concat(mk(planTot.sales, prevTot.sales, [1, 1, 1, 1, 1])),
-    ['gp'].concat(mk(planTot.gp, prevTot.gp, [0.88, 0.92, 0.96, 1.02, 0.99])),
-    ['op'].concat(mk(planTot.op, prevTot.op, [0.55, 0.70, 0.86, 1.08, 0.95])),
-    ['orders'].concat(mk(totalSales * 1.06, prevSales * 1.03, [1, 1, 1, 1, 1])),
-    ['capex'].concat(mk(totalSales * 0.045, prevSales * 0.040, [0.7, 0.8, 0.9, 1.1, 0.95]))
-  ]);
-
-  /* ⑤ 손익구조 */
-  var P = function (v) { return Math.round(v); };
-  var pS = P(planTot.sales), pG = P(planTot.gp), pO = P(planTot.op);
-  var bS = P(prevTot.sales), bG = P(prevTot.gp), bO = P(prevTot.op);
-  var shPL = clear(SH.pl, true);
-  shPL.getRange(2, 1, 17, 5).setValues([
-    [1, '매출액',        bS,               pS,               '사업부 합계'],
-    [2, '　제품매출',    P(bS * 0.62),     P(pS * 0.61),     '자사 생산'],
-    [2, '　상품매출',    P(bS * 0.33),     P(pS * 0.34),     '수입·외주 매입'],
-    [2, '　기타매출',    P(bS * 0.05),     P(pS * 0.05),     '임대·용역'],
-    [1, '매출원가',      bS - bG,          pS - pG,          ''],
-    [2, '　재료비',      P((bS - bG) * 0.52), P((pS - pG) * 0.51), '원자재·부자재'],
-    [2, '　노무비',      P((bS - bG) * 0.17), P((pS - pG) * 0.18), ''],
-    [2, '　제조경비',    P((bS - bG) * 0.14), P((pS - pG) * 0.14), '동력·감가상각'],
-    [2, '　상품원가',    P((bS - bG) * 0.17), P((pS - pG) * 0.17), ''],
-    [1, '매출총이익',    bG,               pG,               ''],
-    [1, '판매관리비',    bG - bO,          pG - pO,          ''],
-    [2, '　인건비',      P((bG - bO) * 0.42), P((pG - pO) * 0.42), ''],
-    [2, '　판매촉진비',  P((bG - bO) * 0.19), P((pG - pO) * 0.20), '광고·판촉'],
-    [2, '　물류비',      P((bG - bO) * 0.14), P((pG - pO) * 0.13), '운반·보관'],
-    [2, '　기타판관비',  P((bG - bO) * 0.25), P((pG - pO) * 0.25), ''],
-    [1, '영업이익',      bO,               pO,               ''],
-    [1, '영업외손익',    P(-bS * 0.010),   P(-pS * 0.009),   '금융비용 등']
-  ]);
-
-  /* ⑥ 전제조건 */
-  var shAs = clear(SH.assum, true);
-  shAs.getRange(2, 1, 12, 6).setValues([
-    ['거시', '원/달러 환율',     '원',   1440,  1400, '연평균 가정'],
-    ['거시', '기준금리',         '%',    2.75,  2.50, '연말 기준'],
-    ['거시', '소비자물가 상승률','%',    2.10,  1.90, ''],
-    ['원자재', '구리',           '$/톤', 9800,  9500, 'LME 연평균'],
-    ['원자재', '아연',           '$/톤', 2850,  2800, 'LME 연평균'],
-    ['원자재', '원자재 투입가',  '%',    3.20, -1.50, '전년 대비 변동'],
-    ['시장', '주택 착공',        '천호',  272,   295, '국토부 기준'],
-    ['시장', '분양 물량',        '천호',  198,   215, ''],
-    ['시장', '미분양',           '천호',   66,    58, '연말 잔량'],
-    ['영업', '판가 인상률',      '%',    1.50,  2.50, '평균'],
-    ['영업', 'B2B 비중',         '%',      58,    60, '매출 기준'],
-    ['인사', '임금 인상률',      '%',    3.50,  3.20, '']
-  ]);
-
-  /* ⑦ 추진과제 */
-  var shTk = clear(SH.task, true);
-  shTk.getRange(2, 1, 10, 8).setValues([
-    ['영업', 'B2B 대형 건설사 신규 채널 확보', '신규 수주액', '18,000백만', '영업본부', '1Q~4Q', 1800, '상위 5개사 우선'],
-    ['영업', '리모델링 B2C 온라인 판매 확대',  '온라인 매출', '전년比 +25%', '마케팅팀', '1Q~4Q', 900, '자사몰·오픈마켓'],
-    ['생산', '창원공장 수율 개선',             '불량률',      '3.2% → 2.4%', '생산본부', '1Q~3Q', 620, '설비 자동화 연계'],
-    ['생산', '제천공장 라인 자동화 투자',      '인당 생산성', '+12%',        '생산본부', '2Q~4Q', 780, 'CAPEX 4,200 연계'],
-    ['구매', '원자재 통합구매·이원화',         '재료비율',    '-1.2%p',      '구매팀',   '1Q~2Q', 1100, '중국·베트남 이원화'],
-    ['개발', '스마트 비데 신제품 출시',        '신제품 매출', '4,500백만',   '개발본부', '2Q 출시', 450, 'IoT 연동'],
-    ['개발', '절수 1등급 양변기 라인업 확대',  '인증 품목수', '6종 → 10종',  '개발본부', '1Q~4Q', 380, '환경표지 연계'],
-    ['물류', '수도권 물류센터 재편',           '물류비율',    '-0.5%p',      '물류팀',   '2Q~3Q', 340, '3PL 재계약'],
-    ['재무', '운전자본 회전 개선',             '재고회전일',  '62일 → 54일', '재무팀',   '1Q~4Q', 0, '현금흐름 개선'],
-    ['ESG',  '탄소배출 저감 설비 도입',        'Scope1 배출', '-8%',         '경영지원', '3Q~4Q', 0, '규제 대응']
-  ]);
-
-  /* ⑧ 투자계획 */
-  var shCx = clear(SH.capex, true);
-  shCx.getRange(2, 1, 8, 6).setValues([
-    ['생산설비', '제천공장 성형라인 자동화',   4200, '2Q~4Q', '생산성 +12%', '핵심 투자'],
-    ['생산설비', '창원공장 소성로 교체',       2600, '1Q~2Q', '에너지 절감', ''],
-    ['생산설비', '수전 가공라인 증설',         1800, '3Q',    'CAPA +15%',  ''],
-    ['금형',     '신제품 금형 제작',           1500, '1Q~4Q', '신제품 8종', ''],
-    ['IT',       'ERP 고도화 / MES 연계',       900, '2Q~3Q', '실시간 원가', ''],
-    ['물류',     '수도권 물류센터 설비',        700, '2Q',    '물류비 절감', ''],
-    ['안전환경', '집진·폐수 설비 보강',         600, '3Q',    '규제 대응',  '법정 의무'],
-    ['기타',     '사무환경·전산 교체',          400, '연중',  '-',          '']
-  ]);
-
-  /* ⑨ 인원계획 */
-  var shHc = clear(SH.hc, true);
-  shHc.getRange(2, 1, 7, 4).setValues([
-    ['생산',     412, 424, '자동화 반영, 증원 최소화'],
-    ['영업',      96, 106, 'B2B 채널 확대'],
-    ['마케팅',    24,  28, '온라인 강화'],
-    ['개발',      38,  44, '신제품 라인업'],
-    ['구매·물류', 31,  32, ''],
-    ['경영지원',  46,  46, '동결'],
-    ['기타',      16,  16, '']
-  ]);
-
-  /* ⑩ 시나리오 */
-  var shSc = clear(SH.scen, true);
-  shSc.getRange(2, 1, 3, 6).setValues([
-    ['Base', pS,               pG,               pO,               60, '주택 착공 295천호, 환율 1,400원, 판가 +2.5%'],
-    ['Best', P(pS * 1.07),     P(pG * 1.12),     P(pO * 1.35),     20, '착공 회복 320천호, 원자재 -4%, B2B 조기 수주'],
-    ['Worst', P(pS * 0.92),    P(pG * 0.86),     P(pO * 0.52),     20, '착공 260천호, 환율 1,480원, 판가 인상 불발']
-  ]);
-
-  /* ⑪ 직원 (접근 게이트용 샘플) */
-  var shEm = clear(SH.emp, true);
-  shEm.getRange(2, 1, 3, 4).setValues([
-    ['기획팀', '1001', '홍길동', 'Y'],
-    ['기획팀', '1002', '김철수', 'Y'],
-    ['기획팀', '1003', '이영희', 'Y']
-  ]);
-
-  Logger.log('데모 데이터 — 채운 시트 ' + filled + '개 / 보존한 시트 ' + kept + '개');
-  return { filled: filled, kept: kept };
+  Logger.log('데이터 — 채운 시트 '+filled+'개 / 보존한 시트 '+kept+'개');
+  return {filled:filled,kept:kept};
 }
 
-/* 데모값으로 되돌리기 — 입력한 숫자가 사라지므로 반드시 확인을 받는다 */
-function resetDemoData() {
-  var ui = SpreadsheetApp.getUi();
-  var ans = ui.alert('데모데이터로 되돌리기',
-    '지금까지 입력한 계획 숫자가 모두 지워지고 데모값으로 바뀝니다.\n\n되돌릴 수 없습니다. 계속할까요?',
+/* 원본으로 되돌리기 — 입력값이 사라지므로 확인을 받는다 */
+function resetSeedData(){
+  var ui=SpreadsheetApp.getUi();
+  var ans=ui.alert('원본 데이터로 되돌리기',
+    '지금까지 입력·수정한 값이 모두 지워지고 2026 사업계획서 기준 원본으로 돌아갑니다.\n\n되돌릴 수 없습니다. 계속할까요?',
     ui.ButtonSet.YES_NO);
-  if (ans !== ui.Button.YES) { ui.alert('취소했습니다. 입력값은 그대로입니다.'); return; }
-  var r = seedDemoData(false);
-  ui.alert('완료', r.filled + '개 시트를 데모값으로 되돌렸습니다.', ui.ButtonSet.OK);
+  if(ans!==ui.Button.YES){ ui.alert('취소했습니다. 입력값은 그대로입니다.'); return; }
+  var r=seedData_(false);
+  ui.alert('완료', r.filled+'개 시트를 원본으로 되돌렸습니다.', ui.ButtonSet.OK);
 }
