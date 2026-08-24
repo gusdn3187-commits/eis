@@ -35,7 +35,10 @@
   --neg:#FF0000;
 }
 body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo',sans-serif;
-  background:var(--bg);color:var(--text-1);font-size:15px;line-height:1.5;min-width:1180px}
+  background:var(--bg);color:var(--text-1);font-size:15px;line-height:1.5}
+/* 좁은 화면에서 페이지 전체가 옆으로 밀리지 않게, 본문만 자체적으로 가로 스크롤한다 */
+#shell{overflow-x:auto;background:var(--bg)}
+#page{min-width:1180px}
 
 /* ── 상단 ── */
 .nav{background:linear-gradient(135deg,var(--navy-dk) 0%,var(--navy) 55%,var(--sky) 100%);
@@ -209,7 +212,8 @@ tr.clickable{cursor:pointer}
 footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   border-top:1px solid var(--border);background:#f8faff}
 @media print{
-  body{background:#fff;min-width:0}
+  body{background:#fff}
+  #shell{overflow-x:visible}#page{min-width:0}
   .main-tab-bar,.nav-pill,.chip-panel,.sens-ctrl,.memo-add,.pill-preset{display:none!important}
   .tab-pane{display:block!important;page-break-before:always}
   .tab-pane:first-of-type{page-break-before:auto}
@@ -231,6 +235,8 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     <button onclick="authSubmit()">접속</button>
   </div>
 </div>
+
+<div id="shell"><div id="page">
 
 <div id="demoBar" class="demo-bar hidden">
   <b>참고</b> 2027년 수치는 2026년 사업계획을 기준으로 한 <b>가정값</b>입니다. 구글시트에 확정 계획을 입력하면 이 안내가 사라집니다.
@@ -455,6 +461,8 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
 
 <footer id="pageFooter">2027 사업계획 EIS</footer>
 <script type="application/json" id="__plan_data"><?!= DATA_JSON ?></script>
+
+</div></div>
 <script>
 /* ══════════════════════════════════════════════════════
    데이터 로드 — 웹앱이면 서버 주입값, 파일로 열면 DEMO 폴백
