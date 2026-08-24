@@ -428,10 +428,19 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div id="trendItem" class="hidden">
     <div class="sec-head" style="margin-top:2px">
       <span class="sec-label">2027년 품목별 위치</span>
-      <span class="sec-note">막대=매출액(좌) · 점=매출총이익률(우) · 매출 큰 순</span>
+      <span class="sec-note">매출 큰 순 · 두 그래프의 품목 순서는 같습니다</span>
     </div>
     <div class="card card-sm">
-      <div style="position:relative;height:330px"><canvas id="chItemPos"></canvas></div>
+      <div class="row-2">
+        <div>
+          <div class="ch-head"><span class="ch-title">매출액</span><span class="ch-unit">억원</span></div>
+          <div style="position:relative;height:300px"><canvas id="chItemPos"></canvas></div>
+        </div>
+        <div>
+          <div class="ch-head"><span class="ch-title">매출총이익률</span><span class="ch-unit">%</span></div>
+          <div style="position:relative;height:300px"><canvas id="chItemRate"></canvas></div>
+        </div>
+      </div>
       <div class="note-line" id="itemPosNote"></div>
     </div>
 
@@ -822,6 +831,18 @@ function dataLabels(opt){
         if(x0<r.x1+pad&&x1>r.x0-pad&&y0<r.y1+pad&&y1>r.y0-pad) return false;}
       return true;
     }
+    /* 선그래프의 점 마커 자리를 먼저 잡아 둔다 (라벨이 마커를 덮지 않게) */
+    ch.data.datasets.forEach(function(ds,di){
+      const meta=ch.getDatasetMeta(di);
+      if(meta.hidden||!meta.data) return;
+      const pr=ds.pointRadius;
+      meta.data.forEach(function(el,i){
+        const r0=(typeof pr==='number')?pr:(Array.isArray(pr)?pr[i]:(el.options&&el.options.radius));
+        if(!r0||el.x==null) return;
+        const rr=r0+2.5;
+        placed.push({x0:el.x-rr,y0:el.y-rr,x1:el.x+rr,y1:el.y+rr});
+      });
+    });
     if(ch.config.type==='doughnut'||ch.config.type==='pie'){
       const ds0=ch.data.datasets[0], meta0=ch.getDatasetMeta(0);
       const tot=(ds0.data||[]).reduce(function(a,v){return a+(v||0);},0)||1;
@@ -856,9 +877,15 @@ function dataLabels(opt){
         const t=fmt(v,i,di);
         if(t==null||t==='') return;
         const w=ctx.measureText(t).width, h=11;
-        let x,y,ta;
+        const prr=(function(){
+          const pr=ds.pointRadius;
+          const r0=(typeof pr==='number')?pr:(Array.isArray(pr)?pr[i]:(el.options&&el.options.radius));
+          return (typeof r0==='number'&&r0>0)?r0:0;
+        })();
+        const off2=off+prr+(prr?6:0);
+        let x,y,ta,insideNow=false;
         if(opt.axis==='x'){                      /* 가로 막대 */
-          ta=v>=0?'left':'right'; x=el.x+(v>=0?off:-off); y=el.y;
+          ta=v>=0?'left':'right'; x=el.x+(v>=0?off2:-off2); y=el.y;
           var x0=v>=0?x:x-w, x1=v>=0?x+w:x;
           if(!free(x0,y-h/2,x1,y+h/2)) return;
           placed.push({x0:x0,y0:y-h/2,x1:x1,y1:y+h/2});
@@ -866,19 +893,26 @@ function dataLabels(opt){
           ta='center'; x=el.x;
           const base=(el.base!=null&&!isNaN(el.base))?el.base:el.y;
           const inside=(typeof opt.inside==='function')?opt.inside(v,i,di):opt.inside;
+          const outY=(v>=0? Math.min(el.y,base) : Math.max(el.y,base)) + (v>=0?-off2:off2);
+          let ok=false;
           if(inside){
-            /* 막대 안쪽 — 막대가 글자보다 짧으면 그리지 않는다 */
             const bh=Math.abs(base-el.y);
-            if(bh<h+8) return;
-            y=(v>=0? Math.min(el.y,base)+off+4 : Math.max(el.y,base)-off-4);
+            if(bh>=h+10){
+              y=(v>=0? Math.min(el.y,base)+off2+4 : Math.max(el.y,base)-off2-4);
+              ok=free(x-w/2,y-h/2,x+w/2,y+h/2);
+            }
+            if(!ok){ y=outY; ok=free(x-w/2,y-h/2,x+w/2,y+h/2); }   /* 안쪽이 안 되면 막대 위로 */
           } else {
-            y=(v>=0? Math.min(el.y,base) : Math.max(el.y,base)) + (v>=0?-off:off);
+            y=outY; ok=free(x-w/2,y-h/2,x+w/2,y+h/2);
           }
-          if(!free(x-w/2,y-h/2,x+w/2,y+h/2)) return;
+          if(!ok) return;
           placed.push({x0:x-w/2,y0:y-h/2,x1:x+w/2,y1:y+h/2});
+          insideNow=!!inside&&Math.abs(y-outY)>1;
         }
         ctx.textAlign=ta;
-        ctx.fillStyle=(typeof opt.color==='function')?opt.color(v,i,di):(opt.color||'#5A6B85');
+        let col=(typeof opt.color==='function')?opt.color(v,i,di):(opt.color||'#5A6B85');
+        if(insideNow&&opt.insideColor) col=opt.insideColor;
+        ctx.fillStyle=col;
         ctx.fillText(t,x,y);
       });
     });
@@ -1183,26 +1217,33 @@ function renderItemTrend(){
       return {n:n, s:s2[li], g:g2[li], r:(s2[li]?+(g2[li]/s2[li]*100).toFixed(1):null)};
     }).filter(function(o){ return o.s!=null; })
     .sort(function(a,b2){ return b2.s-a.s; });
+  const LBL=tops.map(function(o){return o.n;});
+  const barOpt=function(unit,isPct){
+    return baseOpt({indexAxis:'y',layout:{padding:{left:4,right:52,top:6,bottom:4}},
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:function(c){
+          return isPct?n1(c.parsed.x)+'%':n0(c.parsed.x)+'억';}}}},
+      scales:{x:{grid:{color:'rgba(0,0,0,.05)'},beginAtZero:true,
+          ticks:{callback:function(v){return isPct?v+'%':nf.format(v);},font:{size:11}}},
+        y:{grid:{display:false},ticks:{font:{size:12.5}}}}});
+  };
   draw('chItemPos',{type:'bar',
-    data:{labels:tops.map(function(o){return o.n;}),datasets:[
-      {label:'매출액',data:tops.map(function(o){return o.s;}),backgroundColor:P.바스,...BAR,order:2},
-      {type:'line',label:'매출총이익률',data:tops.map(function(o){return o.r;}),
-       borderColor:P.영업이익률,backgroundColor:'#fff',pointStyle:'circle',pointRadius:6,
-       pointBorderWidth:2.5,borderWidth:0,showLine:false,yAxisID:'y1',order:1}]},
-    options:baseOpt({layout:{padding:{top:28,right:12}},
-      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}},
-        tooltip:{mode:'index',intersect:false,callbacks:{label:function(c){
-          return c.dataset.label+': '+(c.datasetIndex===1?n1(c.parsed.y)+'%':n0(c.parsed.y)+'억');}}}},
-      scales:{x:{grid:{display:false},ticks:{font:{size:12}}},
-        y:{grid:{color:'rgba(0,0,0,.05)'},title:{display:true,text:'매출액(억)',font:{size:11}},
-           ticks:{callback:function(v){return nf.format(v);}}},
-        y1:{position:'right',grid:{display:false},title:{display:true,text:'이익률(%)',font:{size:11}},
-           ticks:{callback:function(v){return v+'%';},font:{size:11}}}}}),
-    plugins:[dataLabels({key:'ipos',off:8,
-      inside:function(v,i,di){ return di===0; },
-      fmt:function(v,i,di){ return di===1?n1(v)+'%':nf.format(Math.round(v)); },
-      color:function(v,i,di){ return di===1?'#6F55C8':'#fff'; },
-      font:'700 11.5px "Noto Sans KR",sans-serif'})]});
+    data:{labels:LBL,datasets:[{data:tops.map(function(o){return o.s;}),
+      backgroundColor:P.바스,borderRadius:3,categoryPercentage:.74,barPercentage:.82}]},
+    options:barOpt('억원',false),
+    plugins:[dataLabels({key:'ipos',axis:'x',off:8,
+      fmt:function(v){ return nf.format(Math.round(v)); },
+      color:'#16233B',font:'700 12px "Noto Sans KR",sans-serif'})]});
+  draw('chItemRate',{type:'bar',
+    data:{labels:LBL,datasets:[{data:tops.map(function(o){return o.r;}),
+      backgroundColor:tops.map(function(o){return o.r<0?'#D4526E':'#6FBFAE';}),
+      borderRadius:3,categoryPercentage:.74,barPercentage:.82}]},
+    options:barOpt('%',true),
+    plugins:[dataLabels({key:'irate',axis:'x',off:8,
+      fmt:function(v){ return n1(v)+'%'; },
+      color:function(v){ return v<0?'#C94A63':'#0E7A63'; },
+      font:'700 12px "Noto Sans KR",sans-serif'})]});
+
   if(tops.length){
     const bestR=tops.slice().sort(function(a,b2){return (b2.r||0)-(a.r||0);})[0];
     document.getElementById('itemPosNote').innerHTML=
