@@ -131,6 +131,16 @@ body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI','App
 .sens-ctrl-head .sens-reset{width:auto;margin:0;padding:5px 12px;font-size:12px}
 .sens-now{font-size:12px;color:var(--text-3);font-variant-numeric:tabular-nums}
 .sens-now b{font-size:13.5px;font-weight:700;color:var(--navy)}
+.opt-chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-2);
+  font-size:12.5px;user-select:none}
+.opt-chk input{accent-color:var(--navy);width:14px;height:14px;cursor:pointer}
+.ax-box{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3)}
+.ax-box input{width:64px;height:26px;padding:0 7px;border:1px solid var(--border-strong);
+  border-radius:6px;font-family:inherit;font-size:12px;text-align:right;outline:none}
+.ax-box input:focus{border-color:var(--navy)}
+.ax-box button{height:26px;padding:0 11px;border:1px solid var(--border-strong);border-radius:6px;
+  background:#fff;color:var(--text-2);font-size:12px;font-family:inherit;cursor:pointer}
+.ax-box button:hover{border-color:var(--navy);color:var(--navy)}
 .det-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);
   border:1px solid var(--border);border-radius:var(--r-md);padding:11px 15px;margin-bottom:16px}
 .det-lbl{font-size:12.5px;font-weight:700;color:var(--text-2)}
@@ -169,6 +179,9 @@ tr.det-on td:first-child{box-shadow:inset 3px 0 0 var(--navy)}
 .kpi-chip.up{background:#E7F4F0;color:var(--pos)}
 .kpi-chip.dn{background:#FBEDF0;color:var(--neg)}
 .kpi-chip.flat{background:#F0F3F7;color:var(--text-2)}
+.kpi-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.kpi-row .kpi-chip{margin-top:0}
+.kpi-spark{flex:0 0 auto;opacity:.9}
 .kpi-sub{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-3);gap:8px}
 .kpi-sub b{font-size:14.5px}
@@ -183,16 +196,21 @@ thead th[colspan]{text-align:center;letter-spacing:.02em}
 thead th.plan-h{background:var(--navy-900)}
 tbody td{padding:9px 14px;font-size:13.5px;text-align:right;white-space:nowrap;color:var(--text-1);
   border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;line-height:1.45}
-tbody td:first-child{text-align:left}
+tbody td:first-child{text-align:left;background:#FAFCFE}
+/* 하위 항목은 들여쓰기 대신 └ 로 계층을 드러낸다 (참고 대시보드 방식) */
+tr.lv2 td:first-child::before,tr.lv3 td:first-child::before{
+  content:'└';color:var(--text-3);font-weight:400;margin-right:6px;font-size:11.5px}
+tr.lv3 td:first-child::before{margin-left:14px}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover td{background:#F7FAFD}
 /* 대분류 = 구분선 역할. 배경 대신 굵기와 윗선으로 위계를 준다 */
 tr.lv1 td{background:var(--tbl-lv1);font-weight:700;color:var(--navy-700);
   border-top:1px solid var(--border-strong);border-bottom:1px solid var(--border-strong)}
+tr.lv1 td:first-child{background:#E8EFF7}
 tr.lv1:hover td{background:#E8EFF7}
 tr.lv2 td{background:#fff;color:var(--text-2)}
-tr.lv2 td:first-child{padding-left:30px;font-size:13px}
-tr.lv3 td:first-child{padding-left:48px;font-size:12.5px;color:var(--text-3)}
+tr.lv2 td:first-child{padding-left:24px;font-size:13px;background:#FAFCFE}
+tr.lv3 td:first-child{padding-left:24px;font-size:12.5px;color:var(--text-3);background:#FCFDFE}
 /* 계획열 — 노랑 대신 연한 블루 틴트 */
 td.plan{background:var(--tbl-plan)!important;font-weight:700;color:var(--navy-700)}
 tr.lv2 td.plan,tr.lv3 td.plan{background:var(--tbl-plan-lt)!important;font-weight:600;color:var(--navy)}
@@ -208,9 +226,9 @@ tr.tot td{background:var(--navy-050);font-weight:800;color:var(--navy-700);
   border-top:2px solid var(--navy-700);border-bottom:none}
 td.neg,span.neg{color:var(--neg)}
 td.pos,span.pos{color:var(--pos)}
-td.sticky,th.sticky{position:sticky;left:0;z-index:2;background:#fff}
+td.sticky,th.sticky{position:sticky;left:0;z-index:2;background:#FAFCFE}
 thead th.sticky{z-index:4;background:var(--tbl-head)}
-tr.lv1 td.sticky{background:var(--tbl-lv1)}
+tr.lv1 td.sticky{background:#E8EFF7}
 tr.tot td.sticky{background:var(--navy-050)}
 tbody tr:hover td.sticky{background:#F7FAFD}
 tr.lv1:hover td.sticky{background:#E8EFF7}
@@ -418,7 +436,12 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
 
   <div id="trendDiv">
     <div class="card card-sm">
-      <div class="ch-head"><span class="ch-title" id="divChTitle">2010~2027년 부문별 매출액</span><span class="ch-unit">(단위 : 억원)</span></div>
+      <div class="ch-head"><span class="ch-title" id="divChTitle">2010~2027년 부문별 매출액</span>
+        <span class="ax-box">Y축
+          <input id="divYmin" type="number" placeholder="0" oninput="drawDiv()">–
+          <input id="divYmax" type="number" placeholder="자동" oninput="drawDiv()">
+          <button onclick="divYreset()">자동</button>
+        </span></div>
       <div style="position:relative;height:470px"><canvas id="chDiv"></canvas></div>
     </div>
     <div class="sec-head"><span class="sec-label">부문별 연도 추이</span><span class="unit">(단위 : 억원)</span></div>
@@ -475,7 +498,9 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
 <div id="t-plan" class="tab-pane">
   <div class="sec-head">
     <span class="sec-label">월별 계획 추이</span>
-    <span class="sec-note">막대=월별 · 선=누계 · 억원</span>
+    <span class="sec-note">
+      <label class="opt-chk"><input type="checkbox" id="showPrev" onchange="renderPlan()"> 전년(2026E) 겹쳐 보기</label>
+      &nbsp;·&nbsp; 막대=월별 · 선=누계 · 억원</span>
   </div>
   <div class="stack">
     <div class="card card-sm">
@@ -632,6 +657,24 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
       <div style="position:relative;height:290px"><canvas id="chPeerO"></canvas></div>
     </div>
   </div>
+
+  <div class="sec-head">
+    <span class="sec-label">1:1 비교</span>
+    <span class="sec-note">대림바스와 한 회사를 나란히 — 회사를 고르세요</span>
+  </div>
+  <div class="chip-panel" id="n1Chips"></div>
+  <div class="row-2">
+    <div class="card card-flush">
+      <div class="tbl-wrap"><table id="n1Table"><thead id="n1Head"></thead><tbody id="n1Body"></tbody></table></div>
+      <div class="tbl-legend"><span>2024년 · 억원 · 별도기준</span></div>
+    </div>
+    <div class="card card-sm">
+      <div class="ch-head"><span class="ch-title">규모·수익성 비교</span>
+        <span class="ch-unit">각 지표의 최대값을 100으로 환산</span></div>
+      <div style="position:relative;height:400px"><canvas id="chN1"></canvas></div>
+      <div class="note-line" id="n1Note"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ══ 06 자산·투자 ══ -->
@@ -765,6 +808,27 @@ function deltaTxt(v,unit){ if(v==null||isNaN(v)) return '–';
     : (Math.round(v)===0?'0'+unit:'+'+nf.format(Math.round(v))+unit); }
 const EOK=v=>v==null?null:v/100;            /* 백만원 → 억원 */
 const sum=a=>(a||[]).reduce((x,y)=>x+(y||0),0);
+/* KPI 카드용 미니 스파크라인 — 4개년 궤적을 한눈에 */
+/* 받침 유무에 따라 조사를 고른다 — '대림가' 같은 어색한 말이 나오지 않게 */
+function josa(word,withBatchim,without){
+  const c=String(word||'').replace(/[^가-힣a-zA-Z0-9]/g,'').slice(-1);
+  if(!c) return without;
+  const code=c.charCodeAt(0);
+  if(code>=0xAC00&&code<=0xD7A3) return ((code-0xAC00)%28)?withBatchim:without;
+  return /[0-9lmnr]$/i.test(c)?withBatchim:without;   /* 영문·숫자는 통상 발음 기준 */
+}
+function spark(vals,color){
+  const v=vals.filter(function(x){return x!=null&&!isNaN(x);});
+  if(v.length<2) return '';
+  const W=76,H=26,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),sp2=(mx-mn)||1;
+  const pts=v.map(function(x,i){
+    return (i/(v.length-1)*W).toFixed(1)+','+(H-2-(x-mn)/sp2*(H-6)).toFixed(1); });
+  const last=pts[pts.length-1].split(',');
+  return '<svg class="kpi-spark" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true">'
+    +'<polyline points="'+pts.join(' ')+'" fill="none" stroke="'+color+'" stroke-width="1.8" '
+    +'stroke-linejoin="round" stroke-linecap="round" opacity=".85"/>'
+    +'<circle cx="'+last[0]+'" cy="'+last[1]+'" r="2.6" fill="'+color+'"/></svg>';
+}
 
 Chart.defaults.font.family="'Noto Sans KR',sans-serif";
 Chart.defaults.color='#5A6B85';
@@ -815,6 +879,13 @@ function filterChips(hostId, items, state, onChange, title){
 ══════════════════════════════════════════════════════ */
 function dataLabels(opt){
   opt=opt||{};
+  /* 라벨이 막대나 선 위에 놓여도 읽히도록 흰 테두리를 두른다 */
+  function stroke(ctx,t,x,y,on){
+    if(!on) return;
+    ctx.lineJoin='round'; ctx.miterLimit=2;
+    ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.92)';
+    ctx.strokeText(t,x,y);
+  }
   const fmt=opt.fmt||(v=>nf.format(Math.round(v)));
   const off=opt.off==null?7:opt.off;
   const font=opt.font||'600 10.5px "Noto Sans KR",sans-serif';
@@ -843,6 +914,32 @@ function dataLabels(opt){
         placed.push({x0:el.x-rr,y0:el.y-rr,x1:el.x+rr,y1:el.y+rr});
       });
     });
+    /* 레이더 — 정규화 값 대신 실제 값을 꼭짓점 바깥에 적는다 */
+    if(ch.config.type==='radar'){
+      const sc=ch.scales.r, cx=sc.xCenter, cy=sc.yCenter;
+      ctx.font=opt.font||'700 11px "Noto Sans KR",sans-serif'; ctx.textBaseline='middle';
+      ch.data.datasets.forEach(function(ds,di){
+        const meta=ch.getDatasetMeta(di); if(meta.hidden) return;
+        meta.data.forEach(function(el,i){
+          const t=fmt(ds.data[i],i,di); if(t==null||t==='') return;
+          const dx=el.x-cx, dy=el.y-cy, L=Math.hypot(dx,dy)||1;
+          /* 첫 계열은 바깥, 둘째 계열은 안쪽으로 밀어 서로 부딪히지 않게 */
+          const push=(di===0)?14:-15;
+          const x=el.x+dx/L*push, y=el.y+dy/L*push;
+          const w=ctx.measureText(t).width;
+          const ta=(di===0)?(dx>4?'left':(dx<-4?'right':'center'))
+                           :(dx>4?'right':(dx<-4?'left':'center'));
+          const x0=ta==='left'?x:(ta==='right'?x-w:x-w/2);
+          if(!free(x0,y-6,x0+w,y+6)) return;
+          placed.push({x0:x0,y0:y-6,x1:x0+w,y1:y+6});
+          ctx.textAlign=ta;
+          stroke(ctx,t,x,y,true);
+          ctx.fillStyle=(typeof opt.color==='function')?opt.color(ds.data[i],i,di):(opt.color||'#5A6B85');
+          ctx.fillText(t,x,y);
+        });
+      });
+      ctx.__dl=false; ctx.restore(); return;
+    }
     if(ch.config.type==='doughnut'||ch.config.type==='pie'){
       const ds0=ch.data.datasets[0], meta0=ch.getDatasetMeta(0);
       const tot=(ds0.data||[]).reduce(function(a,v){return a+(v||0);},0)||1;
@@ -913,7 +1010,9 @@ function dataLabels(opt){
         }
         ctx.textAlign=ta;
         let col=(typeof opt.color==='function')?opt.color(v,i,di):(opt.color||'#5A6B85');
-        if(insideNow&&opt.insideColor) col=opt.insideColor;
+        const white=insideNow&&opt.insideColor;
+        if(white) col=opt.insideColor;
+        stroke(ctx,t,x,y,!white);       /* 막대 안 흰 글씨엔 흰 테두리를 두르지 않는다 */
         ctx.fillStyle=col;
         ctx.fillText(t,x,y);
       });
@@ -1012,11 +1111,12 @@ function renderOverview(){
   }
   const S=K('매출액'), G=K('매출총이익'), O=K('영업이익'), N=K('당기순이익');
   const rate=(a,b)=>(b?+(a/b*100).toFixed(1):null);
+  const sp=function(o){ return {s1:o.y1,s2:o.y2,s3:o.y3,s4:o.y4}; };
   const kpi=[
-    {n:'매출액',    v:S.y4, p:S.y3, c:P.바스, sub:'전년(E)', subv:n0(S.y3)+'억원'},
-    {n:'매출총이익', v:G.y4, p:G.y3, c:P.매출총이익률, r:rate(G.y4,S.y4), rp:rate(G.y3,S.y3)},
-    {n:'영업이익',  v:O.y4, p:O.y3, c:P.영업이익률,   r:rate(O.y4,S.y4), rp:rate(O.y3,S.y3)},
-    {n:'당기순이익', v:N.y4, p:N.y3, c:P.당기순이익,   r:rate(N.y4,S.y4), rp:rate(N.y3,S.y3)}
+    Object.assign({n:'매출액',    v:S.y4, p:S.y3, c:P.바스, sub:'전년(E)', subv:n0(S.y3)+'억원'},sp(S)),
+    Object.assign({n:'매출총이익', v:G.y4, p:G.y3, c:P.매출총이익률, r:rate(G.y4,S.y4), rp:rate(G.y3,S.y3)},sp(G)),
+    Object.assign({n:'영업이익',  v:O.y4, p:O.y3, c:P.영업이익률,   r:rate(O.y4,S.y4), rp:rate(O.y3,S.y3)},sp(O)),
+    Object.assign({n:'당기순이익', v:N.y4, p:N.y3, c:P.당기순이익,   r:rate(N.y4,S.y4), rp:rate(N.y3,S.y3)},sp(N))
   ];
   document.getElementById('ovKpi').innerHTML=kpi.map(function(k){
     var d=(k.v!=null&&k.p!=null)?k.v-k.p:null;
@@ -1026,8 +1126,10 @@ function renderOverview(){
     return '<div class="kpi" style="border-top-color:'+k.c+'">'
       +'<div class="kpi-name">'+k.n+'</div>'
       +'<div class="kpi-num">'+n0(k.v)+'<span class="kpi-u">억원</span></div>'
+      +'<div class="kpi-row">'
       +'<div class="kpi-chip '+cls+'">'+arrow+' '+nf.format(Math.abs(Math.round(d||0)))+'억'
       +(g!=null?'  '+(g<0?'−':'+')+n1(Math.abs(g))+'%':'')+'</div>'
+      +spark([k.s1,k.s2,k.s3,k.s4],k.c)+'</div>'
       +(k.r!=null
         ? '<div class="kpi-sub"><span>이익률</span><b>'+n1(k.r)+'%'
           +(k.rp!=null?' <span style="font-size:12px;color:var(--text-3)">('+(k.r-k.rp>=0?'+':'−')+n1(Math.abs(k.r-k.rp))+'%p)</span>':'')+'</b></div>'
@@ -1037,11 +1139,10 @@ function renderOverview(){
 
   /* 손익 요약표 */
   document.getElementById('ovHead').innerHTML=
-    '<tr><th rowspan="2" class="sticky" style="min-width:130px">구분</th>'
+    '<tr><th class="sticky" style="min-width:130px">구분</th>'
     +'<th>2024년 실적</th><th>2025년 실적</th><th>'+(D.META.baseYear)+'년 예상</th>'
-    +'<th colspan="3" class="plan-h">'+(D.META.planYear)+'년 계획</th></tr>'
-    +'<tr><th>금액</th><th>금액</th><th>금액</th><th class="plan-h">금액</th>'
-    +'<th class="plan-h">전년대비</th><th class="plan-h">증감율</th></tr>';
+    +'<th class="plan-h">'+(D.META.planYear)+'년 계획</th>'
+    +'<th>전년대비</th><th>증감율</th></tr>';
   document.getElementById('ovBody').innerHTML=(D.SUMMARY||[]).map(function(r){
     var isPct=String(r.item).indexOf('%')>=0;
     var d=(r.y4!=null&&r.y3!=null)?r.y4-r.y3:null;
@@ -1140,12 +1241,20 @@ function setTrend(btn,m){
 }
 function renderTrend(){ trendMode==='div'?renderDivTrend():renderItemTrend(); }
 
+function divYreset(){
+  const a=document.getElementById('divYmin'), b=document.getElementById('divYmax');
+  if(a) a.value=''; if(b) b.value=''; drawDiv();
+}
+function drawDiv(){ renderDivTrend(); }
 function renderDivTrend(){
   const Y=D.DIV_YEARS||[], V=D.DIV||{};
   const S=V['매출액']||[], B=V['바스']||[], K=V['BK']||[], C=V['CARE']||[],
         G=V['매출총이익']||[], O=V['영업이익']||[], N=V['당기순이익']||[];
   const gr=S.map((s,i)=>s?+(G[i]/s*100).toFixed(1):null);
   const or_=S.map((s,i)=>s?+(O[i]/s*100).toFixed(1):null);
+  const gy=function(id){ const e=document.getElementById(id);
+    if(!e||e.value==='') return null; const v=parseFloat(e.value); return isNaN(v)?null:v; };
+  const yMin=gy('divYmin'), yMax=gy('divYmax');
   draw('chDiv',{type:'bar',
     data:{labels:Y,datasets:[
       {label:'바스',data:B,backgroundColor:P.바스,stack:'s',order:3,...BAR},
@@ -1161,7 +1270,8 @@ function renderDivTrend(){
       tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'
         ? c.dataset.label+': '+n1(c.parsed.y)+'%' : c.dataset.label+': '+n0(c.parsed.y)+'억'}}},
       scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11.5}}},
-        y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>nf.format(v)}},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>nf.format(v)},
+           min:(yMin!=null?yMin:undefined), max:(yMax!=null?yMax:undefined)},
         y1:{position:'right',grid:{display:false},min:-6,max:32,ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
     plugins:[dataLabels({key:'div',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
 
@@ -1375,12 +1485,17 @@ function drawMonthOne(metric){
   const r=R_(metric), v=r.m.map(x=>+EOK(x).toFixed(1));
   let run=0; const cum=v.map(x=>{run+=(x||0);return +run.toFixed(1);});
   const col=metric==='매출액'?P.바스:(metric==='매출총이익'?'#7FA8D4':'#6FBFAE');
+  /* 전년(직전연도 예상)은 연간값을 계획연도의 월 비중대로 나눠 참고선으로 얹는다 */
+  const prevOn=!!(document.getElementById('showPrev')||{}).checked;
+  const tot=sum(v)||1;
+  const prev=prevOn?v.map(function(x){ return +(EOK(r.y3)*(x/tot)).toFixed(1); }):null;
+  const ds=[{label:metric,data:v,backgroundColor:col,...BAR,order:2}];
+  if(prev) ds.push({label:'전년(E)',data:prev,backgroundColor:P.예상,...BAR,order:3,_noLabel:true});
   draw('chM_'+metric,{type:'bar',
-    data:{labels:MONTHS,datasets:[
-      {label:metric,data:v,backgroundColor:col,...BAR,order:2},
+    data:{labels:MONTHS,datasets:ds.concat([
       {type:'line',label:'누계',data:cum,borderColor:P.영업이익률,backgroundColor:'#fff',
        pointStyle:'circle',pointRadius:3,pointBorderWidth:2,borderWidth:2,tension:.25,
-       yAxisID:'y1',order:1,_noLabel:true}]},
+       yAxisID:'y1',order:1,_noLabel:true}])},
     options:baseOpt({layout:{padding:{top:26}},
       plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}},
         tooltip:{mode:'index',intersect:false,
@@ -1773,6 +1888,91 @@ function drawPeer(){
         font:'700 10.5px "Noto Sans KR",sans-serif'})]});
   };
   mk('매출액','chPeerS',false); mk('매출총이익률','chPeerG',true); mk('영업이익률','chPeerO',true);
+  drawN1();
+}
+
+/* ── 1:1 비교 : 대림바스 vs 한 회사 ── */
+let n1Pick=null;
+function n1Set(k){ n1Pick=k; drawN1(); }
+function ourName(cos){
+  for(var i=0;i<cos.length;i++) if(cos[i].indexOf('대림')>=0 && cos[i].indexOf('통상')<0) return cos[i];
+  return cos[0];
+}
+function drawN1(){
+  const Y=D.PEER_YEARS||[], G=(D.PEER||{})[peerGroup];
+  if(!G) return;
+  const cos=G._order||[], us=ourName(cos);
+  const others=cos.filter(function(c){ return c!==us; });
+  if(!others.length) return;
+  if(!n1Pick || others.indexOf(n1Pick)<0) n1Pick=others[0];
+
+  /* 회사 선택 칩 */
+  document.getElementById('n1Chips').innerHTML=
+    '<div class="chip-head"><span class="chip-title">비교 대상</span>'
+    +'<span class="chip-cnt">'+esc(us)+' vs '+esc(n1Pick)+'</span></div>'
+    +'<div class="chip-row">'+others.map(function(c,i){
+      return '<button class="chip'+(c===n1Pick?'':' off')+'" style="--cc:'+ITEM_COLORS[(i+1)%ITEM_COLORS.length]+'"'
+        +' onclick="n1Set(&#39;'+esc(c).replace(/'/g,'&#39;')+'&#39;)"><i></i>'+esc(c)+'</button>';
+    }).join('')+'</div>';
+
+  const li=Y.length-1;
+  const val=function(co,m){ const a2=(G[co]&&G[co][m])||[]; return a2[li]; };
+  const gpAmt=function(co){ const s2=val(co,'매출액'), r2=val(co,'매출총이익률');
+    return (s2!=null&&r2!=null)?+(s2*r2/100).toFixed(0):null; };
+  const opAmt=function(co){ const s2=val(co,'매출액'), r2=val(co,'영업이익률');
+    return (s2!=null&&r2!=null)?+(s2*r2/100).toFixed(0):null; };
+  const rows=[
+    {n:'매출액',     a:val(us,'매출액'),        b:val(n1Pick,'매출액'),        u:'억'},
+    {n:'매출총이익',  a:gpAmt(us),              b:gpAmt(n1Pick),              u:'억'},
+    {n:'매출총이익률', a:val(us,'매출총이익률'),  b:val(n1Pick,'매출총이익률'),  u:'%'},
+    {n:'영업이익',    a:opAmt(us),              b:opAmt(n1Pick),              u:'억'},
+    {n:'영업이익률',  a:val(us,'영업이익률'),    b:val(n1Pick,'영업이익률'),    u:'%'}
+  ];
+  document.getElementById('n1Head').innerHTML='<tr><th class="sticky" style="min-width:120px">지표</th>'
+    +'<th class="plan-h">★ '+esc(us)+'</th><th>'+esc(n1Pick)+'</th><th>격차</th></tr>';
+  document.getElementById('n1Body').innerHTML=rows.map(function(r){
+    const pct=(r.u==='%');
+    const f=function(v){ return v==null?'–':(pct?n1(v)+'%':nf.format(Math.round(v))); };
+    const d=(r.a!=null&&r.b!=null)?r.a-r.b:null;
+    return '<tr class="lv1"><td class="sticky">'+esc(r.n)+'</td>'
+      +'<td class="plan">'+f(r.a)+'</td><td>'+f(r.b)+'</td>'
+      +'<td>'+(d==null?'–':(d<0
+          ? '<span class="neg">△'+(pct?n1(Math.abs(d))+'%p':nf.format(Math.round(Math.abs(d))))+'</span>'
+          : '+'+(pct?n1(d)+'%p':nf.format(Math.round(d)))))+'</td></tr>';
+  }).join('');
+
+  /* 레이더 — 지표마다 단위가 달라 각 축의 최대값을 100으로 환산한다 */
+  const AX=rows.map(function(r){ return r.n; });
+  const norm=function(v,r){ const m=Math.max(Math.abs(r.a||0),Math.abs(r.b||0))||1; return +(v/m*100).toFixed(1); };
+  draw('chN1',{type:'radar',
+    data:{labels:AX,datasets:[
+      {label:us,data:rows.map(function(r){return norm(r.a||0,r);}),
+       borderColor:P.바스,backgroundColor:'rgba(31,56,100,.16)',borderWidth:2.4,
+       pointBackgroundColor:P.바스,pointRadius:3.5},
+      {label:n1Pick,data:rows.map(function(r){return norm(r.b||0,r);}),
+       borderColor:'#6FBFAE',backgroundColor:'rgba(111,191,174,.18)',borderWidth:2.4,
+       pointBackgroundColor:'#6FBFAE',pointRadius:3.5}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      layout:{padding:{top:14,bottom:6,left:52,right:52}},
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}},
+        tooltip:{callbacks:{label:function(c){
+          const r=rows[c.dataIndex], v=(c.datasetIndex===0?r.a:r.b);
+          return c.dataset.label+' · '+r.n+': '+(r.u==='%'?n1(v)+'%':nf.format(Math.round(v))+'억');}}}},
+      scales:{r:{min:0,suggestedMax:110,angleLines:{color:'#E4EAF2'},grid:{color:'#E4EAF2'},
+        pointLabels:{font:{size:12,weight:'600'},color:'#16233B',padding:22},
+        ticks:{display:false}}}},
+    plugins:[dataLabels({key:'n1',minGap:2,
+      fmt:function(v,i,di){ const r=rows[i]; const a2=(di===0?r.a:r.b);
+        if(a2==null) return ''; return r.u==='%'?n1(a2)+'%':nf.format(Math.round(a2)); },
+      color:function(v,i,di){ return di===0?'#1F3864':'#3E9C7E'; },
+      font:'700 11px "Noto Sans KR",sans-serif'})]});
+
+  const s0=rows[0], o0=rows[4];
+  document.getElementById('n1Note').innerHTML=
+    '매출은 <b>'+esc(us)+'</b>'+josa(us,'이','가')+' '+esc(n1Pick)+'의 <b>'
+    +(s0.b?n1(s0.a/s0.b)+'배':'–')+'</b>, 영업이익률은 <b>'
+    +(o0.a>=o0.b?esc(us):esc(n1Pick))+'</b>'+josa(o0.a>=o0.b?us:n1Pick,'이','가')
+    +' <b>'+n1(Math.abs((o0.a||0)-(o0.b||0)))+'%p</b> 높습니다.';
 }
 
 /* ══════════════ 06 자산 · 투자 ══════════════ */
