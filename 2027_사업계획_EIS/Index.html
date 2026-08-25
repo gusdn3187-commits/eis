@@ -404,7 +404,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     <span class="sec-note">2026(E) 210억 → 2027(P) 245억 · 억원</span>
   </div>
   <div class="card card-sm">
-    <div style="position:relative;height:300px"><canvas id="chBridge"></canvas></div>
+    <div style="position:relative;height:360px"><canvas id="chBridge"></canvas></div>
     <div class="note-line" id="bridgeNote"></div>
   </div>
 
@@ -412,11 +412,11 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="row-2">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">부문별 매출 구성</span><span class="ch-unit">억원</span></div>
-      <div style="position:relative;height:290px"><canvas id="chMix"></canvas></div>
+      <div style="position:relative;height:350px"><canvas id="chMix"></canvas></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">수익성 추이</span><span class="ch-unit">%</span></div>
-      <div style="position:relative;height:330px"><canvas id="chRate"></canvas></div>
+      <div style="position:relative;height:380px"><canvas id="chRate"></canvas></div>
     </div>
   </div>
 
@@ -445,7 +445,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
           <input id="divYmax" type="number" placeholder="자동" oninput="drawDiv()">
           <button onclick="divYreset()">자동</button>
         </span></div>
-      <div style="position:relative;height:470px"><canvas id="chDiv"></canvas></div>
+      <div style="position:relative;height:560px"><canvas id="chDiv"></canvas></div>
     </div>
     <div class="sec-head"><span class="sec-label">부문별 연도 추이</span><span class="unit">(단위 : 억원)</span></div>
     <div class="card card-sm"><div class="tbl-wrap"><table id="divTable"><thead id="divHead"></thead><tbody id="divBody"></tbody></table></div></div>
@@ -460,11 +460,11 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
       <div class="row-2">
         <div>
           <div class="ch-head"><span class="ch-title">매출액</span><span class="ch-unit">억원</span></div>
-          <div style="position:relative;height:300px"><canvas id="chItemPos"></canvas></div>
+          <div style="position:relative;height:340px"><canvas id="chItemPos"></canvas></div>
         </div>
         <div>
           <div class="ch-head"><span class="ch-title">매출총이익률</span><span class="ch-unit">%</span></div>
-          <div style="position:relative;height:300px"><canvas id="chItemRate"></canvas></div>
+          <div style="position:relative;height:340px"><canvas id="chItemRate"></canvas></div>
         </div>
       </div>
       <div class="note-line" id="itemPosNote"></div>
@@ -483,7 +483,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title" id="itemChTitle">품목별 매출액</span>
         <span class="ch-unit" id="itemChUnit">억원</span></div>
-      <div style="position:relative;height:360px"><canvas id="chItem"></canvas></div>
+      <div style="position:relative;height:420px"><canvas id="chItem"></canvas></div>
     </div>
 
     <div class="sec-head">
@@ -508,18 +508,18 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="stack">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">매출액</span><span class="ch-unit">억원 · 누계 우측축</span></div>
-      <div style="position:relative;height:300px"><canvas id="chM_매출액"></canvas></div>
+      <div style="position:relative;height:360px"><canvas id="chM_매출액"></canvas></div>
       <div class="note-line" id="note_매출액"></div>
     </div>
     <div class="row-2">
       <div class="card card-sm">
         <div class="ch-head"><span class="ch-title">매출총이익</span><span class="ch-unit">억원 · 누계 우측축</span></div>
-        <div style="position:relative;height:280px"><canvas id="chM_매출총이익"></canvas></div>
+        <div style="position:relative;height:330px"><canvas id="chM_매출총이익"></canvas></div>
         <div class="note-line" id="note_매출총이익"></div>
       </div>
       <div class="card card-sm">
         <div class="ch-head"><span class="ch-title">영업이익</span><span class="ch-unit">억원 · 누계 우측축</span></div>
-        <div style="position:relative;height:280px"><canvas id="chM_영업이익"></canvas></div>
+        <div style="position:relative;height:330px"><canvas id="chM_영업이익"></canvas></div>
         <div class="note-line" id="note_영업이익"></div>
       </div>
     </div>
@@ -530,16 +530,16 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     <span class="sec-note">체크박스로 부문을 넣고 뺄 수 있습니다</span>
   </div>
   <div class="chip-panel" id="segChips"></div>
-  <div class="card card-sm"><div style="position:relative;height:380px"><canvas id="chMonthMix"></canvas></div></div>
+  <div class="card card-sm"><div style="position:relative;height:440px"><canvas id="chMonthMix"></canvas></div></div>
 
   <div class="row-2" style="margin-top:18px">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">분기별 손익</span><span class="ch-unit">억원</span></div>
-      <div style="position:relative;height:290px"><canvas id="chQtr"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chQtr"></canvas></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">월별 이익률</span><span class="ch-unit">%</span></div>
-      <div style="position:relative;height:290px"><canvas id="chMonthRate"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chMonthRate"></canvas></div>
     </div>
   </div>
 
@@ -589,7 +589,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
           <span class="ch-title" id="torTitle">변수별 영업이익 영향</span>
           <span class="ch-unit">억원 · 계획 대비</span>
         </div>
-        <div style="position:relative;height:300px"><canvas id="chTornado"></canvas></div>
+        <div style="position:relative;height:320px"><canvas id="chTornado"></canvas></div>
         <div class="note-line" id="tornadoNote"></div>
       </div>
     </div>
@@ -602,12 +602,12 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="row-2">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">달성률별 영업이익</span><span class="ch-unit">억원</span></div>
-      <div style="position:relative;height:310px"><canvas id="chSensCurve"></canvas></div>
+      <div style="position:relative;height:360px"><canvas id="chSensCurve"></canvas></div>
       <div class="note-line" id="curveNote"></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">월별 영업이익 — 계획 vs 시나리오</span><span class="ch-unit">억원</span></div>
-      <div style="position:relative;height:310px"><canvas id="chSensMon"></canvas></div>
+      <div style="position:relative;height:360px"><canvas id="chSensMon"></canvas></div>
       <div class="note-line" id="sensMonNote"></div>
     </div>
   </div>
@@ -627,17 +627,17 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
 
   <div class="sec-head"><span class="sec-label">주택건설경기</span><span class="unit">(단위 : 만 가구)</span></div>
   <div class="card card-sm">
-    <div style="position:relative;height:340px"><canvas id="chHouse"></canvas></div>
+    <div style="position:relative;height:420px"><canvas id="chHouse"></canvas></div>
   </div>
 
   <div class="row-2" style="margin-top:14px">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">환율 · 기준금리</span><span class="ch-unit">(원 / %)</span></div>
-      <div style="position:relative;height:290px"><canvas id="chFx"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chFx"></canvas></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">원자재 (구리 · 아연)</span><span class="ch-unit">($/톤)</span></div>
-      <div style="position:relative;height:290px"><canvas id="chRaw"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chRaw"></canvas></div>
     </div>
   </div>
 
@@ -665,7 +665,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
         <button onclick="peerYreset()">자동</button>
       </span>
     </div>
-    <div style="position:relative;height:400px"><canvas id="chPeerTrend"></canvas></div>
+    <div style="position:relative;height:480px"><canvas id="chPeerTrend"></canvas></div>
     <div class="note-line" id="peerTrendNote"></div>
   </div>
 
@@ -680,7 +680,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="card card-sm" style="margin-top:18px">
     <div class="ch-head"><span class="ch-title" id="peerOneTitle">연도별 손익</span>
       <span class="ch-unit">막대=매출액·영업이익(좌, 억원) · 선=영업이익률(우, %)</span></div>
-    <div style="position:relative;height:360px"><canvas id="chPeerOne"></canvas></div>
+    <div style="position:relative;height:430px"><canvas id="chPeerOne"></canvas></div>
     <div class="note-line" id="peerOneNote"></div>
   </div>
 
@@ -710,11 +710,11 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="row-2">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">매출채권</span><span class="ch-unit">(백만원 / 회전율)</span></div>
-      <div style="position:relative;height:300px"><canvas id="chAR"></canvas></div>
+      <div style="position:relative;height:350px"><canvas id="chAR"></canvas></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">재고자산</span><span class="ch-unit">(백만원 / 회전율)</span></div>
-      <div style="position:relative;height:300px"><canvas id="chINV"></canvas></div>
+      <div style="position:relative;height:350px"><canvas id="chINV"></canvas></div>
     </div>
   </div>
   <div class="card card-sm" style="margin-top:14px">
@@ -725,16 +725,16 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="row-2">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">구분별 투자</span><span class="ch-unit">백만원</span></div>
-      <div style="position:relative;height:290px"><canvas id="chCapexCat"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chCapexCat"></canvas></div>
     </div>
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">부문별 투자</span><span class="ch-unit">백만원</span></div>
-      <div style="position:relative;height:290px"><canvas id="chCapexDiv"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chCapexDiv"></canvas></div>
     </div>
   </div>
   <div class="card card-sm" style="margin-top:18px">
     <div class="ch-head"><span class="ch-title">월별 집행 계획</span><span class="ch-unit">백만원 · 누계 우측축</span></div>
-    <div style="position:relative;height:280px"><canvas id="chCapexM"></canvas></div>
+    <div style="position:relative;height:340px"><canvas id="chCapexM"></canvas></div>
   </div>
   <div class="card card-sm" style="margin-top:14px">
     <div class="tbl-wrap"><table id="capexTable"><thead id="capexHead"></thead><tbody id="capexBody"></tbody></table></div>
@@ -749,7 +749,7 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
   <div class="row-2">
     <div class="card card-sm">
       <div class="ch-head"><span class="ch-title">부문별 인원</span><span class="ch-unit">명</span></div>
-      <div style="position:relative;height:290px"><canvas id="chHr"></canvas></div>
+      <div style="position:relative;height:340px"><canvas id="chHr"></canvas></div>
     </div>
     <div class="card card-flush">
       <div class="tbl-wrap"><table id="hrTable"><thead id="hrHead"></thead><tbody id="hrBody"></tbody></table></div>
@@ -782,11 +782,11 @@ footer{padding:16px 36px;text-align:center;color:var(--text-3);font-size:13px;
     <div class="row-2">
       <div class="card card-sm">
         <div class="ch-head"><span class="ch-title" id="detYTitle">연도별 추이</span><span class="ch-unit">백만원</span></div>
-        <div style="position:relative;height:290px"><canvas id="chDetY"></canvas></div>
+        <div style="position:relative;height:340px"><canvas id="chDetY"></canvas></div>
       </div>
       <div class="card card-sm">
         <div class="ch-head"><span class="ch-title" id="detMTitle">월별</span><span class="ch-unit">백만원</span></div>
-        <div style="position:relative;height:290px"><canvas id="chDetM"></canvas></div>
+        <div style="position:relative;height:340px"><canvas id="chDetM"></canvas></div>
       </div>
     </div>
     <div class="card card-flush" style="margin-top:18px">
@@ -860,7 +860,10 @@ function spark(vals,color){
 Chart.defaults.font.family="'Noto Sans KR',sans-serif";
 Chart.defaults.color='#5A6B85';
 Chart.defaults.borderColor='#E4EAF2';
-const BAR={categoryPercentage:.72,barPercentage:.88,borderRadius:1};
+/* 막대 폭 — 칸의 절반쯤만 채워야 세로로 길어 보인다 (참고 대시보드 비율) */
+const BAR={categoryPercentage:.62,barPercentage:.78,borderRadius:2};
+/* 단일 계열 막대는 더 슬림하게 */
+const BAR1={categoryPercentage:.52,barPercentage:.72,borderRadius:2};
 function baseOpt(extra){
   return Object.assign({responsive:true,maintainAspectRatio:false,
     layout:{padding:{top:24,right:10,left:4}},
@@ -868,7 +871,8 @@ function baseOpt(extra){
     plugins:{legend:{position:'bottom',labels:{usePointStyle:true,pointStyle:'rectRounded',boxWidth:10,font:{size:12},padding:14}},
       tooltip:{backgroundColor:'#16233B',padding:10,titleFont:{weight:'bold'}}},
     scales:{x:{grid:{display:false},ticks:{font:{size:12}}},
-      y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:12},callback:v=>nf.format(v)}}}},extra||{});
+      y:{grid:{color:'rgba(0,0,0,.05)'},grace:'12%',
+         ticks:{font:{size:12},callback:v=>nf.format(v)}}}},extra||{});
 }
 /* ── 시리즈 필터 칩 ──
    items = [{k,label,color}] · state = Set(켜진 k) · onChange 시 다시 그린다 */
@@ -1032,6 +1036,36 @@ function dataLabels(opt){
     ctx.__dl=false;
     ctx.restore();
   }};
+}
+
+/* 세로 구분선 — 실적이 끝나고 계획이 시작되는 지점을 표시한다 (참고 대시보드의 점선) */
+function markerLine(labelIndex,text,color){
+  color=color||'#C94A63';
+  return {id:'mk'+labelIndex, afterDatasetsDraw(ch){
+    const sc=ch.scales.x, area=ch.chartArea;
+    if(!sc||labelIndex==null||labelIndex<0) return;
+    const x=sc.getPixelForValue(labelIndex)-(sc.getPixelForValue(1)-sc.getPixelForValue(0))/2;
+    if(!(x>area.left&&x<area.right)) return;
+    const ctx=ch.ctx; ctx.save();
+    ctx.setLineDash([5,4]); ctx.lineWidth=1.4; ctx.strokeStyle=color;
+    ctx.beginPath(); ctx.moveTo(x,area.top+16); ctx.lineTo(x,area.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font='700 11px "Noto Sans KR",sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    const w=ctx.measureText(text).width+14, y=area.top+8;
+    ctx.fillStyle='#fff'; ctx.strokeStyle=color; ctx.lineWidth=1;
+    if(ctx.roundRect){ ctx.beginPath(); ctx.roundRect(x-w/2,y-9,w,18,4); ctx.fill(); ctx.stroke(); }
+    else { ctx.fillRect(x-w/2,y-9,w,18); ctx.strokeRect(x-w/2,y-9,w,18); }
+    ctx.fillStyle=color; ctx.fillText(text,x,y);
+    ctx.restore();
+  }};
+}
+/* 라벨 배열에서 '실적 → 예상/계획' 이 처음 갈리는 지점 */
+function planStart(labels){
+  for(var i=0;i<labels.length;i++){
+    var t=String(labels[i]);
+    if(t.indexOf('(E)')>=0||t.indexOf('(P)')>=0) return i;
+  }
+  return -1;
 }
 
 const CH={};
@@ -1221,7 +1255,7 @@ function renderOverview(){
       {label:(D.META.planYear)+'(P)',data:mix.map(x=>EOK(x.y4)),backgroundColor:P.바스,...BAR}]},
     options:baseOpt({scales:{x:{grid:{display:false},ticks:{font:{size:12}}},
       y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>nf.format(v)+'억'}}}}),
-    plugins:[dataLabels({key:'mix',off:6,fmt:function(v){return nf.format(Math.round(v));},font:'600 10.5px "Noto Sans KR",sans-serif'})]});
+    plugins:[dataLabels({key:'mix',off:6,fmt:function(v){return nf.format(Math.round(v));},font:'600 10.5px "Noto Sans KR",sans-serif'}),markerLine(planStart(YL),'실적 → 계획')]});
 
   /* 수익성 추이 — 4개년 */
   var gr=[],or_=[],nr=[];
@@ -1239,7 +1273,7 @@ function renderOverview(){
     plugins:[dataLabels({key:'rate',off:8,minGap:2,fmt:function(v){return n1(v);},
       font:'700 10.5px "Noto Sans KR",sans-serif',
       below:function(v,i,di){ return di===2; },   /* 당기순이익률은 아래로 — 영업이익률과 붙어 있다 */
-      color:function(v,i,di){return [P.매출총이익률,P.영업이익률,P.당기순이익][di]||'#5A6B85';}})]});
+      color:function(v,i,di){return [P.매출총이익률,P.영업이익률,P.당기순이익][di]||'#5A6B85';}}),markerLine(planStart(YL),'실적 → 계획')]});
 }
 
 /* ══════════════ 02 손익추이 ══════════════ */
@@ -1278,14 +1312,42 @@ function renderDivTrend(){
         pointStyle:'circle',pointRadius:4,pointBorderWidth:2,borderWidth:2,tension:.2,order:0,yAxisID:'y1'},
       {type:'line',label:'영업이익률',data:or_,borderColor:P.영업이익률,backgroundColor:'#fff',
         pointStyle:'rectRot',pointRadius:5,pointBorderWidth:2,borderWidth:2,tension:.2,order:0,yAxisID:'y1'}]},
-    options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}},
-      tooltip:{callbacks:{label:c=>c.dataset.yAxisID==='y1'
-        ? c.dataset.label+': '+n1(c.parsed.y)+'%' : c.dataset.label+': '+n0(c.parsed.y)+'억'}}},
+    options:baseOpt({layout:{padding:{top:14,right:6}},
+      plugins:{legend:{position:'top',align:'end',
+          labels:{usePointStyle:true,boxWidth:10,font:{size:11.5},padding:14}},
+        tooltip:{mode:'index',intersect:false,callbacks:{label:c=>c.dataset.yAxisID==='y1'
+          ? c.dataset.label+': '+n1(c.parsed.y)+'%' : c.dataset.label+': '+n0(c.parsed.y)+'억'}}},
       scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:11.5}}},
-        y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:v=>nf.format(v)},
+        y:{stacked:true,grid:{color:'rgba(0,0,0,.05)'},grace:'14%',
+           ticks:{callback:v=>nf.format(v)},
            min:(yMin!=null?yMin:undefined), max:(yMax!=null?yMax:undefined)},
-        y1:{position:'right',grid:{display:false},min:-6,max:32,ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'div',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+        y1:{position:'right',grid:{display:false},min:-6,max:34,
+            ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
+    plugins:[
+      /* 누적막대 합계는 막대 위에 네이비 굵게 — 참고 대시보드의 매출액 라벨 방식 */
+      {id:'divtot',afterDatasetsDraw(ch){
+        const ctx=ch.ctx; ctx.save(); ctx.__dl=true;
+        ctx.font='700 11.5px "Noto Sans KR",sans-serif'; ctx.textAlign='center';
+        ctx.lineJoin='round'; ctx.lineWidth=3; ctx.strokeStyle='rgba(255,255,255,.92)';
+        const n=ch.data.labels.length;
+        for(let i=0;i<n;i++){
+          let t=0, top=1e9;
+          ch.data.datasets.forEach(function(d,di){
+            if(d.type==='line'||ch.getDatasetMeta(di).hidden) return;
+            t+=(d.data[i]||0);
+            const el=ch.getDatasetMeta(di).data[i]; if(el) top=Math.min(top,el.y);
+          });
+          if(t>0&&top<1e9){
+            const x=ch.getDatasetMeta(0).data[i].x, y=top-9;
+            ctx.strokeText(n0(t),x,y); ctx.fillStyle='#1F3864'; ctx.fillText(n0(t),x,y);
+          }
+        }
+        ctx.__dl=false; ctx.restore();}},
+      /* 선(이익률·당기순이익)은 라벨을 달지 않는다.
+         18년 × 3선 = 54개가 막대 안으로 파고들어 읽히지 않는다.
+         참고 대시보드도 막대 값만 적고 선은 툴팁으로 본다. */
+      markerLine(planStart(Y),'실적 → 계획')
+    ]});
 
   /* 표 */
   document.getElementById('divHead').innerHTML='<tr><th class="sticky" style="min-width:110px">구분</th>'
@@ -1424,7 +1486,7 @@ function drawItemTrend(){
            ticks:{callback:function(v){return isPct?v+'%':nf.format(v)+'억';}}}}}),
     plugins:[dataLabels({key:'itm',off:8,
       fmt:function(v){ return isPct?n1(v)+'%':nf.format(Math.round(v)); },
-      font:'700 10.5px "Noto Sans KR",sans-serif'})]});
+      font:'700 10.5px "Noto Sans KR",sans-serif'}),markerLine(planStart(Y),'실적 → 계획')]});
 }
 
 /* ── 03 사업계획 : 세 지표를 한 화면에 나란히 ── */
@@ -1835,7 +1897,7 @@ function renderMkt(){
       tooltip:{callbacks:{label:c=>c.dataset.label+': '+n1(c.parsed.y)+'만'}}},
       scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+'만'}},
         y1:{position:'right',grid:{display:false},ticks:{callback:v=>v+'만',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'house',off:8,fmt:function(v){return n1(v);}})]});
+    plugins:[dataLabels({key:'house',off:8,fmt:function(v){return n1(v);}}),markerLine(planStart(Y),'실적 → 계획')]});
 
   draw('chFx',{type:'bar',
     data:{labels:Y,datasets:[
@@ -1845,7 +1907,7 @@ function renderMkt(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{grid:{display:false}},y:{min:900,ticks:{callback:v=>nf.format(v)}},
         y1:{position:'right',grid:{display:false},min:0,max:5,ticks:{callback:v=>v+'%',font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'fx',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'fx',off:8,fmt:function(v){return nf.format(Math.round(v));}}),markerLine(planStart(Y),'실적 → 계획')]});
 
   draw('chRaw',{type:'line',
     data:{labels:Y,datasets:[
@@ -1854,7 +1916,7 @@ function renderMkt(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>nf.format(v)}},
         y1:{position:'right',grid:{display:false},ticks:{callback:v=>nf.format(v),font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'raw',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'raw',off:8,fmt:function(v){return nf.format(Math.round(v));}}),markerLine(planStart(Y),'실적 → 계획')]});
 
   document.getElementById('mktHead').innerHTML='<tr><th class="sticky" style="min-width:150px">항목</th><th>단위</th>'
     +Y.map(y=>'<th'+(String(y).indexOf('(P)')>=0?' class="plan-h"':'')+'>'+esc(y)+'</th>').join('')+'</tr>';
@@ -2144,7 +2206,7 @@ function renderAsset(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>nf.format(v/1000)+'천'}},
         y1:{position:'right',grid:{display:false},min:0,max:1,ticks:{font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'ar',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'ar',off:8,fmt:function(v){return nf.format(Math.round(v));}}),markerLine(planStart(Y),'실적 → 계획')]});
   draw('chINV',{type:'bar',
     data:{labels:Y,datasets:[
       {label:'제품',data:g('재고자산','제품'),backgroundColor:P.바스,stack:'i',...BAR},
@@ -2155,7 +2217,7 @@ function renderAsset(){
     options:baseOpt({plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:10,font:{size:12},padding:12}}},
       scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,ticks:{callback:v=>nf.format(v/1000)+'천'}},
         y1:{position:'right',grid:{display:false},min:0,max:1,ticks:{font:{size:11.5}}}}}),
-    plugins:[dataLabels({key:'inv',off:8,fmt:function(v){return nf.format(Math.round(v));}})]});
+    plugins:[dataLabels({key:'inv',off:8,fmt:function(v){return nf.format(Math.round(v));}}),markerLine(planStart(Y),'실적 → 계획')]});
 
   document.getElementById('arHead').innerHTML='<tr><th class="sticky" style="min-width:160px">항목</th>'
     +Y.map(y=>'<th'+(String(y).indexOf('(P)')>=0?' class="plan-h"':'')+'>'+esc(y)+'</th>').join('')+'</tr>';
